@@ -1,20 +1,18 @@
-package com.teamChallenge.Figures;
+package com.teamChallenge.entity.Figures;
 
-import com.teamChallenge.Products.Product;
+import com.teamChallenge.entity.Products.Product;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "figures")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class FigureEntity extends Product {
 

@@ -1,22 +1,20 @@
-package com.teamChallenge.Users;
+package com.teamChallenge.entity.Users;
 
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.sql.Date;
 
 @Entity
 @Table(name = "users")
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
 public class UserEntity {
 
-    public UserEntity(String name, String email, String password) {
-        this.name = name;
+    public UserEntity(String username, String email, String password) {
+        this.username = username;
         this.email = email;
         this.password = password;
         role = Roles.USER;
@@ -27,7 +25,7 @@ public class UserEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String name, email, password;
+    private String username, email, password;
 
     @Column(nullable = false)
     private Roles role;

@@ -1,4 +1,4 @@
-package com.teamChallenge.Figures;
+package com.teamChallenge.entity.Figures;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

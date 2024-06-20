@@ -1,7 +1,7 @@
 package com.teamChallenge.jwt;
 
+import com.teamChallenge.entity.Users.UserEntity;
 import com.teamChallenge.exception.exceptions.generalExceptions.BadJWTException;
-import com.teamChallenge.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -25,9 +25,9 @@ public class JwtUtils {
     private Duration jwtLifetime;
 
 
-    public String generateToken(User user) {
+    public String generateToken(UserEntity user) {
         Map<String, Object> claims = new HashMap<>();
-        String roles = user.getRole().getName();
+        String roles = user.getRole().toString();
         claims.put("id", user.getId());
         claims.put("roles", roles);
         claims.put("username", user.getUsername());

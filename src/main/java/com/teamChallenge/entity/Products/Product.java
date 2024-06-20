@@ -1,4 +1,4 @@
-package com.teamChallenge.Products;
+package com.teamChallenge.entity.Products;
 
 import lombok.Getter;
 import lombok.Setter;
