@@ -16,15 +16,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class FigureEntity extends Product {
 
-    public FigureEntity(String name, String description, int price, int amount, String color, List<String> images) {
-        this.setName(name);
-        this.setDescription(description);
-        this.setPrice(price);
-        this.setAmount(amount);
-        this.color = color;
-        this.setImages(images);
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -35,4 +26,13 @@ public class FigureEntity extends Product {
     @Column(nullable = false)
     @CreatedDate
     private Date createdAt;
+
+    public FigureEntity(String name, String description, int price, int amount, String color, List<String> images) {
+        this.setName(name);
+        this.setDescription(description);
+        this.setPrice(price);
+        this.setAmount(amount);
+        this.color = color;
+        this.setImages(images);
+    }
 }
