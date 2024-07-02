@@ -1,11 +1,13 @@
 package com.teamChallenge.entity.Figures;
 
+import com.teamChallenge.entity.Products.Category;
 import com.teamChallenge.entity.Products.Product;
+
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,11 +17,6 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 public class FigureEntity extends Product {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
     @Column(nullable = false)
     private String color;
 
@@ -27,12 +24,27 @@ public class FigureEntity extends Product {
     @CreatedDate
     private Date createdAt;
 
-    public FigureEntity(String name, String description, int price, int amount, String color, List<String> images) {
+    public FigureEntity(String name, String shortDescription, String longDescription, Category category, int price, int amount, String color, List<String> images) {
         this.setName(name);
-        this.setDescription(description);
+        this.setShortDescription(shortDescription);
+        this.setLongDescription(longDescription);
+        this.setCategory(category);
         this.setPrice(price);
         this.setAmount(amount);
-        this.color = color;
+        this.setColor(color);
         this.setImages(images);
+    }
+
+    public FigureEntity(UUID id, String name, String shortDescription, String longDescription, Category category, int price, int amount, String color, List<String> images, Date createdAt) {
+        this.setId(id);
+        this.setName(name);
+        this.setShortDescription(shortDescription);
+        this.setLongDescription(longDescription);
+        this.setCategory(category);
+        this.setPrice(price);
+        this.setAmount(amount);
+        this.setColor(color);
+        this.setImages(images);
+        this.setCreatedAt(createdAt);
     }
 }
