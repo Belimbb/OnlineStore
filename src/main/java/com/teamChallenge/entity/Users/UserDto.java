@@ -1,36 +1,20 @@
 package com.teamChallenge.entity.Users;
 
+import com.teamChallenge.entity.ShoppingCart.CartDto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.Date;
 
-import java.sql.Date;
+public record UserDto(
+        Long id,
+        @NotBlank @Email String email,
+        @NotBlank String username,
+        @NotBlank @Size(min = 3, max = 100) String password,
+        @NotNull Roles role,
+        Date createdAt,
+        CartDto cartDTO
+) {}
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class UserDto {
-
-    private Long id;
-
-    @NotBlank
-    @Email
-    private String email;
-
-    @NotBlank
-    private String username;
-
-    @NotBlank
-    @Size(min = 3, max = 100)
-    private String password;
-
-    @NotNull
-    private Roles role;
-
-    private Date createdAt;
-}

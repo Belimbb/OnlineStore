@@ -1,4 +1,4 @@
-package com.teamChallenge.entity.ShoppingСart;
+package com.teamChallenge.entity.ShoppingCart;
 
 import jakarta.persistence.*;
 
