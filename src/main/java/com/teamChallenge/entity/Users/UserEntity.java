@@ -1,5 +1,6 @@
 package com.teamChallenge.entity.Users;
 
+import com.teamChallenge.entity.ShoppingCart.CartEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -40,10 +41,22 @@ public class UserEntity {
     @CreatedDate
     private Date createdAt;
 
+    @Column(nullable = false)
+    private CartEntity cart = new CartEntity();
+
     public UserEntity(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
         role = Roles.USER;
+    }
+
+    public UserEntity(Long id, String username, String email, String password, Roles role, Date createdAt) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.createdAt = createdAt;
     }
 }
