@@ -12,9 +12,9 @@ public class CartMapper {
 
     public CartEntity toEntity (CartDto dto){
         return new CartEntity(
-                dto.getId(),
-                dto.getProductsIds(),
-                dto.getPrice()
+                dto.id(),
+                dto.productsIds(),
+                dto.price()
         );
     }
 
