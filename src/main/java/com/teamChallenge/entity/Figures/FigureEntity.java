@@ -1,6 +1,5 @@
 package com.teamChallenge.entity.Figures;
 
-import com.teamChallenge.entity.Products.Category;
 import com.teamChallenge.entity.Products.Product;
 
 import jakarta.persistence.*;
@@ -24,7 +23,7 @@ public class FigureEntity extends Product {
     @CreatedDate
     private Date createdAt;
 
-    public FigureEntity(String name, String shortDescription, String longDescription, Category category, int price, int amount, String color, List<String> images) {
+    public FigureEntity(String name, String shortDescription, String longDescription, Enum category, int price, int amount, String color, List<String> images) {
         this.setName(name);
         this.setShortDescription(shortDescription);
         this.setLongDescription(longDescription);
@@ -35,7 +34,7 @@ public class FigureEntity extends Product {
         this.setImages(images);
     }
 
-    public FigureEntity(UUID id, String name, String shortDescription, String longDescription, Category category, int price, int amount, String color, List<String> images, Date createdAt) {
+    public FigureEntity(UUID id, String name, String shortDescription, String longDescription, Enum category, int price, int amount, String color, List<String> images, Date createdAt) {
         this.setId(id);
         this.setName(name);
         this.setShortDescription(shortDescription);
