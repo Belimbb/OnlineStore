@@ -20,7 +20,7 @@ public abstract class Product {
 
     String name, shortDescription, longDescription;
 
-    Category category;
+    Enum category;
 
     int price, amount;
 

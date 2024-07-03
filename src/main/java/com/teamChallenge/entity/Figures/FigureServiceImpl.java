@@ -1,6 +1,5 @@
 package com.teamChallenge.entity.Figures;
 
-import com.teamChallenge.entity.Products.Category;
 import com.teamChallenge.exception.exceptions.productExceptions.ProductAlreadyExistException;
 import com.teamChallenge.exception.exceptions.productExceptions.ProductNotFoundException;
 
@@ -22,7 +21,7 @@ public class FigureServiceImpl implements FigureService{
     private final FigureMapper figureMapper;
 
     @Override
-    public FigureDto createFigure(String name, String shortDescription, String longDescription, Category category, int price, int amount, String color, List<String> images) throws ProductAlreadyExistException {
+    public FigureDto createFigure(String name, String shortDescription, String longDescription, Enum category, int price, int amount, String color, List<String> images) throws ProductAlreadyExistException {
         FigureEntity figureEntity = new FigureEntity(name, shortDescription, longDescription,
                 category, price, amount, color, images);
         figureRepository.save(figureEntity);
