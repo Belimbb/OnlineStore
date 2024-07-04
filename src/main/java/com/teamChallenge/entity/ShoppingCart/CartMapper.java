@@ -13,7 +13,7 @@ public class CartMapper {
     public CartEntity toEntity (CartDto dto){
         return new CartEntity(
                 dto.id(),
-                dto.productsIds(),
+                dto.figures(),
                 dto.price()
         );
     }
@@ -21,7 +21,7 @@ public class CartMapper {
     public CartDto toDto (CartEntity entity){
         return new CartDto(
                 entity.getId(),
-                entity.getProductsIds(),
+                entity.getFigures(),
                 entity.getPrice()
         );
     }

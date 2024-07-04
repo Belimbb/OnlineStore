@@ -51,8 +51,9 @@ public class FigureServiceImpl implements FigureService{
 
     @Override
     public boolean deleteFigure(UUID id) {
-        if(figureRepository.existById(id)){
-            return figureRepository.deleteById(id);
+        if(figureRepository.existsById(id)){
+            figureRepository.deleteById(id);
+            return true;
         }
         throw new ProductNotFoundException(id);
     }
