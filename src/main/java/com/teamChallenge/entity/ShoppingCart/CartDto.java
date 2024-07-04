@@ -1,7 +1,8 @@
 package com.teamChallenge.entity.ShoppingCart;
 
-import java.util.List;
-import java.util.UUID;
+import com.teamChallenge.entity.Figures.FigureEntity;
 
-public record CartDto(Long id,List<UUID> productsIds, int price) {
+import java.util.List;
+
+public record CartDto(Long id, List<FigureEntity> figures, int price) {
 }

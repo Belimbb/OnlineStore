@@ -1,25 +1,29 @@
 package com.teamChallenge.entity.ShoppingCart;
 
+import com.teamChallenge.entity.Figures.FigureEntity;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "cart")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CartEntity {
+public class CartEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private List<UUID> productsIds;
+    @Column
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<FigureEntity> figures;
 
+    @Column
     private int price;
 }
