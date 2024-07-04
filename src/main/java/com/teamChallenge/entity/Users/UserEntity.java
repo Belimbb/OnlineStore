@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 import org.springframework.data.annotation.CreatedDate;
 
-import java.sql.Date;
+import java.util.Date;
 
 @Entity
 @Table(name = "users")
