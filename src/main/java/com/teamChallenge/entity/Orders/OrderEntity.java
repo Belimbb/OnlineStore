@@ -1,6 +1,6 @@
 package com.teamChallenge.entity.Orders;
 
-import com.teamChallenge.entity.Products.Product;
+import com.teamChallenge.entity.Figures.FigureEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,12 +30,12 @@ public class OrderEntity {
     private Statuses status;
 
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "orders")
-    private List<Product> products;
+    private List<FigureEntity> figureList;
 
-    public OrderEntity(String address, int price, List<Product> products) {
+    public OrderEntity(String address, int price, List<FigureEntity> figureList) {
         this.address = address;
         this.price = price;
         status = Statuses.NEW;
-        this.products = products;
+        this.figureList = figureList;
     }
 }
