@@ -15,7 +15,7 @@ public class OrderMapper {
                 order.getAddress(),
                 order.getPrice(),
                 order.getStatus(),
-                order.getProducts());
+                order.getFigureList());
     }
 
     public OrderEntity toEntity(OrderDto orderDto) {
@@ -24,7 +24,7 @@ public class OrderMapper {
                 orderDto.address(),
                 orderDto.price(),
                 orderDto.status(),
-                orderDto.products());
+                orderDto.figureList());
     }
 
     public List<OrderDto> toDtoList(List<OrderEntity> orders) {

@@ -1,5 +1,6 @@
 package com.teamChallenge.entity.Figures;
 
+import com.teamChallenge.entity.Orders.OrderEntity;
 import com.teamChallenge.entity.ShoppingCart.CartEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -53,6 +54,9 @@ public class FigureEntity {
     @Column(nullable = false)
     @CreatedDate
     private Date createdAt;
+
+    @ManyToMany
+    private List<OrderEntity> orders;
 
     public FigureEntity(String name, String shortDescription, String longDescription, Enum category, int price, int amount, String color, List<String> images) {
         this.setName(name);

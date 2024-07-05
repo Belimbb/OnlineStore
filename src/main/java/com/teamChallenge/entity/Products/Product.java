@@ -1,7 +1,9 @@
 package com.teamChallenge.entity.Products;
 
-import com.teamChallenge.entity.Orders.OrderEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,7 +25,4 @@ public abstract class Product {
     int price, amount;
 
     List<String> images;
-
-    @ManyToMany
-    List<OrderEntity> orders;
 }
