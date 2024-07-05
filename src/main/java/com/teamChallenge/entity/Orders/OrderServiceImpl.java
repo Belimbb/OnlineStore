@@ -27,7 +27,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto create(OrderDto orderDto) {
-        OrderEntity newOrder = new OrderEntity(orderDto.address(), orderDto.price(), orderDto.products());
+        OrderEntity newOrder = new OrderEntity(orderDto.address(), orderDto.price(), orderDto.figureList());
         orderRepository.save(newOrder);
         return orderMapper.toDto(newOrder);
     }
@@ -37,7 +37,7 @@ public class OrderServiceImpl implements OrderService {
         OrderEntity order = orderRepository.getReferenceById(id);
         order.setAddress(orderDto.address());
         order.setPrice(orderDto.price());
-        order.setProducts(orderDto.products());
+        order.setFigureList(orderDto.figureList());
 
         orderRepository.save(order);
         return orderMapper.toDto(order);
