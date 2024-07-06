@@ -1,7 +1,7 @@
 package com.teamChallenge.entity.Figures;
 
-import com.teamChallenge.exception.exceptions.productExceptions.ProductAlreadyExistException;
-import com.teamChallenge.exception.exceptions.productExceptions.ProductNotFoundException;
+import com.teamChallenge.exception.exceptions.figureExceptions.FigureAlreadyExistException;
+import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ public class FigureServiceImpl implements FigureService{
     private final FigureMapper figureMapper;
 
     @Override
-    public FigureDto createFigure(String name, String shortDescription, String longDescription, Enum category, int price, int amount, String color, List<String> images) throws ProductAlreadyExistException {
+    public FigureDto createFigure(String name, String shortDescription, String longDescription, Enum category, int price, int amount, String color, List<String> images) throws FigureAlreadyExistException {
         FigureEntity figureEntity = new FigureEntity(name, shortDescription, longDescription,
                 category, price, amount, color, images);
         figureRepository.save(figureEntity);
@@ -34,7 +34,7 @@ public class FigureServiceImpl implements FigureService{
         if (figureEntity.isPresent()){
             return figureMapper.toDto(figureEntity.get());
         }
-        throw new ProductNotFoundException(id);
+        throw new FigureNotFoundException(id);
     }
 
     @Override
@@ -55,6 +55,6 @@ public class FigureServiceImpl implements FigureService{
             figureRepository.deleteById(id);
             return true;
         }
-        throw new ProductNotFoundException(id);
+        throw new FigureNotFoundException(id);
     }
 }
