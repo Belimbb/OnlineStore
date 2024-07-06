@@ -1,4 +1,4 @@
-package com.teamChallenge.entity.Products.categories;
+package com.teamChallenge.entity.Figures.categories;
 
 public enum DollsAndRobots {
     ROBOTS,
