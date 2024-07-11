@@ -1,9 +1,5 @@
 services:
-  postgres:
-    image: 'postgres:latest'
-    environment:
-      - 'POSTGRES_DB=${DB_NAME}'
-      - 'POSTGRES_PASSWORD=${DB_PASSWORD}'
-      - 'POSTGRES_USER=${DB_USERNAME}'
+  mongodb:
+    image: 'mongo:latest'
     ports:
-      - '5432'
+      - '27017'

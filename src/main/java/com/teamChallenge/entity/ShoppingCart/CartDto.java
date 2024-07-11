@@ -4,5 +4,5 @@ import com.teamChallenge.entity.Figures.FigureEntity;
 
 import java.util.List;
 
-public record CartDto(Long id, List<FigureEntity> figures, int price) {
+public record CartDto(String id, List<FigureEntity> figures, int price) {
 }

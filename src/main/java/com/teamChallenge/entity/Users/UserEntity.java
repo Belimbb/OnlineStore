@@ -10,17 +10,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
-@Entity
-@Table(name = "users")
+@Document(collection = "users")
 @Data
 @NoArgsConstructor
 public class UserEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -51,7 +51,7 @@ public class UserEntity {
         role = Roles.USER;
     }
 
-    public UserEntity(Long id, String username, String email, String password, Roles role, Date createdAt) {
+    public UserEntity(String id, String username, String email, String password, Roles role, Date createdAt) {
         this.id = id;
         this.username = username;
         this.email = email;
