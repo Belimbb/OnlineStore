@@ -1,24 +1,25 @@
 package com.teamChallenge.entity.Orders;
 
 import com.teamChallenge.entity.Figures.FigureEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
-import java.util.UUID;
 
-@Entity
-@Table(name = "orders")
+@Document(collection = "orders")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
     @Column(nullable = false)
     private String address;
@@ -29,7 +30,7 @@ public class OrderEntity {
     @Enumerated
     private Statuses status;
 
-    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "orders")
+    @DBRef
     private List<FigureEntity> figureList;
 
     public OrderEntity(String address, int price, List<FigureEntity> figureList) {

@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 import java.util.Date;
 
 public record UserDto(
-        Long id,
+        String id,
         @NotBlank @Email String email,
         @NotBlank String username,
         @NotBlank @Size(min = 3, max = 100) String password,
