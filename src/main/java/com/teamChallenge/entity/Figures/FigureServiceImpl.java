@@ -2,15 +2,12 @@ package com.teamChallenge.entity.Figures;
 
 import com.teamChallenge.exception.exceptions.productExceptions.ProductAlreadyExistException;
 import com.teamChallenge.exception.exceptions.productExceptions.ProductNotFoundException;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,7 +26,7 @@ public class FigureServiceImpl implements FigureService{
     }
 
     @Override
-    public FigureDto getById(UUID id){
+    public FigureDto getById(String id){
         Optional<FigureEntity> figureEntity = figureRepository.findById(id);
         if (figureEntity.isPresent()){
             return figureMapper.toDto(figureEntity.get());
@@ -50,7 +47,7 @@ public class FigureServiceImpl implements FigureService{
     }
 
     @Override
-    public boolean deleteFigure(UUID id) {
+    public boolean deleteFigure(String id) {
         if(figureRepository.existsById(id)){
             figureRepository.deleteById(id);
             return true;
