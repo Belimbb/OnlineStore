@@ -1,4 +1,4 @@
-package com.teamChallenge.jwt;
+package com.teamChallenge.security.jwt;
 
 import com.teamChallenge.exception.exceptions.generalExceptions.BadJWTException;
 import io.jsonwebtoken.ExpiredJwtException;

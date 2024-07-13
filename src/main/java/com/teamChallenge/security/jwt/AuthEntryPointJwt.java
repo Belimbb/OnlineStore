@@ -1,4 +1,4 @@
-package com.teamChallenge.jwt;
+package com.teamChallenge.security.jwt;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
