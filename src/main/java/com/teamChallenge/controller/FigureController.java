@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -33,12 +34,12 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/figures")
-public class FiguresController {
+public class FigureController {
 
     private final FigureServiceImpl figureService;
     private final FigureMapper figureMapper;
 
-    @GetMapping("")
+    @GetMapping("/all")
     @Operation(summary = "Get all figures")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List figures",
@@ -51,6 +52,42 @@ public class FiguresController {
         List<FigureDto> figureDtos = figureService.getAllFigures();
 
         log.info("{}: Figures were retrieved from the database", LogEnum.CONTROLLER);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(figureDtos);
+    }
+
+    @GetMapping("/all/by_category")
+    @Operation(summary = "Get all figures by category")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List figures by category",
+                    content = { @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = FigureDto.class)))}
+            )
+    })
+    @SecurityRequirement(name = "BearerAuth")
+    public ResponseEntity<List<FigureDto>> figureListByCategory(@NotNull @Valid @RequestParam String category) throws FigureNotFoundException {
+        List<FigureDto> figureDtos = figureService.getAllFiguresByCategory(category);
+
+        log.info("{}: Figures from category {} were retrieved from the database", LogEnum.CONTROLLER, category);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(figureDtos);
+    }
+
+    @GetMapping("/all/by_subcategory")
+    @Operation(summary = "Get all figures by sub category")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List figures by subCategory",
+                    content = { @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = FigureDto.class)))}
+            )
+    })
+    @SecurityRequirement(name = "BearerAuth")
+    public ResponseEntity<List<FigureDto>> figureListByCategory(@Valid @NotNull @RequestParam Enum<?> subCategory) throws FigureNotFoundException {
+        List<FigureDto> figureDtos = figureService.getAllFiguresBySubCategory(subCategory);
+
+        log.info("{}: Figures from subCategory {} were retrieved from the database", LogEnum.CONTROLLER, subCategory);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(figureDtos);
