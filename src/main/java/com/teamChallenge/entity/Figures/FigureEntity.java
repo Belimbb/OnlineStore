@@ -3,8 +3,10 @@ package com.teamChallenge.entity.Figures;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Size;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -32,7 +34,10 @@ public class FigureEntity {
     private String longDescription;
 
     @Column (nullable = false)
-    private Enum category;
+    private String category;
+
+    @Column (nullable = false)
+    private Enum<?> subCategory;
 
     @Column (nullable = false)
     int price;
@@ -50,23 +55,25 @@ public class FigureEntity {
     @CreatedDate
     private Date createdAt;
 
-    public FigureEntity(String name, String shortDescription, String longDescription, Enum category, int price, int amount, String color, List<String> images) {
+    public FigureEntity(String name, String shortDescription, String longDescription, Enum<?> subCategory, int price, int amount, String color, List<String> images) {
         this.setName(name);
         this.setShortDescription(shortDescription);
         this.setLongDescription(longDescription);
-        this.setCategory(category);
+        this.setCategory(subCategory.getClass().getSimpleName());
+        this.setSubCategory(subCategory);
         this.setPrice(price);
         this.setAmount(amount);
         this.setColor(color);
         this.setImages(images);
     }
 
-    public FigureEntity(String id, String name, String shortDescription, String longDescription, Enum category, int price, int amount, String color, List<String> images, Date createdAt) {
+    public FigureEntity(String id, String name, String shortDescription, String longDescription, Enum<?> subCategory, int price, int amount, String color, List<String> images, Date createdAt) {
         this.id = id;
         this.name = name;
         this.shortDescription = shortDescription;
         this.longDescription = longDescription;
-        this.category = category;
+        this.category = subCategory.getClass().getSimpleName();
+        this.subCategory = subCategory;
         this.price = price;
         this.amount = amount;
         this.color = color;

@@ -8,6 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface FigureRepository extends MongoRepository<FigureEntity, String> {
-    Optional<List<FigureEntity>> findByCategory(Enum category);
+    Optional<List<FigureEntity>> findByCategory(String category);
+    Optional<List<FigureEntity>> findBySubCategory(Enum<?> subCategory);
     Optional<List<FigureEntity>> findByColor(String color);
 }
