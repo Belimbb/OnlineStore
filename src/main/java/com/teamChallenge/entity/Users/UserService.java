@@ -6,11 +6,11 @@ public interface UserService {
 
     List<UserDto> getAll();
 
-    UserDto getById(Long id);
+    UserDto getById(String id);
 
     UserDto create(UserDto userDto);
 
-    UserDto update(Long id, UserDto userDto);
+    UserDto update(String id, UserDto userDto);
 
-    boolean delete(Long id);
+    boolean delete(String id);
 }

@@ -20,8 +20,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getById(Long id) {
-        return userMapper.toDto(userRepository.getReferenceById(id));
+    public UserDto getById(String id) {
+        return userMapper.toDto(userRepository.findById(id).get());
     }
 
     @Override
@@ -32,8 +32,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto update(Long id, UserDto userDto) {
-        UserEntity user = userRepository.getReferenceById(id);
+    public UserDto update(String id, UserDto userDto) {
+        UserEntity user = userRepository.findById(id).get();
         user.setUsername(userDto.username());
         user.setEmail(userDto.email());
 
@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean delete(Long id) {
+    public boolean delete(String id) {
         userRepository.deleteById(id);
         return true;
     }

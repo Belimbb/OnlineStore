@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -21,8 +20,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDto getById(UUID id) {
-        return orderMapper.toDto(orderRepository.getReferenceById(id));
+    public OrderDto getById(String id) {
+        return orderMapper.toDto(orderRepository.findById(id).get());
     }
 
     @Override
@@ -33,8 +32,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDto update(UUID id, OrderDto orderDto) {
-        OrderEntity order = orderRepository.getReferenceById(id);
+    public OrderDto update(String id, OrderDto orderDto) {
+        OrderEntity order = orderRepository.findById(id).get();
         order.setAddress(orderDto.address());
         order.setPrice(orderDto.price());
         order.setFigureList(orderDto.figureList());
@@ -44,7 +43,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public boolean delete(UUID id) {
+    public boolean delete(String id) {
         orderRepository.deleteById(id);
         return true;
     }
