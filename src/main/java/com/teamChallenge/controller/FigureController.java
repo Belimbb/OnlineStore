@@ -27,7 +27,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Validated
@@ -105,7 +104,7 @@ public class FigureController {
 
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<FigureDto> getFigureById(@NotBlank @NotNull @PathVariable("figureId") UUID figureId) throws FigureNotFoundException{
+    public ResponseEntity<FigureDto> getFigureById(@NotBlank @NotNull @PathVariable("figureId") String figureId) throws FigureNotFoundException{
         FigureDto figure = figureService.getById(figureId);
         log.info("{}: Figure (id: {}) was retrieved from the database", LogEnum.SERVICE, figure.id());
         return ResponseEntity
