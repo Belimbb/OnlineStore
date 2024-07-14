@@ -17,4 +17,3 @@ public record UserDto(
         Date createdAt,
         CartDto cartDTO
 ) {}
-
