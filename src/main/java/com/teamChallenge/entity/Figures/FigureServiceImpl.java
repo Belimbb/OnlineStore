@@ -1,9 +1,10 @@
 package com.teamChallenge.entity.Figures;
 
-import com.teamChallenge.exception.exceptions.productExceptions.ProductAlreadyExistException;
-import com.teamChallenge.exception.exceptions.productExceptions.ProductNotFoundException;
+import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,9 +19,9 @@ public class FigureServiceImpl implements FigureService{
     private final FigureMapper figureMapper;
 
     @Override
-    public FigureDto createFigure(String name, String shortDescription, String longDescription, Enum category, int price, int amount, String color, List<String> images) throws ProductAlreadyExistException {
+    public FigureDto createFigure(String name, String shortDescription, String longDescription, Enum<?> subCategory, int price, int amount, String color, List<String> images){
         FigureEntity figureEntity = new FigureEntity(name, shortDescription, longDescription,
-                category, price, amount, color, images);
+                subCategory, price, amount, color, images);
         figureRepository.save(figureEntity);
         return figureMapper.toDto(figureEntity);
     }
@@ -31,13 +32,29 @@ public class FigureServiceImpl implements FigureService{
         if (figureEntity.isPresent()){
             return figureMapper.toDto(figureEntity.get());
         }
-        throw new ProductNotFoundException(id);
+        throw new FigureNotFoundException(id);
     }
 
     @Override
     public List<FigureDto> getAllFigures() {
         List<FigureEntity> figureEntities = figureRepository.findAll();
         return figureMapper.toDtoList(figureEntities);
+    }
+
+    public List<FigureDto> getAllFiguresByCategory(String category){
+        Optional<List<FigureEntity>> figureEntities = figureRepository.findByCategory(category);
+        if (figureEntities.isPresent()){
+            return figureMapper.toDtoList(figureEntities.get());
+        }
+        throw new FigureNotFoundException();
+    }
+
+    public List<FigureDto> getAllFiguresBySubCategory (Enum<?> subCategory){
+        Optional<List<FigureEntity>> figureEntities = figureRepository.findBySubCategory(subCategory);
+        if (figureEntities.isPresent()){
+            return figureMapper.toDtoList(figureEntities.get());
+        }
+        throw new FigureNotFoundException();
     }
 
     @Override
@@ -52,6 +69,6 @@ public class FigureServiceImpl implements FigureService{
             figureRepository.deleteById(id);
             return true;
         }
-        throw new ProductNotFoundException(id);
+        throw new FigureNotFoundException(id);
     }
 }

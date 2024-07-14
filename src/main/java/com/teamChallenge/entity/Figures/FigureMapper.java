@@ -16,7 +16,7 @@ public class FigureMapper {
                 entity.getName(),
                 entity.getShortDescription(),
                 entity.getLongDescription(),
-                entity.getCategory(),
+                entity.getSubCategory(),
                 entity.getPrice(),
                 entity.getAmount(),
                 entity.getColor(),
@@ -30,12 +30,12 @@ public class FigureMapper {
                 dto.name(),
                 dto.shortDescription(),
                 dto.longDescription(),
-                dto.category(),
+                dto.subCategory(),
                 dto.price(),
                 dto.amount(),
                 dto.color(),
                 dto.images(),
-                dto.createdA());
+                dto.createdAt());
     }
 
     public List<FigureDto> toDtoList (List<FigureEntity> entities){
