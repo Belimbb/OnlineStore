@@ -5,6 +5,7 @@ import com.teamChallenge.entity.Figures.FigureMapper;
 import com.teamChallenge.entity.Figures.FigureServiceImpl;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;
+Dimport com.teamChallenge.request.FigureRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -109,6 +110,27 @@ public class FigureController {
         log.info("{}: Figure (id: {}) was retrieved from the database", LogEnum.SERVICE, figure.id());
         return ResponseEntity
                 .status(HttpStatus.OK)
+                .body(figure);
+    }
+
+    @PostMapping("/add")
+    @Operation(summary = "Add new Figure")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Added new Figure",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = FigureDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Validation errors",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CustomErrorResponse.class))})
+    })
+    @SecurityRequirement(name = "BearerAuth")
+    public ResponseEntity<FigureDto> addFigure(@Valid @NotNull @RequestBody FigureRequest request) {
+        FigureDto figure = figureService.createFigure(request.name(), request.shortDescription(), request.longDescription(),
+                request.subCategory(), request.price(), request.amount(), request.color(), request.images());
+
+        log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, figure.id());
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
                 .body(figure);
     }
 }
