@@ -5,7 +5,7 @@ import com.teamChallenge.entity.Figures.FigureMapper;
 import com.teamChallenge.entity.Figures.FigureServiceImpl;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;
-Dimport com.teamChallenge.request.FigureRequest;
+import com.teamChallenge.request.FigureRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
