@@ -34,15 +34,10 @@ dependencies {
 	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 	implementation 'io.jsonwebtoken:jjwt:0.12.5'
-
-	// https://mvnrepository.com/artifact/org.springframework.data/spring-data-mongodb
 	implementation 'org.springframework.data:spring-data-mongodb:4.3.1'
-	
 
 	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 	annotationProcessor 'org.projectlombok:lombok'
-
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
