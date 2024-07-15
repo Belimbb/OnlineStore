@@ -53,7 +53,7 @@ public class AuthController {
                     content = { @Content(mediaType = "application/json", schema = @Schema(implementation = CustomErrorResponse.class)) })
     })
     public ResponseEntity<JwtResponseDto> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) throws Exception {
-        Authentication authentication = null;
+        Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())

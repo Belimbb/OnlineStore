@@ -1,5 +1,6 @@
 package com.teamChallenge.entity.Figures;
 
+import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class FigureServiceImpl implements FigureService{
         FigureEntity figureEntity = new FigureEntity(name, shortDescription, longDescription,
                 subCategory, price, amount, color, images);
         figureRepository.save(figureEntity);
+        log.info("{}: Figure (Name: {}) was created", LogEnum.SERVICE, name);
         return figureMapper.toDto(figureEntity);
     }
 
@@ -30,6 +32,7 @@ public class FigureServiceImpl implements FigureService{
     public FigureDto getById(String id){
         Optional<FigureEntity> figureEntity = figureRepository.findById(id);
         if (figureEntity.isPresent()){
+            log.info("{}: Figure retrieved from db by id {}", LogEnum.SERVICE, id);
             return figureMapper.toDto(figureEntity.get());
         }
         throw new FigureNotFoundException(id);
@@ -38,12 +41,14 @@ public class FigureServiceImpl implements FigureService{
     @Override
     public List<FigureDto> getAllFigures() {
         List<FigureEntity> figureEntities = figureRepository.findAll();
+        log.info("{}: All figures retrieved from db", LogEnum.SERVICE);
         return figureMapper.toDtoList(figureEntities);
     }
 
     public List<FigureDto> getAllFiguresByCategory(String category){
         Optional<List<FigureEntity>> figureEntities = figureRepository.findByCategory(category);
         if (figureEntities.isPresent()){
+            log.info("{}: All figures by category {} retrieved from db", LogEnum.SERVICE, category);
             return figureMapper.toDtoList(figureEntities.get());
         }
         throw new FigureNotFoundException();
@@ -52,6 +57,7 @@ public class FigureServiceImpl implements FigureService{
     public List<FigureDto> getAllFiguresBySubCategory (Enum<?> subCategory){
         Optional<List<FigureEntity>> figureEntities = figureRepository.findBySubCategory(subCategory);
         if (figureEntities.isPresent()){
+            log.info("{}: All figures by sub category {} retrieved from db", LogEnum.SERVICE, subCategory);
             return figureMapper.toDtoList(figureEntities.get());
         }
         throw new FigureNotFoundException();
@@ -60,6 +66,7 @@ public class FigureServiceImpl implements FigureService{
     @Override
     public FigureDto updateFigure(FigureDto figureDto) {
         FigureEntity savedFigure = figureRepository.save(figureMapper.toEntity(figureDto));
+        log.info("{}: Figure (id: {}) updated)", LogEnum.SERVICE, savedFigure.getId());
         return figureMapper.toDto(savedFigure);
     }
 
@@ -67,6 +74,7 @@ public class FigureServiceImpl implements FigureService{
     public boolean deleteFigure(String id) {
         if(figureRepository.existsById(id)){
             figureRepository.deleteById(id);
+            log.info("{}: Figure (id: {}) deleted", LogEnum.SERVICE, id);
             return true;
         }
         throw new FigureNotFoundException(id);
