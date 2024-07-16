@@ -1,8 +1,8 @@
 package com.teamChallenge.controller;
 
-import com.teamChallenge.entity.Figures.FigureDto;
-import com.teamChallenge.entity.Figures.FigureMapper;
-import com.teamChallenge.entity.Figures.FigureServiceImpl;
+import com.teamChallenge.entity.figure.FigureDto;
+import com.teamChallenge.entity.figure.FigureMapper;
+import com.teamChallenge.entity.figure.FigureServiceImpl;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;
 import com.teamChallenge.request.FigureRequest;
