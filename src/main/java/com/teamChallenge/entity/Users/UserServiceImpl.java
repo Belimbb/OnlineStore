@@ -107,7 +107,7 @@ public class UserServiceImpl implements UserDetailsService,UserService {
             throw new RuntimeException(e);
         }
         return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
+                user.getUsername(),
                 user.getPassword(),
                 Collections.singleton(new SimpleGrantedAuthority(user.getRole().name()))
         );
