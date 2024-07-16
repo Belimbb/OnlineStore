@@ -1,5 +1,6 @@
 package com.teamChallenge.entity.Orders;
 
+import com.teamChallenge.exception.exceptions.orderExceptions.OrderNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto getById(String id) {
-        return orderMapper.toDto(orderRepository.findById(id).get());
+        return orderMapper.toDto(findById(id));
     }
 
     @Override
@@ -33,7 +34,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto update(String id, OrderDto orderDto) {
-        OrderEntity order = orderRepository.findById(id).get();
+        OrderEntity order = findById(id);
         order.setAddress(orderDto.address());
         order.setPrice(orderDto.price());
         order.setFigureList(orderDto.figureList());
@@ -44,7 +45,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public boolean delete(String id) {
-        orderRepository.deleteById(id);
+        OrderEntity order = findById(id);
+        orderRepository.delete(order);
         return true;
+    }
+
+    private OrderEntity findById(String id) {
+        return orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
     }
 }
