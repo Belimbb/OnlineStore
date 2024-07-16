@@ -3,12 +3,17 @@ package com.teamChallenge.entity.Users;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.userExceptions.UserAlreadyExistException;
 import com.teamChallenge.exception.exceptions.userExceptions.UserNotFoundException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -22,6 +27,12 @@ public class UserServiceImpl implements UserDetailsService,UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    public void passwordEncoder(@Lazy PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public List<UserDto> getAll() {
@@ -51,9 +62,6 @@ public class UserServiceImpl implements UserDetailsService,UserService {
 
     @Override
     public UserDto create(UserDto userDto) throws UserAlreadyExistException{
-//        UserEntity newUser = new UserEntity(userDto.username(), userDto.email(), userDto.password());
-//        userRepository.save(newUser);
-//        return userMapper.toDto(newUser);
         return create(userDto.username(), userDto.email(), userDto.password());
     }
 
@@ -62,7 +70,7 @@ public class UserServiceImpl implements UserDetailsService,UserService {
         if (existsByUsername(username)){
             throw new UserAlreadyExistException(username);
         }
-        UserEntity user = new UserEntity(username, email, password);
+        UserEntity user = new UserEntity(username, email, passwordEncoder.encode(password));
         user.setCreatedAt(new Date());
         UserEntity saved = userRepository.save(user);
         log.info("{}: User (Username: {}) was created", LogEnum.SERVICE, username);
