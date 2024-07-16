@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserDetailsService,UserService {
     @Override
     public UserDto getById(String id) {
         log.info("{}: request on retrieving user by id {} was sent", LogEnum.SERVICE, id);
-        return userMapper.toDto(userRepository.findById(id).orElseThrow(UserNotFoundException::new));
+        return userMapper.toDto(findById(id));
     }
 
     @Override
@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserDetailsService,UserService {
 
     @Override
     public UserDto update(String id, UserDto userDto) {
-        UserEntity user = userRepository.findById(id).get();
+        UserEntity user = findById(id);
         user.setUsername(userDto.username());
         user.setEmail(userDto.email());
 
@@ -90,7 +90,8 @@ public class UserServiceImpl implements UserDetailsService,UserService {
 
     @Override
     public boolean delete(String id) {
-        userRepository.deleteById(id);
+        UserEntity user = findById(id);
+        userRepository.delete(user);
         log.info("{}: User (id: {}) was deleted", LogEnum.SERVICE, id);
         return true;
     }
@@ -118,5 +119,9 @@ public class UserServiceImpl implements UserDetailsService,UserService {
                 user.getPassword(),
                 Collections.singleton(new SimpleGrantedAuthority(user.getRole().name()))
         );
+    }
+
+    private UserEntity findById(String id) {
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 }
