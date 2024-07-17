@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
 @Component
 public class AdvertisementMapper {
     public AdvertisementDto toDto(AdvertisementEntity entity){
-        return new AdvertisementDto(entity.getText(), entity.getUrl());
+        return new AdvertisementDto(entity.getId(), entity.getText(), entity.getUrl());
     }
 
     public AdvertisementEntity toEntity(AdvertisementDto dto){
-        return new AdvertisementEntity(dto.text(), dto.url());
+        return new AdvertisementEntity(dto.id(), dto.text(), dto.url());
     }
 
 

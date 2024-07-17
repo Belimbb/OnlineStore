@@ -1,5 +1,7 @@
 package com.teamChallenge.entity.figure;
 
+import com.teamChallenge.entity.figure.sections.Category;
+import com.teamChallenge.entity.figure.sections.SubCategory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Size;
@@ -34,10 +36,10 @@ public class FigureEntity {
     private String longDescription;
 
     @Column (nullable = false)
-    private String category;
+    private Category category;
 
     @Column (nullable = false)
-    private Enum<?> subCategory;
+    private SubCategory subCategory;
 
     @Column (nullable = false)
     int price;
@@ -55,11 +57,11 @@ public class FigureEntity {
     @CreatedDate
     private Date createdAt;
 
-    public FigureEntity(String name, String shortDescription, String longDescription, Enum<?> subCategory, int price, int amount, String color, List<String> images) {
+    public FigureEntity(String name, String shortDescription, String longDescription, SubCategory subCategory, int price, int amount, String color, List<String> images) {
         this.setName(name);
         this.setShortDescription(shortDescription);
         this.setLongDescription(longDescription);
-        this.setCategory(subCategory.getClass().getSimpleName());
+        this.setCategory(subCategory.getCategory());
         this.setSubCategory(subCategory);
         this.setPrice(price);
         this.setAmount(amount);
@@ -67,12 +69,12 @@ public class FigureEntity {
         this.setImages(images);
     }
 
-    public FigureEntity(String id, String name, String shortDescription, String longDescription, Enum<?> subCategory, int price, int amount, String color, List<String> images, Date createdAt) {
+    public FigureEntity(String id, String name, String shortDescription, String longDescription, SubCategory subCategory, int price, int amount, String color, List<String> images, Date createdAt) {
         this.id = id;
         this.name = name;
         this.shortDescription = shortDescription;
         this.longDescription = longDescription;
-        this.category = subCategory.getClass().getSimpleName();
+        this.category = subCategory.getCategory();
         this.subCategory = subCategory;
         this.price = price;
         this.amount = amount;
