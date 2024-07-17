@@ -1,5 +1,7 @@
 package com.teamChallenge.entity.figure;
 
+import com.teamChallenge.entity.figure.sections.Category;
+import com.teamChallenge.entity.figure.sections.SubCategory;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;
 
@@ -20,7 +22,7 @@ public class FigureServiceImpl implements FigureService{
     private final FigureMapper figureMapper;
 
     @Override
-    public FigureDto createFigure(String name, String shortDescription, String longDescription, Enum<?> subCategory, int price, int amount, String color, List<String> images){
+    public FigureDto createFigure(String name, String shortDescription, String longDescription, SubCategory subCategory, int price, int amount, String color, List<String> images){
         FigureEntity figureEntity = new FigureEntity(name, shortDescription, longDescription,
                 subCategory, price, amount, color, images);
         figureRepository.save(figureEntity);
@@ -45,7 +47,7 @@ public class FigureServiceImpl implements FigureService{
         return figureMapper.toDtoList(figureEntities);
     }
 
-    public List<FigureDto> getAllFiguresByCategory(String category){
+    public List<FigureDto> getAllFiguresByCategory(Category category){
         Optional<List<FigureEntity>> figureEntities = figureRepository.findByCategory(category);
         if (figureEntities.isPresent()){
             log.info("{}: All figures by category {} retrieved from db", LogEnum.SERVICE, category);
@@ -54,7 +56,7 @@ public class FigureServiceImpl implements FigureService{
         throw new FigureNotFoundException();
     }
 
-    public List<FigureDto> getAllFiguresBySubCategory (Enum<?> subCategory){
+    public List<FigureDto> getAllFiguresBySubCategory (SubCategory subCategory){
         Optional<List<FigureEntity>> figureEntities = figureRepository.findBySubCategory(subCategory);
         if (figureEntities.isPresent()){
             log.info("{}: All figures by sub category {} retrieved from db", LogEnum.SERVICE, subCategory);
