@@ -1,4 +1,4 @@
-package com.teamChallenge.controller;
+package com.teamChallenge.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
