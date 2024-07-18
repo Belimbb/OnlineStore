@@ -1,7 +1,6 @@
 package com.teamChallenge.controller;
 
 import com.teamChallenge.entity.figure.FigureDto;
-import com.teamChallenge.entity.figure.FigureMapper;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
 import com.teamChallenge.entity.figure.sections.Category;
 import com.teamChallenge.entity.figure.sections.SubCategory;
@@ -30,7 +29,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -41,7 +39,6 @@ import java.util.List;
 public class FigureController {
 
     private final FigureServiceImpl figureService;
-    private final FigureMapper figureMapper;
 
     @GetMapping("/all")
     @Operation(summary = "Get all figures")
@@ -55,7 +52,7 @@ public class FigureController {
     public ResponseEntity<List<FigureDto>> figureList() throws FigureNotFoundException {
         List<FigureDto> figureDtos = figureService.getAllFigures();
 
-        log.info("{}: Figures were retrieved from the database", LogEnum.CONTROLLER);
+        log.info("{}: Figures have been retrieved", LogEnum.CONTROLLER);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(figureDtos);
@@ -73,7 +70,7 @@ public class FigureController {
     public ResponseEntity<List<FigureDto>> figureListByCategory(@NotNull @Valid @RequestParam Category category) throws FigureNotFoundException {
         List<FigureDto> figureDtos = figureService.getAllFiguresByCategory(category);
 
-        log.info("{}: Figures from category {} were retrieved from the database", LogEnum.CONTROLLER, category);
+        log.info("{}: Figures from category {} have been retrieved", LogEnum.CONTROLLER, category);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(figureDtos);
@@ -91,7 +88,7 @@ public class FigureController {
     public ResponseEntity<List<FigureDto>> figureListByCategory(@Valid @NotNull @RequestParam SubCategory subCategory) throws FigureNotFoundException {
         List<FigureDto> figureDtos = figureService.getAllFiguresBySubCategory(subCategory);
 
-        log.info("{}: Figures from subCategory {} were retrieved from the database", LogEnum.CONTROLLER, subCategory);
+        log.info("{}: Figures from subCategory {} have been retrieved", LogEnum.CONTROLLER, subCategory);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(figureDtos);
@@ -111,7 +108,7 @@ public class FigureController {
     @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<FigureDto> getFigureById(@NotBlank @NotNull @PathVariable("figureId") String figureId) throws FigureNotFoundException{
         FigureDto figure = figureService.getById(figureId);
-        log.info("{}: Figure (id: {}) was retrieved from the database", LogEnum.SERVICE, figure.id());
+        log.info("{}: Figure (id: {}) has been retrieved", LogEnum.SERVICE, figure.id());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(figure);
