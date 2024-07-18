@@ -35,6 +35,8 @@ dependencies {
 	implementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 	implementation 'io.jsonwebtoken:jjwt:0.12.5'
 
+	// https://mvnrepository.com/artifact/commons-codec/commons-codec
+	implementation 'commons-codec:commons-codec:1.17.0'
 	// https://mvnrepository.com/artifact/org.springframework.data/spring-data-mongodb
 	implementation 'org.springframework.data:spring-data-mongodb:4.3.1'
 	

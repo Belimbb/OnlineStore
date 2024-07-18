@@ -6,6 +6,7 @@ import com.teamChallenge.entity.figure.FigureServiceImpl;
 import com.teamChallenge.entity.figure.sections.Category;
 import com.teamChallenge.entity.figure.sections.SubCategory;
 import com.teamChallenge.exception.LogEnum;
+import com.teamChallenge.exception.exceptions.figureExceptions.FigureAlreadyExistException;
 import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;
 import com.teamChallenge.request.FigureRequest;
 
@@ -126,7 +127,7 @@ public class FigureController {
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<FigureDto> addFigure(@Valid @NotNull @RequestBody FigureRequest request) {
+    public ResponseEntity<FigureDto> addFigure(@Valid @NotNull @RequestBody FigureRequest request) throws FigureAlreadyExistException {
         FigureDto figure = figureService.createFigure(request.name(), request.shortDescription(), request.longDescription(),
                 request.subCategory(), request.price(), request.amount(), request.color(), request.images());
 

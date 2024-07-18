@@ -3,6 +3,7 @@ package com.teamChallenge.entity.figure;
 import com.teamChallenge.entity.figure.sections.Category;
 import com.teamChallenge.entity.figure.sections.SubCategory;
 import com.teamChallenge.exception.LogEnum;
+import com.teamChallenge.exception.exceptions.figureExceptions.FigureAlreadyExistException;
 import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,9 +24,13 @@ public class FigureServiceImpl implements FigureService{
     private final FigureMapper figureMapper;
 
     @Override
-    public FigureDto createFigure(String name, String shortDescription, String longDescription, SubCategory subCategory, int price, int amount, String color, List<String> images){
+    public FigureDto createFigure(String name, String shortDescription, String longDescription, SubCategory subCategory, int price, int amount, String color, List<String> images) throws FigureAlreadyExistException {
         FigureEntity figureEntity = new FigureEntity(name, shortDescription, longDescription,
                 subCategory, price, amount, color, images);
+        if (figureRepository.existsByUniqueHash(figureEntity.getUniqueHash())){
+            throw new FigureAlreadyExistException(name);
+        }
+        figureEntity.setCreatedAt(new Date());
         figureRepository.save(figureEntity);
         log.info("{}: Figure (Name: {}) was created", LogEnum.SERVICE, name);
         return figureMapper.toDto(figureEntity);
