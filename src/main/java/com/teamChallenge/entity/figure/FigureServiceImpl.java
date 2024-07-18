@@ -79,12 +79,12 @@ public class FigureServiceImpl implements FigureService{
     }
 
     @Override
-    public boolean deleteFigure(String id) {
+    public void deleteFigure(String id) {
         if(figureRepository.existsById(id)){
             figureRepository.deleteById(id);
             log.info("{}: Figure (id: {}) deleted", LogEnum.SERVICE, id);
-            return true;
+        }else {
+            throw new FigureNotFoundException(id);
         }
-        throw new FigureNotFoundException(id);
     }
 }

@@ -30,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -135,5 +136,20 @@ public class FigureController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(figure);
+    }
+
+    @DeleteMapping("/{figureId}")
+    @Operation(summary = "Delete figure")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Figure deleted"),
+            @ApiResponse(responseCode = "404", description = "Figure not found",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CustomErrorResponse.class)) }) })
+    @ResponseStatus(HttpStatus.OK)
+    @SecurityRequirement(name = "BearerAuth")
+    public void deleteUrlByShortId(@PathVariable("figureId") String  figureId) throws FigureNotFoundException {
+        figureService.deleteFigure(figureId);
+
+        log.info("{}: Figure (id: {}) has been deleted", LogEnum.CONTROLLER, figureId);
     }
 }
