@@ -1,6 +1,6 @@
 package com.teamChallenge.security.jwt;
 
-import com.teamChallenge.entity.Users.UserEntity;
+import com.teamChallenge.entity.user.UserEntity;
 import com.teamChallenge.exception.exceptions.generalExceptions.BadJWTException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,6 @@
 package com.teamChallenge.controller;
 
-import com.teamChallenge.entity.Users.*;
+import com.teamChallenge.entity.user.*;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.userExceptions.UserAlreadyExistException;
 import com.teamChallenge.request.auth.LoginRequest;
