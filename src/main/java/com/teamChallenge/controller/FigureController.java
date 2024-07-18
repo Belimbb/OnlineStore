@@ -1,8 +1,10 @@
 package com.teamChallenge.controller;
 
-import com.teamChallenge.entity.Figures.FigureDto;
-import com.teamChallenge.entity.Figures.FigureMapper;
-import com.teamChallenge.entity.Figures.FigureServiceImpl;
+import com.teamChallenge.entity.figure.FigureDto;
+import com.teamChallenge.entity.figure.FigureMapper;
+import com.teamChallenge.entity.figure.FigureServiceImpl;
+import com.teamChallenge.entity.figure.sections.Category;
+import com.teamChallenge.entity.figure.sections.SubCategory;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;
 import com.teamChallenge.request.FigureRequest;
@@ -66,7 +68,7 @@ public class FigureController {
             )
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<List<FigureDto>> figureListByCategory(@NotNull @Valid @RequestParam String category) throws FigureNotFoundException {
+    public ResponseEntity<List<FigureDto>> figureListByCategory(@NotNull @Valid @RequestParam Category category) throws FigureNotFoundException {
         List<FigureDto> figureDtos = figureService.getAllFiguresByCategory(category);
 
         log.info("{}: Figures from category {} were retrieved from the database", LogEnum.CONTROLLER, category);
@@ -84,7 +86,7 @@ public class FigureController {
             )
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<List<FigureDto>> figureListByCategory(@Valid @NotNull @RequestParam Enum<?> subCategory) throws FigureNotFoundException {
+    public ResponseEntity<List<FigureDto>> figureListByCategory(@Valid @NotNull @RequestParam SubCategory subCategory) throws FigureNotFoundException {
         List<FigureDto> figureDtos = figureService.getAllFiguresBySubCategory(subCategory);
 
         log.info("{}: Figures from subCategory {} were retrieved from the database", LogEnum.CONTROLLER, subCategory);
