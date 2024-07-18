@@ -4,6 +4,7 @@ import com.teamChallenge.entity.figure.FigureDto;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
 import com.teamChallenge.entity.figure.sections.Category;
 import com.teamChallenge.entity.figure.sections.SubCategory;
+import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.figureExceptions.FigureAlreadyExistException;
 import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;

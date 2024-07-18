@@ -1,5 +1,7 @@
 package com.teamChallenge.entity.order;
 
+import com.teamChallenge.entity.figure.FigureMapper;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -7,7 +9,9 @@ import java.util.List;
 
 @Slf4j
 @Component
+@AllArgsConstructor
 public class OrderMapper {
+    private final FigureMapper figureMapper;
 
     public OrderDto toDto(OrderEntity order) {
         return new OrderDto(
@@ -15,7 +19,7 @@ public class OrderMapper {
                 order.getAddress(),
                 order.getPrice(),
                 order.getStatus(),
-                order.getFigureList());
+                figureMapper.toDtoList(order.getFigureList()));
     }
 
     public OrderEntity toEntity(OrderDto orderDto) {
@@ -24,7 +28,7 @@ public class OrderMapper {
                 orderDto.address(),
                 orderDto.price(),
                 orderDto.status(),
-                orderDto.figureList());
+                figureMapper.toEntityList(orderDto.figureList()));
     }
 
     public List<OrderDto> toDtoList(List<OrderEntity> orders) {
