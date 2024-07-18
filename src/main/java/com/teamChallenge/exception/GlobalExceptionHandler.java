@@ -1,6 +1,8 @@
 package com.teamChallenge.exception;
 
+import com.teamChallenge.exception.exceptions.figureExceptions.FigureAlreadyExistException;
 import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;
+import com.teamChallenge.exception.exceptions.userExceptions.UserAlreadyExistException;
 import com.teamChallenge.exception.exceptions.userExceptions.UserIncorrectPasswordException;
 import com.teamChallenge.exception.exceptions.userExceptions.UserNotFoundException;
 
@@ -46,6 +48,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Map<String, List<String>>> userNotFoundException(UserNotFoundException e) {
+        return getErrorsMap(e, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UserAlreadyExistException.class)
+    public ResponseEntity<Map<String, List<String>>> userAlreadyExistException(UserAlreadyExistException e) {
         return getErrorsMap(e, HttpStatus.CONFLICT);
     }
 
@@ -57,8 +64,13 @@ public class GlobalExceptionHandler {
     /* Figure exceptions */
 
     @ExceptionHandler(FigureNotFoundException.class)
-    public ResponseEntity<Map<String, List<String>>> figureNotFoundExpired(FigureNotFoundException e) {
+    public ResponseEntity<Map<String, List<String>>> figureNotFoundException(FigureNotFoundException e) {
         return getErrorsMap(e, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(FigureAlreadyExistException.class)
+    public ResponseEntity<Map<String, List<String>>> figureAlreadyExistException(FigureAlreadyExistException e) {
+        return getErrorsMap(e, HttpStatus.CONFLICT);
     }
 
     /* Helpers */

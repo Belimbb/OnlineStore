@@ -13,4 +13,6 @@ public interface FigureRepository extends MongoRepository<FigureEntity, String> 
     Optional<List<FigureEntity>> findByCategory(Category category);
     Optional<List<FigureEntity>> findBySubCategory(SubCategory subCategory);
     Optional<List<FigureEntity>> findByColor(String color);
+
+    boolean existsByUniqueHash (String uniqueHash);
 }

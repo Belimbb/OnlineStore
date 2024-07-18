@@ -11,5 +11,5 @@ public interface FigureService {
     FigureDto getById (String id) throws FigureNotFoundException;
     List<FigureDto> getAllFigures ();
     FigureDto updateFigure (FigureDto figureDto);
-    boolean deleteFigure (String id);
+    void deleteFigure (String id);
 }
