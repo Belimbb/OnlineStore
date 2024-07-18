@@ -1,10 +1,8 @@
 package com.teamChallenge.exception;
 
-import com.teamChallenge.exception.exceptions.figureExceptions.FigureAlreadyExistException;
-import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;
-import com.teamChallenge.exception.exceptions.userExceptions.UserAlreadyExistException;
+import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
+import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.exception.exceptions.userExceptions.UserIncorrectPasswordException;
-import com.teamChallenge.exception.exceptions.userExceptions.UserNotFoundException;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +34,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(getErrorsMap(result), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
-
     /* General exceptions */
 
     @ExceptionHandler(value = {HttpMessageNotReadableException.class, ExpiredJwtException.class})
@@ -44,33 +41,21 @@ public class GlobalExceptionHandler {
         return getErrorsMap(e, HttpStatus.BAD_REQUEST);
     }
 
-    /* User exceptions */
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Map<String, List<String>>> userNotFoundException(UserNotFoundException e) {
+    @ExceptionHandler(CustomNotFoundException.class)
+    public ResponseEntity<Map<String, List<String>>> notFoundException(CustomNotFoundException e) {
         return getErrorsMap(e, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(UserAlreadyExistException.class)
-    public ResponseEntity<Map<String, List<String>>> userAlreadyExistException(UserAlreadyExistException e) {
+    @ExceptionHandler(CustomAlreadyExistException.class)
+    public ResponseEntity<Map<String, List<String>>> alreadyExistException(CustomAlreadyExistException e) {
         return getErrorsMap(e, HttpStatus.CONFLICT);
     }
+
+    /* User exceptions */
 
     @ExceptionHandler(UserIncorrectPasswordException.class)
     public ResponseEntity<Map<String, List<String>>> userIncorrectPasswordException(UserIncorrectPasswordException e) {
         return getErrorsMap(e, HttpStatus.UNAUTHORIZED);
-    }
-
-    /* Figure exceptions */
-
-    @ExceptionHandler(FigureNotFoundException.class)
-    public ResponseEntity<Map<String, List<String>>> figureNotFoundException(FigureNotFoundException e) {
-        return getErrorsMap(e, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(FigureAlreadyExistException.class)
-    public ResponseEntity<Map<String, List<String>>> figureAlreadyExistException(FigureAlreadyExistException e) {
-        return getErrorsMap(e, HttpStatus.CONFLICT);
     }
 
     /* Helpers */

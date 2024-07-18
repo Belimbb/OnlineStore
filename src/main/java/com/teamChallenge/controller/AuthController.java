@@ -3,7 +3,7 @@ package com.teamChallenge.controller;
 import com.teamChallenge.entity.user.*;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.userExceptions.UserAlreadyExistException;
+import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.request.auth.LoginRequest;
 import com.teamChallenge.request.auth.SignupRequest;
 import com.teamChallenge.security.jwt.JwtResponseDto;
@@ -80,7 +80,7 @@ public class AuthController {
             @ApiResponse(responseCode = "4XX", description = "Registration failed",
                     content = { @Content(mediaType = "application/json", schema = @Schema(implementation = CustomErrorResponse.class)) })
     })
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) throws UserAlreadyExistException {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) throws CustomAlreadyExistException {
         UserDto userDto = userService.create(signUpRequest.getUsername(), signUpRequest.getEmail(), signUpRequest.getPassword());
         log.info("{}: User (id: {}) has accomplished registration process", LogEnum.CONTROLLER, userDto.id());
         return ResponseEntity.status(201).body(userDto);
