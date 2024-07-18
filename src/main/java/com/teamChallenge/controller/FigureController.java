@@ -6,8 +6,8 @@ import com.teamChallenge.entity.figure.sections.Category;
 import com.teamChallenge.entity.figure.sections.SubCategory;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.figureExceptions.FigureAlreadyExistException;
-import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;
+import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
+import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.request.FigureRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,8 +49,7 @@ public class FigureController {
                             array = @ArraySchema(schema = @Schema(implementation = FigureDto.class)))}
             )
     })
-    @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<List<FigureDto>> figureList() throws FigureNotFoundException {
+    public ResponseEntity<List<FigureDto>> figureList() throws CustomNotFoundException {
         List<FigureDto> figureDtos = figureService.getAllFigures();
 
         log.info("{}: Figures have been retrieved", LogEnum.CONTROLLER);
@@ -67,8 +66,7 @@ public class FigureController {
                             array = @ArraySchema(schema = @Schema(implementation = FigureDto.class)))}
             )
     })
-    @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<List<FigureDto>> figureListByCategory(@NotNull @Valid @RequestParam Category category) throws FigureNotFoundException {
+    public ResponseEntity<List<FigureDto>> figureListByCategory(@NotNull @Valid @RequestParam Category category) throws CustomNotFoundException {
         List<FigureDto> figureDtos = figureService.getAllFiguresByCategory(category);
 
         log.info("{}: Figures from category {} have been retrieved", LogEnum.CONTROLLER, category);
@@ -85,8 +83,7 @@ public class FigureController {
                             array = @ArraySchema(schema = @Schema(implementation = FigureDto.class)))}
             )
     })
-    @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<List<FigureDto>> figureListByCategory(@Valid @NotNull @RequestParam SubCategory subCategory) throws FigureNotFoundException {
+    public ResponseEntity<List<FigureDto>> figureListByCategory(@Valid @NotNull @RequestParam SubCategory subCategory) throws CustomNotFoundException {
         List<FigureDto> figureDtos = figureService.getAllFiguresBySubCategory(subCategory);
 
         log.info("{}: Figures from subCategory {} have been retrieved", LogEnum.CONTROLLER, subCategory);
@@ -106,8 +103,7 @@ public class FigureController {
                             schema = @Schema(implementation = CustomErrorResponse.class)) })
 
     })
-    @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<FigureDto> getFigureById(@NotBlank @NotNull @PathVariable("figureId") String figureId) throws FigureNotFoundException{
+    public ResponseEntity<FigureDto> getFigureById(@NotBlank @NotNull @PathVariable("figureId") String figureId) throws CustomNotFoundException{
         FigureDto figure = figureService.getById(figureId);
         log.info("{}: Figure (id: {}) has been retrieved", LogEnum.SERVICE, figure.id());
         return ResponseEntity
@@ -126,7 +122,7 @@ public class FigureController {
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<FigureDto> addFigure(@Valid @NotNull @RequestBody FigureRequest request) throws FigureAlreadyExistException {
+    public ResponseEntity<FigureDto> addFigure(@Valid @NotNull @RequestBody FigureRequest request) throws CustomAlreadyExistException {
         FigureDto figure = figureService.createFigure(request.name(), request.shortDescription(), request.longDescription(),
                 request.subCategory(), request.price(), request.amount(), request.color(), request.images());
 
@@ -145,7 +141,7 @@ public class FigureController {
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
-    public void deleteUrlByShortId(@PathVariable("figureId") String  figureId) throws FigureNotFoundException {
+    public void deleteUrlByShortId(@PathVariable("figureId") String  figureId) throws CustomNotFoundException {
         figureService.deleteFigure(figureId);
 
         log.info("{}: Figure (id: {}) has been deleted", LogEnum.CONTROLLER, figureId);

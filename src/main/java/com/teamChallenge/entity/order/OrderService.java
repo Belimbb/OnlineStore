@@ -13,7 +13,7 @@ public interface OrderService {
     OrderDto create (String address, int price, List<FigureEntity> figureList);
     OrderDto create(OrderDto orderDto);
 
-    OrderDto update(String id, OrderDto orderDto);
+    OrderDto update(OrderDto orderDto);
 
     void delete(String id);
 }

@@ -19,4 +19,3 @@ COPY --from=builder /app/build/libs/OnlineStore-0.0.1-SNAPSHOT.jar OnlineStore.j
 EXPOSE 8080
 
 CMD ["java","-jar","OnlineStore.jar"]
-
