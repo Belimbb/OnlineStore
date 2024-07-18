@@ -1,8 +1,8 @@
 package com.teamChallenge.entity.user;
 
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.userExceptions.UserAlreadyExistException;
-import com.teamChallenge.exception.exceptions.userExceptions.UserNotFoundException;
+import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
+import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,10 @@ import java.util.List;
 public class UserServiceImpl implements UserDetailsService,UserService {
 
     private final UserRepository userRepository;
+
     private final UserMapper userMapper;
+
+    private static final String OBJECT_NAME = "user";
 
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -36,44 +39,44 @@ public class UserServiceImpl implements UserDetailsService,UserService {
 
     @Override
     public List<UserDto> getAll() {
-        log.info("{}: request on retrieving all users was sent", LogEnum.SERVICE);
+        log.info("{}: request on retrieving all " + OBJECT_NAME + "s was sent", LogEnum.SERVICE);
         return userMapper.toDtoList(userRepository.findAll());
     }
 
     @Override
     public UserDto getById(String id) {
-        log.info("{}: request on retrieving user by id {} was sent", LogEnum.SERVICE, id);
+        log.info("{}: request on retrieving " + OBJECT_NAME + " by id {} was sent", LogEnum.SERVICE, id);
         return userMapper.toDto(findById(id));
     }
 
     @Override
     public UserDto getByEmail (String email){
-        log.info("{}: request on retrieving user by email {} was sent", LogEnum.SERVICE, email);
+        log.info("{}: request on retrieving " + OBJECT_NAME + " by email {} was sent", LogEnum.SERVICE, email);
         return userMapper.toDto(userRepository.findByEmail(email).orElseThrow(() ->
-                new UserNotFoundException(email)));
+                new CustomNotFoundException(OBJECT_NAME, email)));
     }
 
     @Override
     public UserDto getByUsername(String username) {
-        log.info("{}: request on retrieving user by username {} was sent", LogEnum.SERVICE, username);
+        log.info("{}: request on retrieving " + OBJECT_NAME + " by username {} was sent", LogEnum.SERVICE, username);
         return userMapper.toDto(userRepository.findByUsername(username).orElseThrow(() ->
-                new UserNotFoundException(username)));
+                new CustomNotFoundException(OBJECT_NAME, username)));
     }
 
     @Override
-    public UserDto create(UserDto userDto) throws UserAlreadyExistException{
+    public UserDto create(UserDto userDto) throws CustomAlreadyExistException {
         return create(userDto.username(), userDto.email(), userDto.password());
     }
 
     @Override
-    public UserDto create (String username, String email, String password) throws UserAlreadyExistException{
+    public UserDto create (String username, String email, String password) throws CustomAlreadyExistException{
         if (existsByUsername(username)){
-            throw new UserAlreadyExistException(username);
+            throw new CustomAlreadyExistException(OBJECT_NAME, username);
         }
         UserEntity user = new UserEntity(username, email, passwordEncoder.encode(password));
         user.setCreatedAt(new Date());
         UserEntity saved = userRepository.save(user);
-        log.info("{}: User (Username: {}) was created", LogEnum.SERVICE, username);
+        log.info("{}: " + OBJECT_NAME + " (Username: {}) was created", LogEnum.SERVICE, username);
         return userMapper.toDto(saved);
     }
 
@@ -84,7 +87,7 @@ public class UserServiceImpl implements UserDetailsService,UserService {
         user.setEmail(userDto.email());
 
         userRepository.save(user);
-        log.info("{}: User (id: {}) was updated", LogEnum.SERVICE, id);
+        log.info("{}: " + OBJECT_NAME + " (id: {}) was updated", LogEnum.SERVICE, id);
         return userMapper.toDto(user);
     }
 
@@ -92,7 +95,7 @@ public class UserServiceImpl implements UserDetailsService,UserService {
     public boolean delete(String id) {
         UserEntity user = findById(id);
         userRepository.delete(user);
-        log.info("{}: User (id: {}) was deleted", LogEnum.SERVICE, id);
+        log.info("{}: " + OBJECT_NAME + " (id: {}) was deleted", LogEnum.SERVICE, id);
         return true;
     }
 
@@ -111,7 +114,7 @@ public class UserServiceImpl implements UserDetailsService,UserService {
         UserEntity user;
         try {
             user = userMapper.toEntity(getByUsername(username));
-        } catch (UserNotFoundException e) {
+        } catch (CustomNotFoundException e) {
             throw new RuntimeException(e);
         }
         return new org.springframework.security.core.userdetails.User(
@@ -122,6 +125,6 @@ public class UserServiceImpl implements UserDetailsService,UserService {
     }
 
     private UserEntity findById(String id) {
-        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        return userRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
     }
 }

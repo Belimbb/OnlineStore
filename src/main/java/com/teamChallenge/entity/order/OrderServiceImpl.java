@@ -4,6 +4,7 @@ import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.figure.FigureMapper;
 import com.teamChallenge.exception.LogEnum;
 
+import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,51 +18,53 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
+
     private final OrderMapper orderMapper;
+
     private final FigureMapper figureMapper;
+
+    private static final String OBJECT_NAME = "Order";
 
     @Override
     public List<OrderDto> getAll() {
-        log.info("{}: All orders retrieved from db", LogEnum.SERVICE);
+        log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
         return orderMapper.toDtoList(orderRepository.findAll());
     }
 
     @Override
     public OrderDto getById(String id) {
-        log.info("{}: Order (id: {}) retrieved from db", LogEnum.SERVICE, id);
-        return orderMapper.toDto(orderRepository.findById(id).get());
+        log.info("{}: " + OBJECT_NAME + " (id: {}) retrieved from db", LogEnum.SERVICE, id);
+        return orderMapper.toDto(findById(id));
     }
 
     @Override
     public OrderDto create(String address, int price, List<FigureEntity> figureList) {
         OrderEntity newOrder = new OrderEntity(address, price, figureList);
         orderRepository.save(newOrder);
-        log.info("{}: Order was created", LogEnum.SERVICE);
+        log.info("{}: " + OBJECT_NAME + " was created", LogEnum.SERVICE);
         return orderMapper.toDto(newOrder);
     }
 
     @Override
     public OrderDto create(OrderDto orderDto) {
-        return create(orderDto.address(), orderDto.price(), figureMapper.toEntityList(orderDto.figureList()));
+        return create(orderDto.address(), orderDto.price(), orderDto.figureList());
     }
 
     @Override
-    public OrderDto update(String id, OrderDto orderDto) {
-        OrderEntity order = orderRepository.findById(id).get();
-        order.setAddress(orderDto.address());
-        order.setPrice(orderDto.price());
-        order.setFigureList(figureMapper.toEntityList(orderDto.figureList()));
-
-        orderRepository.save(order);
-        log.info("{}: Order (id: {}) updated)", LogEnum.SERVICE, order.getId());
+    public OrderDto update(OrderDto orderDto) {
+        OrderEntity order = orderRepository.save(orderMapper.toEntity(orderDto));
+        log.info("{}: " + OBJECT_NAME + " (id: {}) updated)", LogEnum.SERVICE, order.getId());
         return orderMapper.toDto(order);
     }
 
     @Override
     public void delete(String id) {
-        if(orderRepository.existsById(id)){
-            orderRepository.deleteById(id);
-            log.info("{}: Order (id: {}) deleted", LogEnum.SERVICE, id);
-        }
+        OrderEntity order = findById(id);
+        orderRepository.delete(order);
+        log.info("{}: " + OBJECT_NAME + " (id: {}) deleted", LogEnum.SERVICE, id);
+    }
+
+    private OrderEntity findById(String id) {
+        return orderRepository.findById(id).orElseThrow(()-> new CustomNotFoundException(OBJECT_NAME, id));
     }
 }
