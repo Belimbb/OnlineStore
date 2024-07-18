@@ -20,7 +20,15 @@ import org.springframework.context.annotation.Primary;
 public class OpenAPIConfig {
 
     @Bean
-    public GroupedOpenApi apiLinksV1() {
+    public GroupedOpenApi apiAdsV1() {
+        return GroupedOpenApi.builder()
+                .group("Ads API V1")
+                .pathsToMatch("/api/ads/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi apiFiguresV1() {
         return GroupedOpenApi.builder()
                 .group("Figures API V1")
                 .pathsToMatch("/api/figures/**")
@@ -44,5 +52,4 @@ public class OpenAPIConfig {
                         .version("v1")
                         .description("API Documentation"));
     }
-
 }
