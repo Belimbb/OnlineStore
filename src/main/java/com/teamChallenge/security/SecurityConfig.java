@@ -47,7 +47,7 @@ public class SecurityConfig {
                                         "/v3/api-docs/**",
                                         "/api-docs/**")
                                 .permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/figures/**")
+                                .requestMatchers(HttpMethod.GET, "/api/**")
                                 .permitAll()
                                 .anyRequest().authenticated()
                 );

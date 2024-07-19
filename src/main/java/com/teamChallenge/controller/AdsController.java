@@ -1,6 +1,7 @@
 package com.teamChallenge.controller;
 
 import com.teamChallenge.entity.advertisement.AdvertisementDto;
+import com.teamChallenge.entity.advertisement.AdvertisementServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.request.AdsRequest;
@@ -32,6 +33,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/ads")
 public class AdsController {
+    private final AdvertisementServiceImpl adsService;
 
     @PostMapping("/add")
     @Operation(summary = "Add new Ads")
@@ -45,7 +47,7 @@ public class AdsController {
     })
     @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<AdvertisementDto> addAds(@Valid @NotNull @RequestBody AdsRequest request) {
-        AdvertisementDto ads = null;
+        AdvertisementDto ads = adsService.createAds(request.text(), request.url());
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, ads.id());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -60,9 +62,8 @@ public class AdsController {
                             array = @ArraySchema(schema = @Schema(implementation = AdvertisementDto.class)))}
             )
     })
-    @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<List<AdvertisementDto>> adsList() {
-        List<AdvertisementDto> adsDtoList = new ArrayList<>();
+        List<AdvertisementDto> adsDtoList = adsService.getAll();
 
         log.info("{}: Ads list have been retrieved", LogEnum.CONTROLLER);
         return ResponseEntity
@@ -81,9 +82,8 @@ public class AdsController {
                             schema = @Schema(implementation = CustomErrorResponse.class)) })
 
     })
-    @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<AdvertisementDto> getAdsById(@NotBlank @NotNull @PathVariable("adsId") String adsId) {
-        AdvertisementDto ads = null;
+        AdvertisementDto ads = adsService.getById(adsId);
         log.info("{}: Ads (id: {}) has been retrieved", LogEnum.SERVICE, ads.id());
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -100,7 +100,7 @@ public class AdsController {
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
     public void deleteAdsById(@PathVariable("adsId") String adsId){
-
+        adsService.deleteAds(adsId);
         log.info("{}: Ads (id: {}) has been deleted", LogEnum.CONTROLLER, adsId);
     }
 }
