@@ -1,8 +1,0 @@
-package com.teamChallenge.entity.Figures;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-@Repository
-public interface FigureRepository extends JpaRepository<FigureEntity, Long> {
-}
