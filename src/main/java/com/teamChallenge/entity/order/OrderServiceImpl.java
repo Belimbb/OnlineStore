@@ -47,7 +47,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto create(OrderDto orderDto) {
-        return create(orderDto.address(), orderDto.price(), orderDto.figureList());
+        return create(orderDto.address(), orderDto.price(), figureMapper.toEntityList(orderDto.figureList()));
     }
 
     @Override

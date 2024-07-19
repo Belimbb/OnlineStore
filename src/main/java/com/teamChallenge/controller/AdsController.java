@@ -3,7 +3,6 @@ package com.teamChallenge.controller;
 import com.teamChallenge.entity.advertisement.AdvertisementDto;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.figureExceptions.FigureNotFoundException;
 import com.teamChallenge.request.AdsRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -62,7 +61,7 @@ public class AdsController {
             )
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<List<AdvertisementDto>> adsList() throws FigureNotFoundException {
+    public ResponseEntity<List<AdvertisementDto>> adsList() {
         List<AdvertisementDto> adsDtoList = new ArrayList<>();
 
         log.info("{}: Ads list have been retrieved", LogEnum.CONTROLLER);
