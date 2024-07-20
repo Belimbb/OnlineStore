@@ -1,32 +1,35 @@
 package com.teamChallenge.entity.figure;
 
-import com.teamChallenge.entity.Orders.OrderEntity;
-import com.teamChallenge.entity.ShoppingCart.CartEntity;
+import com.teamChallenge.entity.figure.sections.Category;
+import com.teamChallenge.entity.figure.sections.Labels;
+import com.teamChallenge.entity.figure.sections.SubCategory;
+
 import jakarta.persistence.*;
+import org.apache.commons.codec.digest.DigestUtils;
+
 import jakarta.validation.constraints.Size;
-import lombok.*;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
-@Entity
-@Table(name = "figures")
+@Document(collection = "figures")
 @Data
 @NoArgsConstructor
 public class FigureEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Используйте AUTO для автоматического определения провайдера
-    private UUID id;
+    private String id;
 
     @Size(max = 50)
     @Column (nullable = false)
     private String name;
-
-    @ManyToOne
-    @JoinColumn(name = "cart_id")
-    private CartEntity cart;
 
     @Size(min = 10, max = 200)
     @Column (nullable = false)
@@ -37,16 +40,19 @@ public class FigureEntity {
     private String longDescription;
 
     @Column (nullable = false)
-    private String category;
+    private Category category;
 
     @Column (nullable = false)
-    private Enum<?> subCategory;
+    private SubCategory subCategory;
+
+    @Enumerated(EnumType.STRING)
+    private Labels label;
 
     @Column (nullable = false)
-    int price;
+    private int price;
 
     @Column (nullable = false)
-    int amount;
+    private int amount;
 
     @Column(nullable = false)
     private String color;
@@ -58,32 +64,42 @@ public class FigureEntity {
     @CreatedDate
     private Date createdAt;
 
-    @ManyToMany
-    private List<OrderEntity> orders;
+    @Indexed(unique = true)
+    private String uniqueHash;
 
-    public FigureEntity(String name, String shortDescription, String longDescription, Enum<?> subCategory, int price, int amount, String color, List<String> images) {
+    @PrePersist
+    public void prePersist() {
+        if (uniqueHash==null||uniqueHash.isBlank()){
+            this.uniqueHash = generateUniqueHash();
+        }
+    }
+
+    private String generateUniqueHash() {
+        String data = name + shortDescription + longDescription + category.name() + subCategory.name() + price + amount + color;
+        return DigestUtils.sha256Hex(data);
+    }
+
+    public FigureEntity(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int price, int amount, String color, List<String> images) {
+        setup(name, shortDescription, longDescription, subCategory, label, price, amount, color, images);
+    }
+
+    public FigureEntity(String id, String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int price, int amount, String color, List<String> images, Date createdAt) {
+        setup(name, shortDescription, longDescription, subCategory, label, price, amount, color, images);
+        this.setId(id);
+        this.setCreatedAt(createdAt);
+    }
+
+    private void setup(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int price, int amount, String color, List<String> images){
         this.setName(name);
         this.setShortDescription(shortDescription);
         this.setLongDescription(longDescription);
-        this.setCategory(subCategory.getClass().getSimpleName());
+        this.setCategory(subCategory.getCategory());
         this.setSubCategory(subCategory);
+        this.setLabel(label);
         this.setPrice(price);
         this.setAmount(amount);
         this.setColor(color);
         this.setImages(images);
-    }
-
-    public FigureEntity(UUID id, String name, String shortDescription, String longDescription, Enum<?> subCategory, int price, int amount, String color, List<String> images, Date createdAt) {
-        this.id = id;
-        this.name = name;
-        this.shortDescription = shortDescription;
-        this.longDescription = longDescription;
-        this.category = subCategory.getClass().getSimpleName();
-        this.subCategory = subCategory;
-        this.price = price;
-        this.amount = amount;
-        this.color = color;
-        this.images = images;
-        this.createdAt = createdAt;
+        this.setUniqueHash(generateUniqueHash());
     }
 }
