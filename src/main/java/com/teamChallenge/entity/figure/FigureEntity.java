@@ -1,13 +1,12 @@
 package com.teamChallenge.entity.figure;
 
 import com.teamChallenge.entity.figure.sections.Category;
+import com.teamChallenge.entity.figure.sections.Labels;
 import com.teamChallenge.entity.figure.sections.SubCategory;
 
+import jakarta.persistence.*;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
 import jakarta.validation.constraints.Size;
 
 import lombok.Data;
@@ -46,6 +45,9 @@ public class FigureEntity {
     @Column (nullable = false)
     private SubCategory subCategory;
 
+    @Enumerated(EnumType.STRING)
+    private Labels label;
+
     @Column (nullable = false)
     private int price;
 
@@ -77,22 +79,23 @@ public class FigureEntity {
         return DigestUtils.sha256Hex(data);
     }
 
-    public FigureEntity(String name, String shortDescription, String longDescription, SubCategory subCategory, int price, int amount, String color, List<String> images) {
-        setup(name, shortDescription, longDescription, subCategory, price, amount, color, images);
+    public FigureEntity(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int price, int amount, String color, List<String> images) {
+        setup(name, shortDescription, longDescription, subCategory, label, price, amount, color, images);
     }
 
-    public FigureEntity(String id, String name, String shortDescription, String longDescription, SubCategory subCategory, int price, int amount, String color, List<String> images, Date createdAt) {
-        setup(name, shortDescription, longDescription, subCategory, price, amount, color, images);
+    public FigureEntity(String id, String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int price, int amount, String color, List<String> images, Date createdAt) {
+        setup(name, shortDescription, longDescription, subCategory, label, price, amount, color, images);
         this.setId(id);
         this.setCreatedAt(createdAt);
     }
 
-    private void setup(String name, String shortDescription, String longDescription, SubCategory subCategory, int price, int amount, String color, List<String> images){
+    private void setup(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int price, int amount, String color, List<String> images){
         this.setName(name);
         this.setShortDescription(shortDescription);
         this.setLongDescription(longDescription);
         this.setCategory(subCategory.getCategory());
         this.setSubCategory(subCategory);
+        this.setLabel(label);
         this.setPrice(price);
         this.setAmount(amount);
         this.setColor(color);
