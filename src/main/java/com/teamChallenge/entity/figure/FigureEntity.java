@@ -45,11 +45,17 @@ public class FigureEntity {
     @Column (nullable = false)
     private SubCategory subCategory;
 
-    @Enumerated(EnumType.STRING)
+    @Column
     private Labels label;
 
+    @Column
+    private Boolean inWishList = false;
+
     @Column (nullable = false)
-    private int price;
+    private int currentPrice;
+
+    @Column (nullable = false)
+    private int oldPrice;
 
     @Column (nullable = false)
     private int amount;
@@ -75,28 +81,31 @@ public class FigureEntity {
     }
 
     private String generateUniqueHash() {
-        String data = name + shortDescription + longDescription + category.name() + subCategory.name() + price + amount + color;
+        String data = name + shortDescription + longDescription + category.name() + subCategory.name() + currentPrice + oldPrice + amount + color;
         return DigestUtils.sha256Hex(data);
     }
 
-    public FigureEntity(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int price, int amount, String color, List<String> images) {
-        setup(name, shortDescription, longDescription, subCategory, label, price, amount, color, images);
+    public FigureEntity(String name, String shortDescription, String longDescription, SubCategory subCategory,
+                        Labels label, Boolean inWishList, int currentPrice, int oldPrice, int amount, String color, List<String> images) {
+        setup(name, shortDescription, longDescription, subCategory, label, inWishList, currentPrice, oldPrice, amount, color, images);
     }
 
-    public FigureEntity(String id, String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int price, int amount, String color, List<String> images, Date createdAt) {
-        setup(name, shortDescription, longDescription, subCategory, label, price, amount, color, images);
+    public FigureEntity(String id, String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int currentPrice, int oldPrice, int amount, String color, List<String> images, Date createdAt) {
+        setup(name, shortDescription, longDescription, subCategory, label,false, currentPrice, oldPrice, amount, color, images);
         this.setId(id);
         this.setCreatedAt(createdAt);
     }
 
-    private void setup(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int price, int amount, String color, List<String> images){
+    private void setup(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label,Boolean inWishList, int currentPrice, int oldPrice, int amount, String color, List<String> images){
         this.setName(name);
         this.setShortDescription(shortDescription);
         this.setLongDescription(longDescription);
         this.setCategory(subCategory.getCategory());
         this.setSubCategory(subCategory);
         this.setLabel(label);
-        this.setPrice(price);
+        this.setInWishList(inWishList);
+        this.setCurrentPrice(currentPrice);
+        this.setOldPrice(oldPrice);
         this.setAmount(amount);
         this.setColor(color);
         this.setImages(images);
