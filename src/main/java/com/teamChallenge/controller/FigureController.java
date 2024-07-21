@@ -124,7 +124,7 @@ public class FigureController {
     @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<FigureDto> addFigure(@Valid @NotNull @RequestBody FigureRequest request) throws CustomAlreadyExistException {
         FigureDto figure = figureService.createFigure(request.name(), request.shortDescription(), request.longDescription(),
-                request.subCategory(), request.price(), request.amount(), request.color(), request.images());
+                request.subCategory(), request.label(), request.currentPrice(), request.oldPrice(), request.amount(), request.color(), request.images());
 
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, figure.id());
         return ResponseEntity

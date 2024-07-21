@@ -1,6 +1,7 @@
 package com.teamChallenge.entity.figure;
 
 import com.teamChallenge.entity.figure.sections.Category;
+import com.teamChallenge.entity.figure.sections.Labels;
 import com.teamChallenge.entity.figure.sections.SubCategory;
 import com.teamChallenge.exception.LogEnum;
 
@@ -27,9 +28,10 @@ public class FigureServiceImpl implements FigureService{
     private static final String OBJECT_NAME = "Figure";
 
     @Override
-    public FigureDto createFigure(String name, String shortDescription, String longDescription, SubCategory subCategory, int price, int amount, String color, List<String> images) throws CustomAlreadyExistException {
+    public FigureDto createFigure(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int currentPrice, int oldPrice, int amount, String color, List<String> images) throws CustomAlreadyExistException {
         FigureEntity figureEntity = new FigureEntity(name, shortDescription, longDescription,
-                subCategory, price, amount, color, images);
+                subCategory, null,false, currentPrice, oldPrice, amount, color, images);
+
         if (figureRepository.existsByUniqueHash(figureEntity.getUniqueHash())){
             throw new CustomAlreadyExistException(OBJECT_NAME, name);
         }
