@@ -7,5 +7,5 @@ import java.util.List;
 
 public record FigureRequest(String name, String shortDescription,
                             String longDescription, SubCategory subCategory, Labels label,
-                            int price, int amount, String color, List<String> images) {
+                            int currentPrice, int oldPrice, int amount, String color, List<String> images) {
 }

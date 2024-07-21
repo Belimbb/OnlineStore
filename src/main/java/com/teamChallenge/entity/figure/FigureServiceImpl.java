@@ -28,9 +28,10 @@ public class FigureServiceImpl implements FigureService{
     private static final String OBJECT_NAME = "Figure";
 
     @Override
-    public FigureDto createFigure(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int price, int amount, String color, List<String> images) throws CustomAlreadyExistException {
+    public FigureDto createFigure(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int currentPrice, int oldPrice, int amount, String color, List<String> images) throws CustomAlreadyExistException {
         FigureEntity figureEntity = new FigureEntity(name, shortDescription, longDescription,
-                subCategory, label, price, amount, color, images);
+                subCategory, null,false, currentPrice, oldPrice, amount, color, images);
+
         if (figureRepository.existsByUniqueHash(figureEntity.getUniqueHash())){
             throw new CustomAlreadyExistException(OBJECT_NAME, name);
         }

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -18,7 +19,9 @@ public class FigureMapper {
                 entity.getLongDescription(),
                 entity.getSubCategory(),
                 entity.getLabel(),
-                entity.getPrice(),
+                entity.getInWishList(),
+                entity.getCurrentPrice(),
+                entity.getOldPrice(),
                 entity.getAmount(),
                 entity.getColor(),
                 entity.getImages(),
@@ -33,7 +36,8 @@ public class FigureMapper {
                 dto.longDescription(),
                 dto.subCategory(),
                 dto.label(),
-                dto.price(),
+                dto.currentPrice(),
+                dto.oldPrice(),
                 dto.amount(),
                 dto.color(),
                 dto.images(),
