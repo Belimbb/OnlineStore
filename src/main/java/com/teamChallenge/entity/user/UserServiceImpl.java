@@ -103,10 +103,10 @@ public class UserServiceImpl implements UserDetailsService,UserService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity user;
         try {
-            user = userMapper.toEntity(getByUsername(username));
+            user = findByEmail(email);
         } catch (CustomNotFoundException e) {
             throw new RuntimeException(e);
         }
