@@ -4,10 +4,13 @@ import com.teamChallenge.entity.figure.FigureDto;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
 import com.teamChallenge.entity.figure.sections.Category;
 import com.teamChallenge.entity.figure.sections.SubCategory;
+import com.teamChallenge.entity.user.Roles;
+import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
 import com.teamChallenge.request.FigureRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,11 +28,14 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -40,6 +46,7 @@ import java.util.List;
 public class FigureController {
 
     private final FigureServiceImpl figureService;
+    private final UserServiceImpl userService;
 
     @GetMapping("/all")
     @Operation(summary = "Get all figures")
@@ -122,7 +129,13 @@ public class FigureController {
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<FigureDto> addFigure(@Valid @NotNull @RequestBody FigureRequest request) throws CustomAlreadyExistException {
+    public ResponseEntity<FigureDto> addFigure(@Valid @NotNull @RequestBody FigureRequest request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
+        //можно и так получать е-мейл, но работа через principal выглядит не так запутанно
+        //String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if (!userService.getByEmail(principal.getName()).role().equals(Roles.ADMIN)){
+            throw new UnauthorizedAccessException();
+        }
         FigureDto figure = figureService.createFigure(request.name(), request.shortDescription(), request.longDescription(),
                 request.subCategory(), request.label(), request.currentPrice(), request.oldPrice(), request.amount(), request.color(), request.images());
 
@@ -141,7 +154,10 @@ public class FigureController {
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
-    public void deleteUrlByShortId(@PathVariable("figureId") String  figureId) throws CustomNotFoundException {
+    public void deleteUrlByShortId(@PathVariable("figureId") String figureId, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
+        if (!userService.getByEmail(principal.getName()).role().equals(Roles.ADMIN)){
+            throw new UnauthorizedAccessException();
+        }
         figureService.deleteFigure(figureId);
 
         log.info("{}: Figure (id: {}) has been deleted", LogEnum.CONTROLLER, figureId);
