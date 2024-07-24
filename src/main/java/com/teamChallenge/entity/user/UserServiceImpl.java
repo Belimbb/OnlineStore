@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +25,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserDetailsService,UserService {
+    @Value("${admin.email}")
+    private String adminEmail;
 
     private final UserRepository userRepository;
 
@@ -75,6 +78,11 @@ public class UserServiceImpl implements UserDetailsService,UserService {
         }
         UserEntity user = new UserEntity(username, email, passwordEncoder.encode(password));
         user.setCreatedAt(new Date());
+
+        if (email.trim().equalsIgnoreCase(adminEmail)){
+            user.setRole(Roles.ADMIN);
+        }
+
         UserEntity saved = userRepository.save(user);
         log.info("{}: " + OBJECT_NAME + " (Username: {}) was created", LogEnum.SERVICE, username);
         return userMapper.toDto(saved);

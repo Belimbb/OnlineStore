@@ -2,8 +2,11 @@ package com.teamChallenge.controller;
 
 import com.teamChallenge.entity.advertisement.AdvertisementDto;
 import com.teamChallenge.entity.advertisement.AdvertisementServiceImpl;
+import com.teamChallenge.entity.user.Roles;
+import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
 import com.teamChallenge.request.AdsRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -24,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +38,7 @@ import java.util.List;
 @RequestMapping("/api/ads")
 public class AdsController {
     private final AdvertisementServiceImpl adsService;
+    private final UserServiceImpl userService;
 
     @PostMapping("/add")
     @Operation(summary = "Add new Ads")
@@ -46,7 +51,11 @@ public class AdsController {
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<AdvertisementDto> addAds(@Valid @NotNull @RequestBody AdsRequest request) {
+    public ResponseEntity<AdvertisementDto> addAds(@Valid @NotNull @RequestBody AdsRequest request, Principal principal) throws UnauthorizedAccessException {
+        if (!userService.getByEmail(principal.getName()).role().equals(Roles.ADMIN)){
+            throw new UnauthorizedAccessException();
+        }
+
         AdvertisementDto ads = adsService.createAds(request.text(), request.url());
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, ads.id());
         return ResponseEntity
@@ -99,7 +108,11 @@ public class AdsController {
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
-    public void deleteAdsById(@PathVariable("adsId") String adsId){
+    public void deleteAdsById(@PathVariable("adsId") String adsId, Principal principal) throws UnauthorizedAccessException {
+        if (!userService.getByEmail(principal.getName()).role().equals(Roles.ADMIN)){
+            throw new UnauthorizedAccessException();
+        }
+
         adsService.deleteAds(adsId);
         log.info("{}: Ads (id: {}) has been deleted", LogEnum.CONTROLLER, adsId);
     }

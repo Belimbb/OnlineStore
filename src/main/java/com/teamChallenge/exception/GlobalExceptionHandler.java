@@ -2,6 +2,7 @@ package com.teamChallenge.exception;
 
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
 import com.teamChallenge.exception.exceptions.userExceptions.UserIncorrectPasswordException;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -39,6 +40,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {HttpMessageNotReadableException.class, ExpiredJwtException.class})
     public ResponseEntity<Map<String, List<String>>> unauthorizedAccessException(HttpMessageNotReadableException e) {
         return getErrorsMap(e, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<Map<String, List<String>>> unauthorizedAccessException(UnauthorizedAccessException e) {
+        return getErrorsMap(e, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(CustomNotFoundException.class)
