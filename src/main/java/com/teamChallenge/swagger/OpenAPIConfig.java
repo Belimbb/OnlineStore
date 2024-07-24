@@ -44,6 +44,14 @@ public class OpenAPIConfig {
     }
 
     @Bean
+    public GroupedOpenApi apiCartsV1() {
+        return GroupedOpenApi.builder()
+                .group("Carts API V1")
+                .pathsToMatch("/api/carts/**")
+                .build();
+    }
+
+    @Bean
     @Primary
     public OpenAPI customOpenAPIv1() {
         return new OpenAPI()

@@ -40,8 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirement(name = "")
 @RequestMapping("/auth")
 public class AuthController {
-    private final UserService userService;
-    private final UserMapper userMapper;
+    private final UserServiceImpl userService;
     private final JwtUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
 
@@ -64,7 +63,7 @@ public class AuthController {
         }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserEntity user = userMapper.toEntity(userService.getByEmail(loginRequest.getEmail()));
+        UserEntity user = userService.findByEmail(loginRequest.getEmail());
         String jwt = jwtUtils.generateToken(user);
 
         log.info("{}: User (id: {}) has accomplished authentication process", LogEnum.CONTROLLER, user.getId());

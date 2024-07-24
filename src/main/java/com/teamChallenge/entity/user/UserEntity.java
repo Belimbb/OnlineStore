@@ -1,14 +1,12 @@
 package com.teamChallenge.entity.user;
 
-import com.teamChallenge.entity.shoppingCart.CartEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -40,9 +38,6 @@ public class UserEntity {
     @Column(nullable = false)
     @CreatedDate
     private Date createdAt;
-
-    @Column(nullable = false)
-    private CartEntity cart = new CartEntity();
 
     public UserEntity(String username, String email, String password) {
         this.username = username;

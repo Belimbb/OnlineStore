@@ -1,6 +1,5 @@
 package com.teamChallenge.entity.user;
 
-import com.teamChallenge.entity.shoppingCart.CartMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -12,8 +11,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserMapper {
 
-    private final CartMapper cartMapper;
-
     public UserDto toDto(UserEntity user) {
         return new UserDto(
                 user.getId(),
@@ -21,8 +18,7 @@ public class UserMapper {
                 user.getUsername(),
                 user.getPassword(),
                 user.getRole(),
-                user.getCreatedAt(),
-                cartMapper.toDto(user.getCart()));
+                user.getCreatedAt());
     }
 
     public UserEntity toEntity(UserDto userDto) {

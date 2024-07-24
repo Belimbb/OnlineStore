@@ -2,6 +2,7 @@ package com.teamChallenge.exception;
 
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
+import com.teamChallenge.exception.exceptions.generalExceptions.SomethingWentWrongException;
 import com.teamChallenge.exception.exceptions.userExceptions.UserIncorrectPasswordException;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -49,6 +50,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CustomAlreadyExistException.class)
     public ResponseEntity<Map<String, List<String>>> alreadyExistException(CustomAlreadyExistException e) {
         return getErrorsMap(e, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(SomethingWentWrongException.class)
+    public ResponseEntity<Map<String, List<String>>> somethingWentWrongException(SomethingWentWrongException ex) {
+        return getErrorsMap(ex, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /* User exceptions */
