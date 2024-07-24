@@ -1,8 +1,8 @@
 package com.teamChallenge.entity.user;
 
 import com.teamChallenge.entity.figure.FigureEntity;
-import com.teamChallenge.entity.shoppingCart.CartEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -44,9 +44,6 @@ public class UserEntity {
     @Column(nullable = false)
     @CreatedDate
     private Date createdAt;
-
-    @Column(nullable = false)
-    private CartEntity cart;
 
     @Column
     private List<FigureEntity> whishList;

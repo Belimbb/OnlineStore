@@ -14,6 +14,7 @@ public class CartMapper {
         return new CartEntity(
                 dto.id(),
                 dto.figures(),
+                dto.user(),
                 dto.price()
         );
     }
@@ -22,6 +23,7 @@ public class CartMapper {
         return new CartDto(
                 entity.getId(),
                 entity.getFigures(),
+                entity.getUser(),
                 entity.getPrice()
         );
     }

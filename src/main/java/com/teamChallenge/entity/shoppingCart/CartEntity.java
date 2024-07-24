@@ -1,6 +1,7 @@
 package com.teamChallenge.entity.shoppingCart;
 
 import com.teamChallenge.entity.figure.FigureEntity;
+import com.teamChallenge.entity.user.UserEntity;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -24,6 +25,15 @@ public class CartEntity implements Serializable {
     @DBRef
     private List<FigureEntity> figures;
 
+    @DBRef
+    private UserEntity user;
+
     @Column
     private int price;
+
+    public CartEntity(UserEntity user, int price, List<FigureEntity> figureList) {
+        this.user = user;
+        this.price = price;
+        this.figures = figureList;
+    }
 }

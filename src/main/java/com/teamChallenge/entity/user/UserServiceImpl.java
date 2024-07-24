@@ -57,13 +57,6 @@ public class UserServiceImpl implements UserDetailsService,UserService {
     }
 
     @Override
-    public UserDto getByEmail (String email){
-        log.info("{}: request on retrieving " + OBJECT_NAME + " by email {} was sent", LogEnum.SERVICE, email);
-        return userMapper.toDto(userRepository.findByEmail(email).orElseThrow(() ->
-                new CustomNotFoundException(OBJECT_NAME, email)));
-    }
-
-    @Override
     public UserDto getByUsername(String username) {
         log.info("{}: request on retrieving " + OBJECT_NAME + " by username {} was sent", LogEnum.SERVICE, username);
         return userMapper.toDto(userRepository.findByUsername(username).orElseThrow(() ->
@@ -138,5 +131,10 @@ public class UserServiceImpl implements UserDetailsService,UserService {
 
     private UserEntity findById(String id) {
         return userRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
+    }
+
+    public UserEntity findByEmail (String email) {
+        log.info("{}: request on retrieving " + OBJECT_NAME + " by email {} was sent", LogEnum.SERVICE, email);
+        return userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, email));
     }
 }
