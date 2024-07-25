@@ -2,6 +2,9 @@ package com.teamChallenge.controller;
 
 import com.teamChallenge.entity.advertisement.AdvertisementDto;
 import com.teamChallenge.entity.advertisement.AdvertisementServiceImpl;
+import com.teamChallenge.exception.CustomErrorResponse;
+import com.teamChallenge.exception.LogEnum;
+import com.teamChallenge.request.AdsRequest;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
@@ -27,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.security.Principal;
 import java.util.List;
 

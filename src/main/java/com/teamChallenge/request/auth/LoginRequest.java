@@ -1,4 +1,4 @@
-package com.teamChallenge.dto.request.auth;
+package com.teamChallenge.request.auth;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -10,7 +10,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class LoginRequestDto {
+public class LoginRequest {
 
     @NotBlank
     @Email

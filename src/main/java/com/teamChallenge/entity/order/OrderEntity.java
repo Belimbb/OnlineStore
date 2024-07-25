@@ -1,6 +1,7 @@
 package com.teamChallenge.entity.order;
 
 import com.teamChallenge.entity.figure.FigureEntity;
+import com.teamChallenge.entity.user.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
@@ -33,10 +34,14 @@ public class OrderEntity {
     @DBRef
     private List<FigureEntity> figureList;
 
-    public OrderEntity(String address, int price, List<FigureEntity> figureList) {
+    @DBRef
+    private UserEntity user;
+
+    public OrderEntity(String address, int price, List<FigureEntity> figureList, UserEntity user) {
         this.address = address;
         this.price = price;
         status = Statuses.NEW;
         this.figureList = figureList;
+        this.user = user;
     }
 }

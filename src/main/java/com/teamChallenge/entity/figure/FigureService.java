@@ -6,7 +6,6 @@ import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExi
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface FigureService {
     FigureDto createFigure (String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int currentPrice, int oldPrice, int amount, String color, List<String> images) throws CustomAlreadyExistException;
