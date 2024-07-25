@@ -1,4 +1,4 @@
-package com.teamChallenge.request.auth;
+package com.teamChallenge.dto.request.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class LoginRequest {
+public class LoginRequestDto {
 
     @NotBlank
     @Size (min = 2, max = 50)
