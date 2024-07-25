@@ -4,7 +4,6 @@ import com.teamChallenge.entity.figure.sections.Category;
 import com.teamChallenge.entity.figure.sections.Labels;
 import com.teamChallenge.entity.figure.sections.SubCategory;
 import com.teamChallenge.exception.LogEnum;
-
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import lombok.RequiredArgsConstructor;
