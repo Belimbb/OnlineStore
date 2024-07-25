@@ -36,4 +36,8 @@ public class CartEntity implements Serializable {
         this.price = price;
         this.figures = figureList;
     }
+
+    public CartEntity(List<FigureEntity> figures) {
+        this.figures = figures;
+    }
 }

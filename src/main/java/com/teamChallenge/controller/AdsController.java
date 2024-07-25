@@ -1,16 +1,15 @@
 package com.teamChallenge.controller;
 
+import com.teamChallenge.dto.response.AdsResponseDto;
+import com.teamChallenge.dto.request.AdsRequestDto;
 import com.teamChallenge.entity.advertisement.AdvertisementDto;
 import com.teamChallenge.entity.advertisement.AdvertisementServiceImpl;
-import com.teamChallenge.exception.CustomErrorResponse;
-import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.request.AdsRequest;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
-import com.teamChallenge.dto.request.AdsRequestDto;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,7 +29,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.security.Principal;
 import java.util.List;
 
@@ -48,18 +46,18 @@ public class AdsController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Added new Ads",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = AdvertisementDto.class))}),
+                            schema = @Schema(implementation = AdsResponseDto.class))}),
             @ApiResponse(responseCode = "400", description = "Validation errors",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<AdvertisementDto> addAds(@Valid @NotNull @RequestBody AdsRequestDto request, Principal principal) throws UnauthorizedAccessException {
-        if (!userService.getByEmail(principal.getName()).role().equals(Roles.ADMIN)){
+    public ResponseEntity<AdsResponseDto> addAds(@Valid @NotNull @RequestBody AdsRequestDto request, Principal principal) throws UnauthorizedAccessException {
+        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
             throw new UnauthorizedAccessException();
         }
 
-        AdvertisementDto ads = adsService.createAds(request.text(), request.url());
+        AdsResponseDto ads = adsService.createAds(request.text(), request.url());
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, ads.id());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -71,11 +69,11 @@ public class AdsController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of ads",
                     content = { @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = AdvertisementDto.class)))}
+                            array = @ArraySchema(schema = @Schema(implementation = AdsResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<AdvertisementDto>> adsList() {
-        List<AdvertisementDto> adsDtoList = adsService.getAll();
+    public ResponseEntity<List<AdsResponseDto>> adsList() {
+        List<AdsResponseDto> adsDtoList = adsService.getAll();
 
         log.info("{}: Ads list have been retrieved", LogEnum.CONTROLLER);
         return ResponseEntity
@@ -88,14 +86,14 @@ public class AdsController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Got ads",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = AdvertisementDto.class)) }),
+                            schema = @Schema(implementation = AdsResponseDto.class)) }),
             @ApiResponse(responseCode = "404", description = "Ads not found",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CustomErrorResponse.class)) })
 
     })
-    public ResponseEntity<AdvertisementDto> getAdsById(@NotBlank @NotNull @PathVariable("adsId") String adsId) {
-        AdvertisementDto ads = adsService.getById(adsId);
+    public ResponseEntity<AdsResponseDto> getAdsById(@NotBlank @NotNull @PathVariable("adsId") String adsId) {
+        AdsResponseDto ads = adsService.getById(adsId);
         log.info("{}: Ads (id: {}) has been retrieved", LogEnum.SERVICE, ads.id());
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -112,7 +110,7 @@ public class AdsController {
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
     public void deleteAdsById(@PathVariable("adsId") String adsId, Principal principal) throws UnauthorizedAccessException {
-        if (!userService.getByEmail(principal.getName()).role().equals(Roles.ADMIN)){
+        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
             throw new UnauthorizedAccessException();
         }
 

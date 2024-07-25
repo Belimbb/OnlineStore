@@ -1,11 +1,18 @@
 package com.teamChallenge.controller;
 
+import com.teamChallenge.dto.request.CartRequestDto;
+import com.teamChallenge.dto.response.AdsResponseDto;
+import com.teamChallenge.dto.response.CartResponseDto;
+import com.teamChallenge.entity.figure.FigureMapper;
 import com.teamChallenge.entity.shoppingCart.CartDto;
 import com.teamChallenge.entity.shoppingCart.CartService;
+import com.teamChallenge.entity.user.UserMapper;
+import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.SomethingWentWrongException;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,13 +34,22 @@ public class CartController {
 
     private static final String URI_CART_WITH_ID = "/{id}";
 
+    private final UserServiceImpl userService;
     private final CartService cartService;
+    private final FigureMapper figureMapper;
 
-    @GetMapping
-    @Operation(description = "get all carts")
-    @ApiResponse(responseCode = "200", description = "Received cart List")
-    public List<CartDto> cartList() {
-        List<CartDto> cartList = cartService.getAll();
+    private final UserMapper userMapper;
+
+    @GetMapping("/all")
+    @Operation(summary = "Get all ads")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of carts",
+                    content = { @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = CartResponseDto.class)))}
+            )
+    })
+    public List<CartResponseDto> cartList() {
+        List<CartResponseDto> cartList = cartService.getAll();
         log.info("{}: Cart list has been retrieved", LogEnum.CONTROLLER);
         return cartList;
     }
@@ -41,17 +57,17 @@ public class CartController {
     @GetMapping(URI_CART_WITH_ID)
     @Operation(description = "get a cart by id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the cart",
+            @ApiResponse(responseCode = "200", description = "Cart found",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CartDto.class))}
+                            schema = @Schema(implementation = CartResponseDto.class))}
                     ),
             @ApiResponse(responseCode = "404", description = "Cart not found",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public CartDto getById(@PathVariable String id) {
-        CartDto cart = cartService.getById(id);
+    public CartResponseDto getById(@PathVariable String id) {
+        CartResponseDto cart = cartService.getById(id);
         log.info("{}: Cart (id: {}) has been retrieved", LogEnum.CONTROLLER, id);
         return cart;
     }
@@ -63,15 +79,16 @@ public class CartController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created the cart",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CartDto.class))}
+                            schema = @Schema(implementation = CartResponseDto.class))}
             ),
             @ApiResponse(responseCode = "400", description = "Validation error",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
     })
-    public CartDto create(@RequestBody CartDto cartDto) {
-        CartDto cart = cartService.create(cartDto);
+    public CartResponseDto create(@RequestBody CartRequestDto cartDto) {
+        CartResponseDto cart = cartService.create(userMapper.toEntity(userService.getById(cartDto.userId())),
+                figureMapper.toEntityListFromResponse(cartDto.figures()));
         log.info("{}: Cart (id: {}) has been added", LogEnum.CONTROLLER, cart.id());
         return cart;
     }
@@ -82,7 +99,7 @@ public class CartController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated the cart",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CartDto.class))}
+                            schema = @Schema(implementation = CartResponseDto.class))}
             ),
             @ApiResponse(responseCode = "400", description = "Validation error",
                     content = { @Content(mediaType = "application/json",
@@ -93,8 +110,8 @@ public class CartController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public CartDto update(@PathVariable String id, @RequestBody CartDto cartDto) {
-        CartDto cart = cartService.update(id, cartDto);
+    public CartResponseDto update(@PathVariable String id, @RequestBody CartRequestDto cartDto) {
+        CartResponseDto cart = cartService.update(id, cartDto);
         log.info("{}: Cart (id: {}) has been updated", LogEnum.CONTROLLER, cart.id());
         return cart;
     }
@@ -105,7 +122,7 @@ public class CartController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Deleted the cart",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CartDto.class))}
+                            schema = @Schema(implementation = CartResponseDto.class))}
             ),
             @ApiResponse(responseCode = "404", description = "Cart not found",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -113,10 +130,7 @@ public class CartController {
                     })
     })
     public void delete(@PathVariable String id) {
-        if (cartService.delete(id)) {
-            log.info("{}: Cart (id: {}) has been deleted", LogEnum.CONTROLLER, id);
-        }   else {
-            throw new SomethingWentWrongException();
-        }
+        cartService.delete(id);
+        log.info("{}: Cart (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }
 }

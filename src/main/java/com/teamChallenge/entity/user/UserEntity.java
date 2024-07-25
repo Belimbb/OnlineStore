@@ -1,5 +1,6 @@
 package com.teamChallenge.entity.user;
 
+import com.teamChallenge.entity.figure.FigureEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
@@ -14,6 +15,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.List;
 
 @Document(collection = "users")
 @Data

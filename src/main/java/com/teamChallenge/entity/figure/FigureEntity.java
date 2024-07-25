@@ -90,8 +90,10 @@ public class FigureEntity {
         setup(name, shortDescription, longDescription, subCategory, label, inWishList, currentPrice, oldPrice, amount, color, images);
     }
 
-    public FigureEntity(String id, String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int currentPrice, int oldPrice, int amount, String color, List<String> images, Date createdAt) {
-        setup(name, shortDescription, longDescription, subCategory, label,false, currentPrice, oldPrice, amount, color, images);
+    public FigureEntity(String id, String name, String shortDescription, String longDescription,
+                        SubCategory subCategory, Labels label, Boolean inWishList, int currentPrice, int oldPrice,
+                        int amount, String color, List<String> images, Date createdAt) {
+        setup(name, shortDescription, longDescription, subCategory, label, inWishList, currentPrice, oldPrice, amount, color, images);
         this.setId(id);
         this.setCreatedAt(createdAt);
     }

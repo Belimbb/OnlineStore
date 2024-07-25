@@ -1,5 +1,7 @@
 package com.teamChallenge.entity.shoppingCart;
 
+import com.teamChallenge.dto.request.CartRequestDto;
+import com.teamChallenge.dto.response.CartResponseDto;
 import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
 import com.teamChallenge.entity.user.UserEntity;
@@ -29,38 +31,35 @@ public class CartServiceImpl implements CartService {
     private static final String OBJECT_NAME = "Cart";
 
     @Override
-    public List<CartDto> getAll() {
+    public List<CartResponseDto> getAll() {
         List<CartEntity> cartList = cartRepository.findAll();
         log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
         return cartMapper.toDtoList(cartList);
     }
 
     @Override
-    public CartDto getById(String id) {
+    public CartResponseDto getById(String id) {
         CartEntity cart = findById(id);
         log.info("{}: " + OBJECT_NAME + " retrieved from db by id {}", LogEnum.SERVICE, id);
-        return cartMapper.toDto(cart);
+        return cartMapper.toResponseDto(cart);
     }
 
     @Override
-    public CartDto create(CartDto cartDto) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserEntity currentUser = userService.findByEmail(email);
-        List<FigureEntity> figureList = cartDto.figures()
-                .stream()
-                .map(figure -> figureService.findById(figure.getId()))
-                .toList();
-
-        if (cartRepository.existsByUser(currentUser)) {
-            CartEntity cart = cartRepository.findByUser(currentUser);
-            return cartMapper.toDto(addFigures(cart.getId(), figureList));
+    public CartResponseDto create(UserEntity user, List<FigureEntity> figureList) {
+//        List<FigureEntity> figureList = cartDto.figures()
+//                .stream()
+//                .map(figure -> figureService.findById(figure.getId()))
+//                .toList();
+        if (cartRepository.existsByUser(user)) {
+            CartEntity cart = cartRepository.findByUser(user);
+            return cartMapper.toResponseDto(addFigures(cart.getId(), figureList));
         }
 
         int totalPrice = figureList.stream().mapToInt(FigureEntity::getCurrentPrice).sum();
-        CartEntity newCart = new CartEntity(currentUser, totalPrice, figureList);
+        CartEntity newCart = new CartEntity(user, totalPrice, figureList);
         CartEntity savedCart = cartRepository.save(newCart);
         log.info("{}: " + OBJECT_NAME + " (Id: {}) was created", LogEnum.SERVICE, savedCart.getId());
-        return cartMapper.toDto(savedCart);
+        return cartMapper.toResponseDto(savedCart);
     }
 
     private CartEntity addFigures(String cartId, List<FigureEntity> figureList) {
@@ -84,11 +83,11 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartDto update(String id, CartDto cartDto) {
+    public CartResponseDto update(CartRequestDto cartDto, String id) {
         CartEntity cart = findById(id);
         List<FigureEntity> figureList = cartDto.figures()
                 .stream()
-                .map(figure -> figureService.findById(figure.getId()))
+                .map(figure -> figureService.findById(figure.id()))
                 .toList();
         int totalPrice = figureList.stream().mapToInt(FigureEntity::getCurrentPrice).sum();
 
@@ -97,15 +96,14 @@ public class CartServiceImpl implements CartService {
 
         CartEntity updatedCart = cartRepository.save(cart);
         log.info("{}: " + OBJECT_NAME + " (Id: {}) updated figure list and total price throughout update method", LogEnum.SERVICE, id);
-        return cartMapper.toDto(updatedCart);
+        return cartMapper.toResponseDto(updatedCart);
     }
 
     @Override
-    public boolean delete(String id) {
+    public void delete(String id) {
         CartEntity cart = findById(id);
         cartRepository.delete(cart);
         log.info("{}: " + OBJECT_NAME + " (id: {}) deleted", LogEnum.SERVICE, id);
-        return true;
     }
 
     private CartEntity findById(String id) {

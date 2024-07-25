@@ -1,5 +1,7 @@
 package com.teamChallenge.entity.figure;
 
+import com.teamChallenge.dto.request.FigureRequestDto;
+import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.sections.Category;
 import com.teamChallenge.entity.figure.sections.Labels;
 import com.teamChallenge.entity.figure.sections.SubCategory;
@@ -26,7 +28,7 @@ public class FigureServiceImpl implements FigureService{
     private static final String OBJECT_NAME = "Figure";
 
     @Override
-    public FigureDto createFigure(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int currentPrice, int oldPrice, int amount, String color, List<String> images) throws CustomAlreadyExistException {
+    public FigureResponseDto createFigure(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int currentPrice, int oldPrice, int amount, String color, List<String> images) throws CustomAlreadyExistException {
         FigureEntity figureEntity = new FigureEntity(name, shortDescription, longDescription,
                 subCategory, null,false, currentPrice, oldPrice, amount, color, images);
 
@@ -36,46 +38,46 @@ public class FigureServiceImpl implements FigureService{
         figureEntity.setCreatedAt(new Date());
         figureRepository.save(figureEntity);
         log.info("{}: " + OBJECT_NAME + " (Name: {}) was created", LogEnum.SERVICE, name);
-        return figureMapper.toDto(figureEntity);
+        return figureMapper.toResponseDto(figureEntity);
     }
 
     @Override
-    public FigureDto getById(String id){
+    public FigureResponseDto getById(String id){
         FigureEntity figure = findById(id);
         log.info("{}: " + OBJECT_NAME + " retrieved from db by id {}", LogEnum.SERVICE, id);
-        return figureMapper.toDto(figure);
+        return figureMapper.toResponseDto(figure);
     }
 
     @Override
-    public List<FigureDto> getAllFigures() {
+    public List<FigureResponseDto> getAllFigures() {
         List<FigureEntity> figureEntities = figureRepository.findAll();
         log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
-        return figureMapper.toDtoList(figureEntities);
+        return figureMapper.toResponseDtoList(figureEntities);
     }
 
-    public List<FigureDto> getAllFiguresByCategory(Category category){
+    public List<FigureResponseDto> getAllFiguresByCategory(Category category){
         Optional<List<FigureEntity>> figureEntities = figureRepository.findByCategory(category);
         if (figureEntities.isPresent()){
             log.info("{}: All " + OBJECT_NAME + " by category {} retrieved from db", LogEnum.SERVICE, category);
-            return figureMapper.toDtoList(figureEntities.get());
+            return figureMapper.toResponseDtoList(figureEntities.get());
         }
         throw new CustomNotFoundException(OBJECT_NAME + "s");
     }
 
-    public List<FigureDto> getAllFiguresBySubCategory (SubCategory subCategory){
+    public List<FigureResponseDto> getAllFiguresBySubCategory (SubCategory subCategory){
         Optional<List<FigureEntity>> figureEntities = figureRepository.findBySubCategory(subCategory);
         if (figureEntities.isPresent()){
             log.info("{}: All " + OBJECT_NAME + "s by sub category {} retrieved from db", LogEnum.SERVICE, subCategory);
-            return figureMapper.toDtoList(figureEntities.get());
+            return figureMapper.toResponseDtoList(figureEntities.get());
         }
         throw new CustomNotFoundException(OBJECT_NAME);
     }
 
     @Override
-    public FigureDto updateFigure(FigureDto figureDto) {
-        FigureEntity savedFigure = figureRepository.save(figureMapper.toEntity(figureDto));
+    public FigureResponseDto updateFigure(FigureRequestDto figure) {
+        FigureEntity savedFigure = figureRepository.save(figureMapper.toEntity(figure));
         log.info("{}: " + OBJECT_NAME + " (id: {}) updated)", LogEnum.SERVICE, savedFigure.getId());
-        return figureMapper.toDto(savedFigure);
+        return figureMapper.toResponseDto(savedFigure);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.teamChallenge.controller;
 
-import com.teamChallenge.entity.figure.FigureDto;
+import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
 import com.teamChallenge.entity.figure.sections.Category;
 import com.teamChallenge.entity.figure.sections.SubCategory;
@@ -28,10 +28,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,16 +51,16 @@ public class FigureController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List figures",
                     content = { @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = FigureDto.class)))}
+                            array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<FigureDto>> figureList() throws CustomNotFoundException {
-        List<FigureDto> figureDtos = figureService.getAllFigures();
+    public ResponseEntity<List<FigureResponseDto>> figureList() throws CustomNotFoundException {
+        List<FigureResponseDto> figureResponseDtos = figureService.getAllFigures();
 
         log.info("{}: Figures have been retrieved", LogEnum.CONTROLLER);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(figureDtos);
+                .body(figureResponseDtos);
     }
 
     @GetMapping("/all/by_category")
@@ -70,16 +68,16 @@ public class FigureController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List figures by category",
                     content = { @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = FigureDto.class)))}
+                            array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<FigureDto>> figureListByCategory(@NotNull @Valid @RequestParam Category category) throws CustomNotFoundException {
-        List<FigureDto> figureDtos = figureService.getAllFiguresByCategory(category);
+    public ResponseEntity<List<FigureResponseDto>> figureListByCategory(@NotNull @Valid @RequestParam Category category) throws CustomNotFoundException {
+        List<FigureResponseDto> figureResponseDtos = figureService.getAllFiguresByCategory(category);
 
         log.info("{}: Figures from category {} have been retrieved", LogEnum.CONTROLLER, category);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(figureDtos);
+                .body(figureResponseDtos);
     }
 
     @GetMapping("/all/by_subcategory")
@@ -87,16 +85,16 @@ public class FigureController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List figures by subCategory",
                     content = { @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = FigureDto.class)))}
+                            array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<FigureDto>> figureListByCategory(@Valid @NotNull @RequestParam SubCategory subCategory) throws CustomNotFoundException {
-        List<FigureDto> figureDtos = figureService.getAllFiguresBySubCategory(subCategory);
+    public ResponseEntity<List<FigureResponseDto>> figureListByCategory(@Valid @NotNull @RequestParam SubCategory subCategory) throws CustomNotFoundException {
+        List<FigureResponseDto> figureResponseDtos = figureService.getAllFiguresBySubCategory(subCategory);
 
         log.info("{}: Figures from subCategory {} have been retrieved", LogEnum.CONTROLLER, subCategory);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(figureDtos);
+                .body(figureResponseDtos);
     }
 
     @GetMapping("/{figureId}")
@@ -104,14 +102,14 @@ public class FigureController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Getting figure",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = FigureDto.class)) }),
+                            schema = @Schema(implementation = FigureResponseDto.class)) }),
             @ApiResponse(responseCode = "404", description = "Figure not found",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CustomErrorResponse.class)) })
 
     })
-    public ResponseEntity<FigureDto> getFigureById(@NotBlank @NotNull @PathVariable("figureId") String figureId) throws CustomNotFoundException{
-        FigureDto figure = figureService.getById(figureId);
+    public ResponseEntity<FigureResponseDto> getFigureById(@NotBlank @NotNull @PathVariable("figureId") String figureId) throws CustomNotFoundException{
+        FigureResponseDto figure = figureService.getById(figureId);
         log.info("{}: Figure (id: {}) has been retrieved", LogEnum.SERVICE, figure.id());
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -123,20 +121,20 @@ public class FigureController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Added new Figure",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = FigureDto.class))}),
+                            schema = @Schema(implementation = FigureResponseDto.class))}),
             @ApiResponse(responseCode = "400", description = "Validation errors",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<FigureDto> addFigure(@Valid @NotNull @RequestBody FigureRequestDto request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
+    public ResponseEntity<FigureResponseDto> addFigure(@Valid @NotNull @RequestBody FigureRequestDto request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
         //можно и так получать е-мейл, но работа через principal выглядит не так запутанно
         //String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        if (!userService.getByEmail(principal.getName()).role().equals(Roles.ADMIN)){
+        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
             throw new UnauthorizedAccessException();
         }
-        FigureDto figure = figureService.createFigure(request.name(), request.shortDescription(), request.longDescription(),
+        FigureResponseDto figure = figureService.createFigure(request.name(), request.shortDescription(), request.longDescription(),
                 request.subCategory(), request.label(), request.currentPrice(), request.oldPrice(), request.amount(), request.color(), request.images());
 
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, figure.id());
@@ -155,7 +153,7 @@ public class FigureController {
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
     public void deleteUrlByShortId(@PathVariable("figureId") String figureId, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
-        if (!userService.getByEmail(principal.getName()).role().equals(Roles.ADMIN)){
+        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
             throw new UnauthorizedAccessException();
         }
         figureService.deleteFigure(figureId);

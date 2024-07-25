@@ -1,5 +1,9 @@
 package com.teamChallenge.entity.shoppingCart;
 
+import com.teamChallenge.dto.request.CartRequestDto;
+import com.teamChallenge.dto.response.CartResponseDto;
+import com.teamChallenge.entity.figure.FigureMapper;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -8,35 +12,33 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@AllArgsConstructor
 public class CartMapper {
+    private final FigureMapper figureMapper;
 
-    public CartEntity toEntity (CartDto dto){
+    public CartEntity toEntity (CartRequestDto dto){
         return new CartEntity(
-                dto.id(),
-                dto.figures(),
-                dto.user(),
-                dto.price()
+                figureMapper.toEntityListFromResponse(dto.figures())
         );
     }
 
-    public CartDto toDto (CartEntity entity){
-        return new CartDto(
+    public CartResponseDto toResponseDto(CartEntity entity){
+        return new CartResponseDto(
                 entity.getId(),
-                entity.getFigures(),
-                entity.getUser(),
+                figureMapper.toResponseDtoList(entity.getFigures()),
                 entity.getPrice()
         );
     }
 
-    public List<CartEntity> toEntityList (List<CartDto> dtos){
+    public List<CartEntity> toEntityList (List<CartRequestDto> dtos){
         return dtos.stream()
                 .map(this::toEntity)
                 .collect(Collectors.toList());
     }
 
-    public List<CartDto> toDtoList (List<CartEntity> entities){
+    public List<CartResponseDto> toDtoList (List<CartEntity> entities){
         return entities.stream()
-                .map(this::toDto)
+                .map(this::toResponseDto)
                 .collect(Collectors.toList());
     }
 }

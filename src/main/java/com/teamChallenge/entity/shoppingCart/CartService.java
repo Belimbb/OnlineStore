@@ -1,16 +1,21 @@
 package com.teamChallenge.entity.shoppingCart;
 
+import com.teamChallenge.dto.request.CartRequestDto;
+import com.teamChallenge.dto.response.CartResponseDto;
+import com.teamChallenge.entity.figure.FigureEntity;
+import com.teamChallenge.entity.user.UserEntity;
+
 import java.util.List;
 
 public interface CartService {
 
-    List<CartDto> getAll();
+    List<CartResponseDto> getAll();
 
-    CartDto getById(String id);
+    CartResponseDto getById(String id);
 
-    CartDto create(CartDto cartDto);
+    CartResponseDto create(UserEntity user, List<FigureEntity> figureList);
 
-    CartDto update(String id, CartDto cartDto);
+    CartResponseDto update(String id, CartRequestDto requestDto);
 
-    boolean delete(String id);
+    void delete(String id);
 }
