@@ -11,7 +11,7 @@ import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
-import com.teamChallenge.request.FigureRequest;
+import com.teamChallenge.dto.request.FigureRequestDto;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -129,7 +129,7 @@ public class FigureController {
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<FigureDto> addFigure(@Valid @NotNull @RequestBody FigureRequest request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
+    public ResponseEntity<FigureDto> addFigure(@Valid @NotNull @RequestBody FigureRequestDto request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
         //можно и так получать е-мейл, но работа через principal выглядит не так запутанно
         //String email = SecurityContextHolder.getContext().getAuthentication().getName();
 

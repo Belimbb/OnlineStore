@@ -1,5 +1,7 @@
 package com.teamChallenge.entity.user;
 
+import com.teamChallenge.dto.response.UserResponseDto;
+import com.teamChallenge.entity.shoppingCart.CartDto;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;

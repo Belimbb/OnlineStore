@@ -4,8 +4,8 @@ import com.teamChallenge.entity.user.*;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
-import com.teamChallenge.request.auth.LoginRequest;
-import com.teamChallenge.request.auth.SignupRequest;
+import com.teamChallenge.dto.request.auth.LoginRequestDto;
+import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.security.jwt.JwtResponseDto;
 import com.teamChallenge.security.jwt.JwtUtils;
 
@@ -53,18 +53,18 @@ public class AuthController {
             @ApiResponse(responseCode = "4XX", description = "Login failed",
                     content = { @Content(mediaType = "application/json", schema = @Schema(implementation = CustomErrorResponse.class)) })
     })
-    public ResponseEntity<JwtResponseDto> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) throws Exception {
+    public ResponseEntity<JwtResponseDto> authenticateUser(@Valid @RequestBody LoginRequestDto loginRequestDto) throws Exception {
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+                    new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword())
             );
         } catch (AuthenticationException e) {
             throw new Exception("Authentication Exception", e);
         }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserEntity user = userMapper.toEntity(userService.getByEmail(loginRequest.getEmail()));
+        UserEntity user = userMapper.toEntity(userService.getByEmail(loginRequestDto.getEmail()));
         String jwt = jwtUtils.generateToken(user);
 
         log.info("{}: User (id: {}) has accomplished authentication process", LogEnum.CONTROLLER, user.getId());
@@ -80,8 +80,8 @@ public class AuthController {
             @ApiResponse(responseCode = "4XX", description = "Registration failed",
                     content = { @Content(mediaType = "application/json", schema = @Schema(implementation = CustomErrorResponse.class)) })
     })
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) throws CustomAlreadyExistException {
-        UserDto userDto = userService.create(signUpRequest.getUsername(), signUpRequest.getEmail(), signUpRequest.getPassword());
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequestDto signUpRequestDto) throws CustomAlreadyExistException {
+        UserDto userDto = userService.create(signUpRequestDto.getUsername(), signUpRequestDto.getEmail(), signUpRequestDto.getPassword());
         log.info("{}: User (id: {}) has accomplished registration process", LogEnum.CONTROLLER, userDto.id());
         return ResponseEntity.status(201).body(userDto);
     }

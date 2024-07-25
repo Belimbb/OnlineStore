@@ -7,7 +7,7 @@ import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
-import com.teamChallenge.request.AdsRequest;
+import com.teamChallenge.dto.request.AdsRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,7 +28,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -51,7 +50,7 @@ public class AdsController {
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<AdvertisementDto> addAds(@Valid @NotNull @RequestBody AdsRequest request, Principal principal) throws UnauthorizedAccessException {
+    public ResponseEntity<AdvertisementDto> addAds(@Valid @NotNull @RequestBody AdsRequestDto request, Principal principal) throws UnauthorizedAccessException {
         if (!userService.getByEmail(principal.getName()).role().equals(Roles.ADMIN)){
             throw new UnauthorizedAccessException();
         }
