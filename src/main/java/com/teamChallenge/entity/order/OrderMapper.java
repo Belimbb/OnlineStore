@@ -1,6 +1,8 @@
 package com.teamChallenge.entity.order;
 
+import com.teamChallenge.dto.response.OrderResponseDto;
 import com.teamChallenge.entity.figure.FigureMapper;
+import com.teamChallenge.entity.user.UserMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -11,38 +13,40 @@ import java.util.List;
 @Component
 @AllArgsConstructor
 public class OrderMapper {
+
     private final FigureMapper figureMapper;
 
-    public OrderDto toDto(OrderEntity order) {
-        return new OrderDto(
+    private final UserMapper userMapper;
+
+    public OrderResponseDto toResponseDto(OrderEntity order) {
+        return new OrderResponseDto(
                 order.getId(),
                 order.getAddress(),
                 order.getPrice(),
                 order.getStatus(),
-                order.getFigureList(),
-                order.getUser());
+                figureMapper.toResponseDtoList(order.getFigureList()),
+                userMapper.toResponseDto(order.getUser()));
     }
 
-    public OrderEntity toEntity(OrderDto orderDto) {
+    public OrderEntity toEntity(OrderResponseDto orderResponseDto) {
         return new OrderEntity(
-                orderDto.id(),
-                orderDto.address(),
-                orderDto.price(),
-                orderDto.status(),
-                orderDto.figureList(),
-                orderDto.user());
+                orderResponseDto.id(),
+                orderResponseDto.address(),
+                orderResponseDto.price(),
+                orderResponseDto.status(),
+                figureMapper.toEntityListFromResponse(orderResponseDto.figureList()),
+                userMapper.toEntity(orderResponseDto.userResponseDto()));
     }
 
-    public List<OrderDto> toDtoList(List<OrderEntity> orders) {
+    public List<OrderResponseDto> toResponseDtoList(List<OrderEntity> orders) {
         return orders
                 .stream()
-                .map(this::toDto)
+                .map(this::toResponseDto)
                 .toList();
     }
 
-    public List<OrderEntity> toEntityList(List<OrderDto> orderDtos) {
-        return orderDtos
-                .stream()
+    public List<OrderEntity> toEntityListFromResponse(List<OrderResponseDto> orderResponseDto) {
+        return orderResponseDto.stream()
                 .map(this::toEntity)
                 .toList();
     }

@@ -2,7 +2,6 @@ package com.teamChallenge.entity.figure;
 
 import com.teamChallenge.dto.request.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
-import com.teamChallenge.request.FigureRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -66,7 +65,7 @@ public class FigureMapper {
     }
 
     public List<FigureResponseDto> toResponseDtoList (List<FigureEntity> entities){
-        return entities.stream()
+        return entities == null ? null : entities.stream()
                 .map(this::toResponseDto)
                 .collect(Collectors.toList());
     }

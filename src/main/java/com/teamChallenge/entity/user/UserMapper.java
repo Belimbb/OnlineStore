@@ -1,5 +1,6 @@
 package com.teamChallenge.entity.user;
 
+import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.entity.figure.FigureMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,40 +15,38 @@ public class UserMapper {
 
     private final FigureMapper figureMapper;
 
-    public UserDto toDto(UserEntity user) {
-        return new UserDto(
+    public UserResponseDto toResponseDto(UserEntity user) {
+        return new UserResponseDto(
                 user.getId(),
                 user.getEmail(),
                 user.getUsername(),
                 user.getPassword(),
                 user.getRole(),
                 user.getCreatedAt(),
-                figureMapper.toDtoList(user.getWhishList())
+                figureMapper.toResponseDtoList(user.getWhishList())
         );
     }
 
-    public UserEntity toEntity(UserDto userDto) {
+    public UserEntity toEntity(UserResponseDto userResponseDto) {
         return new UserEntity(
-                userDto.id(),
-                userDto.username(),
-                userDto.email(),
-                userDto.password(),
-                userDto.role(),
-                userDto.createdAt(),
-                figureMapper.toEntityList(userDto.wishList())
-        );
+                userResponseDto.id(),
+                userResponseDto.username(),
+                userResponseDto.email(),
+                null,
+                userResponseDto.role(),
+                userResponseDto.createdAt(),
+                figureMapper.toEntityListFromResponse(userResponseDto.wishList()));
     }
 
-    public List<UserDto> toDtoList(List<UserEntity> users) {
+    public List<UserResponseDto> toResponseDtoList(List<UserEntity> users) {
         return users
                 .stream()
-                .map(this::toDto)
+                .map(this::toResponseDto)
                 .toList();
     }
 
-    public List<UserEntity> toEntityList(List<UserDto> userDtos) {
-        return userDtos
-                .stream()
+    public List<UserEntity> toEntityListFromResponse(List<UserResponseDto> userResponseDto) {
+        return userResponseDto.stream()
                 .map(this::toEntity)
                 .toList();
     }

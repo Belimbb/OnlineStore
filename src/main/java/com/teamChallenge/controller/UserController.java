@@ -1,5 +1,7 @@
 package com.teamChallenge.controller;
 
+import com.teamChallenge.dto.request.UserRequestDto;
+import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
@@ -7,6 +9,7 @@ import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,17 +18,23 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @Slf4j
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 public class UserController {
+
+    private static final String URI_USERS_WITH_ID = "/{id}";
+
     private final UserServiceImpl userService;
 
     /*
@@ -52,7 +61,6 @@ public class UserController {
                 .body(user);
     }
      */
-    /*
     @GetMapping("/all")
     @Operation(summary = "Get all users")
     @ApiResponses(value = {
@@ -61,17 +69,51 @@ public class UserController {
                             array = @ArraySchema(schema = @Schema(implementation = UserResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<--->> userList() throws CustomNotFoundException {
-        List<---> users = userService.getAll();
+    public ResponseEntity<List<UserResponseDto>> userList() throws CustomNotFoundException {
+        List<UserResponseDto> users = userService.getAll();
 
         log.info("{}: Users have been retrieved", LogEnum.CONTROLLER);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(users);
     }
-     */
 
-    @DeleteMapping("/{userId}")
+    @GetMapping(URI_USERS_WITH_ID)
+    @Operation(description = "get an user by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found the user",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CustomErrorResponse.class)) }) })
+    public UserResponseDto getById(@PathVariable String id) {
+        UserResponseDto user = userService.getById(id);
+        log.info("{}: User (id: {}) has been retrieved", LogEnum.CONTROLLER, id);
+        return user;
+    }
+
+    @PutMapping(URI_USERS_WITH_ID)
+    @SecurityRequirement(name = "BearerAuth")
+    @Operation(description = "update an user by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Updated the user",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserResponseDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CustomErrorResponse.class))}
+            ),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CustomErrorResponse.class)) }) })
+    public UserResponseDto update(@PathVariable String id, @RequestBody UserRequestDto userRequestDto) {
+        UserResponseDto user = userService.update(id, userRequestDto);
+        log.info("{}: User (id: {}) has been updated", LogEnum.CONTROLLER, user.id());
+        return user;
+    }
+
+    @DeleteMapping(URI_USERS_WITH_ID)
     @Operation(summary = "Delete user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User deleted"),
@@ -80,12 +122,12 @@ public class UserController {
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
-    public void deleteUrlByShortId(@PathVariable("userId") String userId, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
-        if (!userService.getByEmail(principal.getName()).role().equals(Roles.ADMIN)){
+    public void deleteUrlByShortId(@PathVariable String id, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
+        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
             throw new UnauthorizedAccessException();
         }
-        userService.delete(userId);
+        userService.delete(id);
 
-        log.info("{}: User (id: {}) has been deleted", LogEnum.CONTROLLER, userId);
+        log.info("{}: User (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }
 }
