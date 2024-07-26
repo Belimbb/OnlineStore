@@ -1,16 +1,19 @@
 package com.teamChallenge.entity.order;
 
+import com.teamChallenge.dto.request.OrderRequestDto;
+import com.teamChallenge.dto.response.OrderResponseDto;
+
 import java.util.List;
 
 public interface OrderService {
 
-    List<OrderDto> getAll();
+    List<OrderResponseDto> getAll();
 
-    OrderDto getById(String id);
+    OrderResponseDto getById(String id);
 
-    OrderDto create(OrderDto orderDto);
+    OrderResponseDto create(OrderRequestDto orderRequestDto);
 
-    OrderDto update(String id, OrderDto orderDto);
+    OrderResponseDto update(String id, OrderRequestDto orderRequestDto);
 
     void delete(String id);
 }

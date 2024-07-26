@@ -1,20 +1,16 @@
 package com.teamChallenge.entity.user;
 
+import com.teamChallenge.dto.request.UserRequestDto;
+import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 
 import java.util.List;
 
 public interface UserService {
 
-    List<UserDto> getAll();
-    UserDto getById(String id);
-    UserDto getByUsername(String username);
-
-    UserDto create(UserDto userDto) throws CustomAlreadyExistException;
-    UserDto create(String username, String email, String password) throws CustomAlreadyExistException;
-    UserDto update(String id, UserDto userDto);
-
+    List<UserResponseDto> getAll();
+    UserResponseDto getById(String id);
+    UserResponseDto create(String username, String email, String password) throws CustomAlreadyExistException;
+    UserResponseDto update(String id, UserRequestDto userRequestDto);
     boolean delete(String id);
-    boolean existByEmail(String email);
-    boolean existsByUsername(String username);
 }

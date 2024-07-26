@@ -1,6 +1,7 @@
 package com.teamChallenge.controller;
 
-import com.teamChallenge.entity.order.OrderDto;
+import com.teamChallenge.dto.request.OrderRequestDto;
+import com.teamChallenge.dto.response.OrderResponseDto;
 import com.teamChallenge.entity.order.OrderService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
@@ -32,8 +33,8 @@ public class OrderController {
     @GetMapping
     @Operation(description = "get all orders")
     @ApiResponse(responseCode = "200", description = "Received order List")
-    public List<OrderDto> getAll() {
-        List<OrderDto> orderList = orderService.getAll();
+    public List<OrderResponseDto> getAll() {
+        List<OrderResponseDto> orderList = orderService.getAll();
         log.info("{}: Order list has been retrieved", LogEnum.CONTROLLER);
         return orderList;
     }
@@ -43,15 +44,15 @@ public class OrderController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found the order",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = OrderDto.class))}
+                            schema = @Schema(implementation = OrderResponseDto.class))}
             ),
             @ApiResponse(responseCode = "404", description = "Order not found",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public OrderDto getById(@PathVariable String id) {
-        OrderDto order = orderService.getById(id);
+    public OrderResponseDto getById(@PathVariable String id) {
+        OrderResponseDto order = orderService.getById(id);
         log.info("{}: Order (id: {}) has been retrieved", LogEnum.CONTROLLER, id);
         return order;
     }
@@ -63,15 +64,15 @@ public class OrderController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created the order",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = OrderDto.class))}
+                            schema = @Schema(implementation = OrderResponseDto.class))}
             ),
             @ApiResponse(responseCode = "400", description = "Validation error",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
     })
-    public OrderDto create(@RequestBody OrderDto orderDto) {
-        OrderDto order = orderService.create(orderDto);
+    public OrderResponseDto create(@RequestBody OrderRequestDto orderDto) {
+        OrderResponseDto order = orderService.create(orderDto);
         log.info("{}: Order (id: {}) has been added", LogEnum.CONTROLLER, order.id());
         return order;
     }
@@ -82,7 +83,7 @@ public class OrderController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found the order",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = OrderDto.class))}
+                            schema = @Schema(implementation = OrderResponseDto.class))}
             ),
             @ApiResponse(responseCode = "400", description = "Validation error",
                     content = { @Content(mediaType = "application/json",
@@ -93,8 +94,8 @@ public class OrderController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public OrderDto update(@PathVariable String id, @RequestBody OrderDto orderDto) {
-        OrderDto order = orderService.update(id, orderDto);
+    public OrderResponseDto update(@PathVariable String id, @RequestBody OrderRequestDto orderDto) {
+        OrderResponseDto order = orderService.update(id, orderDto);
         log.info("{}: Order (id: {}) has been updated", LogEnum.CONTROLLER, order.id());
         return order;
     }
@@ -105,7 +106,7 @@ public class OrderController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found the order",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = OrderDto.class))}
+                            schema = @Schema(implementation = OrderResponseDto.class))}
             ),
             @ApiResponse(responseCode = "404", description = "Order not found",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,

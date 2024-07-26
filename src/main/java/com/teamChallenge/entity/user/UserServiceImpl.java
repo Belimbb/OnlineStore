@@ -1,14 +1,12 @@
 package com.teamChallenge.entity.user;
 
+import com.teamChallenge.dto.request.UserRequestDto;
 import com.teamChallenge.dto.response.UserResponseDto;
-import com.teamChallenge.entity.shoppingCart.CartDto;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -26,7 +24,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class UserServiceImpl implements UserDetailsService,UserService {
+public class UserServiceImpl implements UserDetailsService, UserService {
     @Value("${admin.email}")
     private String adminEmail;
 
@@ -43,31 +41,19 @@ public class UserServiceImpl implements UserDetailsService,UserService {
     }
 
     @Override
-    public List<UserDto> getAll() {
+    public List<UserResponseDto> getAll() {
         log.info("{}: request on retrieving all " + OBJECT_NAME + "s was sent", LogEnum.SERVICE);
-        return userMapper.toDtoList(userRepository.findAll());
+        return userMapper.toResponseDtoList(userRepository.findAll());
     }
 
     @Override
-    public UserDto getById(String id) {
+    public UserResponseDto getById(String id) {
         log.info("{}: request on retrieving " + OBJECT_NAME + " by id {} was sent", LogEnum.SERVICE, id);
-        return userMapper.toDto(findById(id));
+        return userMapper.toResponseDto(findById(id));
     }
 
     @Override
-    public UserDto getByUsername(String username) {
-        log.info("{}: request on retrieving " + OBJECT_NAME + " by username {} was sent", LogEnum.SERVICE, username);
-        return userMapper.toDto(userRepository.findByUsername(username).orElseThrow(() ->
-                new CustomNotFoundException(OBJECT_NAME, username)));
-    }
-
-    @Override
-    public UserDto create(UserDto userDto) throws CustomAlreadyExistException {
-        return create(userDto.username(), userDto.email(), userDto.password());
-    }
-
-    @Override
-    public UserDto create (String username, String email, String password) throws CustomAlreadyExistException{
+    public UserResponseDto create (String username, String email, String password) throws CustomAlreadyExistException{
         if (existsByUsername(username)){
             throw new CustomAlreadyExistException(OBJECT_NAME, username);
         }
@@ -80,18 +66,18 @@ public class UserServiceImpl implements UserDetailsService,UserService {
 
         UserEntity saved = userRepository.save(user);
         log.info("{}: " + OBJECT_NAME + " (Username: {}) was created", LogEnum.SERVICE, username);
-        return userMapper.toDto(saved);
+        return userMapper.toResponseDto(saved);
     }
 
     @Override
-    public UserDto update(String id, UserDto userDto) {
+    public UserResponseDto update(String id, UserRequestDto userRequestDto) {
         UserEntity user = findById(id);
-        user.setUsername(userDto.username());
-        user.setEmail(userDto.email());
+        user.setUsername(userRequestDto.username());
+        user.setPassword(userRequestDto.password());
 
         userRepository.save(user);
         log.info("{}: " + OBJECT_NAME + " (id: {}) was updated", LogEnum.SERVICE, id);
-        return userMapper.toDto(user);
+        return userMapper.toResponseDto(user);
     }
 
     @Override
@@ -102,12 +88,10 @@ public class UserServiceImpl implements UserDetailsService,UserService {
         return true;
     }
 
-    @Override
     public boolean existByEmail (String email){
         return userRepository.existsByEmail(email);
     }
 
-    @Override
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
     }
@@ -134,5 +118,10 @@ public class UserServiceImpl implements UserDetailsService,UserService {
     public UserEntity findByEmail (String email) {
         log.info("{}: request on retrieving " + OBJECT_NAME + " by email {} was sent", LogEnum.SERVICE, email);
         return userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, email));
+    }
+
+    public UserEntity getByUsername(String username) {
+        log.info("{}: request on retrieving " + OBJECT_NAME + " by username {} was sent", LogEnum.SERVICE, username);
+        return userRepository.findByUsername(username).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, username));
     }
 }

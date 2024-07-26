@@ -1,5 +1,7 @@
 package com.teamChallenge.entity.order;
 
+import com.teamChallenge.dto.request.OrderRequestDto;
+import com.teamChallenge.dto.response.OrderResponseDto;
 import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
 import com.teamChallenge.entity.user.UserEntity;
@@ -29,25 +31,25 @@ public class OrderServiceImpl implements OrderService {
     private static final String OBJECT_NAME = "Order";
 
     @Override
-    public List<OrderDto> getAll() {
+    public List<OrderResponseDto> getAll() {
         log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
-        return orderMapper.toDtoList(orderRepository.findAll());
+        return orderMapper.toResponseDtoList(orderRepository.findAll());
     }
 
     @Override
-    public OrderDto getById(String id) {
+    public OrderResponseDto getById(String id) {
         log.info("{}: " + OBJECT_NAME + " (id: {}) retrieved from db", LogEnum.SERVICE, id);
-        return orderMapper.toDto(findById(id));
+        return orderMapper.toResponseDto(findById(id));
     }
 
     @Override
-    public OrderDto create(OrderDto orderDto) {
+    public OrderResponseDto create(OrderRequestDto OrderRequestDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity currentUser = userService.findByEmail(email);
 
-        List<FigureEntity> figureList = orderDto.figureList()
+        List<FigureEntity> figureList = OrderRequestDto.figureList()
                 .stream()
-                .map(figure -> figureService.findById(figure.getId()))
+                .map(figure -> figureService.findById(figure.id()))
                 .toList();
 
         int totalPrice = figureList
@@ -55,23 +57,20 @@ public class OrderServiceImpl implements OrderService {
                 .mapToInt(FigureEntity::getCurrentPrice)
                 .sum();
 
-        OrderEntity newOrder = new OrderEntity(orderDto.address(), totalPrice, figureList, currentUser);
+        OrderEntity newOrder = new OrderEntity(OrderRequestDto.address(), totalPrice, figureList, currentUser);
         orderRepository.save(newOrder);
         log.info("{}: " + OBJECT_NAME + " was created", LogEnum.SERVICE);
-        return orderMapper.toDto(newOrder);
+        return orderMapper.toResponseDto(newOrder);
     }
 
     @Override
-    public OrderDto update(String id, OrderDto orderDto) {
+    public OrderResponseDto update(String id, OrderRequestDto orderRequestDto) {
         OrderEntity order = findById(id);
+        order.setAddress(orderRequestDto.address());
 
-        if (orderDto.address() != null && !orderDto.address().isBlank()) {
-            order.setAddress(orderDto.address());
-        }
-
-        List<FigureEntity> figureList = orderDto.figureList()
+        List<FigureEntity> figureList = orderRequestDto.figureList()
                 .stream()
-                .map(figure -> figureService.findById(figure.getId()))
+                .map(figure -> figureService.findById(figure.id()))
                 .toList();
         order.setFigureList(figureList);
 
@@ -83,7 +82,7 @@ public class OrderServiceImpl implements OrderService {
 
         OrderEntity updatedOrder = orderRepository.save(order);
         log.info("{}: " + OBJECT_NAME + " (id: {}) updated)", LogEnum.SERVICE, order.getId());
-        return orderMapper.toDto(updatedOrder);
+        return orderMapper.toResponseDto(updatedOrder);
     }
 
     @Override

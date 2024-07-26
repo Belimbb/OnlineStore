@@ -60,6 +60,14 @@ public class OpenAPIConfig {
     }
 
     @Bean
+    public GroupedOpenApi apiUsersV1() {
+        return GroupedOpenApi.builder()
+                .group("Users API V1")
+                .pathsToMatch("/api/users/**")
+                .build();
+    }
+
+    @Bean
     @Primary
     public OpenAPI customOpenAPIv1() {
         return new OpenAPI()
