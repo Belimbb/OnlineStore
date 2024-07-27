@@ -1,13 +1,16 @@
 package com.teamChallenge.controller;
 
 import com.teamChallenge.dto.request.UserRequestDto;
+import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
+import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,8 +18,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +45,7 @@ public class UserController {
 
     private final UserServiceImpl userService;
 
-    /*
+
     @PostMapping("/add")
     @Operation(summary = "Add new User")
     @ApiResponses(value = {
@@ -49,10 +57,8 @@ public class UserController {
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<FigureDto> addUser(@Valid @NotNull @RequestBody SignupRequestDto request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
-        if (!userService.getByEmail(principal.getName()).role().equals(Roles.ADMIN)){
-            throw new UnauthorizedAccessException();
-        }
+    public ResponseEntity<UserResponseDto> addUser(@Valid @NotNull @RequestBody SignupRequestDto request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
+        validation(principal);
         UserResponseDto user = userService.create(request.getUsername(), request.getEmail(), request.getEmail());
 
         log.info("{}: User (id: {}) has been added", LogEnum.SERVICE, user.id());
@@ -60,7 +66,7 @@ public class UserController {
                 .status(HttpStatus.CREATED)
                 .body(user);
     }
-     */
+
     @GetMapping("/all")
     @Operation(summary = "Get all users")
     @ApiResponses(value = {
@@ -127,7 +133,7 @@ public class UserController {
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
-    public void deleteUrlByShortId(@PathVariable String id, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
+    public void delete(@PathVariable String id, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
         validation(principal);
         userService.delete(id);
 

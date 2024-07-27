@@ -137,9 +137,7 @@ public class FigureController {
         //можно и так получать е-мейл, но работа через principal выглядит не так запутанно
         //String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
-            throw new UnauthorizedAccessException();
-        }
+        validation(principal);
         FigureResponseDto figure = figureService.createFigure(request.name(), request.shortDescription(), request.longDescription(),
                 subCategoryMapper.toEntityFromRequest(request.subCategory()), request.label(), request.currentPrice(), request.oldPrice(), request.amount(), request.color(), request.images());
 
@@ -159,11 +157,15 @@ public class FigureController {
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
     public void deleteUrlByShortId(@PathVariable("figureId") String figureId, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
-        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
-            throw new UnauthorizedAccessException();
-        }
+        validation(principal);
         figureService.deleteFigure(figureId);
 
         log.info("{}: Figure (id: {}) has been deleted", LogEnum.CONTROLLER, figureId);
+    }
+
+    private void validation(Principal principal) throws UnauthorizedAccessException {
+        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
+            throw new UnauthorizedAccessException();
+        }
     }
 }

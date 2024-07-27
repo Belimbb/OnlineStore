@@ -6,11 +6,13 @@ import com.teamChallenge.dto.response.CartResponseDto;
 import com.teamChallenge.entity.figure.FigureMapper;
 import com.teamChallenge.entity.shoppingCart.CartDto;
 import com.teamChallenge.entity.shoppingCart.CartService;
+import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserMapper;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.SomethingWentWrongException;
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -74,7 +77,6 @@ public class CartController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "create a cart")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created the cart",
@@ -86,7 +88,10 @@ public class CartController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
     })
-    public CartResponseDto create(@RequestBody CartRequestDto cartDto) {
+    @SecurityRequirement(name = "BearerAuth")
+    public CartResponseDto create(@RequestBody CartRequestDto cartDto, Principal principal) throws UnauthorizedAccessException {
+        validation(principal);
+
         CartResponseDto cart = cartService.create(userMapper.toEntity(userService.getById(cartDto.userId())),
                 figureMapper.toEntityListFromResponse(cartDto.figures()));
         log.info("{}: Cart (id: {}) has been added", LogEnum.CONTROLLER, cart.id());
@@ -94,7 +99,6 @@ public class CartController {
     }
 
     @PutMapping(URI_CART_WITH_ID)
-    @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "update a cart by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated the cart",
@@ -110,14 +114,15 @@ public class CartController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public CartResponseDto update(@PathVariable String id, @RequestBody CartRequestDto cartDto) {
+    @SecurityRequirement(name = "BearerAuth")
+    public CartResponseDto update(@PathVariable String id, @RequestBody CartRequestDto cartDto, Principal principal) throws UnauthorizedAccessException {
+        validation(principal);
         CartResponseDto cart = cartService.update(id, cartDto);
         log.info("{}: Cart (id: {}) has been updated", LogEnum.CONTROLLER, cart.id());
         return cart;
     }
 
     @DeleteMapping(URI_CART_WITH_ID)
-    @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "delete a cart by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Deleted the cart",
@@ -129,8 +134,16 @@ public class CartController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public void delete(@PathVariable String id) {
+    @SecurityRequirement(name = "BearerAuth")
+    public void delete(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
+        validation(principal);
         cartService.delete(id);
         log.info("{}: Cart (id: {}) has been deleted", LogEnum.CONTROLLER, id);
+    }
+
+    private void validation(Principal principal) throws UnauthorizedAccessException {
+        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
+            throw new UnauthorizedAccessException();
+        }
     }
 }
