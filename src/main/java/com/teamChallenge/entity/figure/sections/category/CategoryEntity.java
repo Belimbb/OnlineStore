@@ -14,6 +14,10 @@ public class CategoryEntity {
     @Id
     private String id;
 
-    @Column(nullable = false, name = "category_name")
-    private String categoryName;
+    @Column(nullable = false, name = "category_name", unique = true)
+    private String name;
+
+    public CategoryEntity(String name) {
+        this.name = name;
+    }
 }

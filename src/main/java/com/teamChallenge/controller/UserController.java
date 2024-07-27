@@ -69,7 +69,9 @@ public class UserController {
                             array = @ArraySchema(schema = @Schema(implementation = UserResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<UserResponseDto>> userList() throws CustomNotFoundException {
+    @SecurityRequirement(name = "BearerAuth")
+    public ResponseEntity<List<UserResponseDto>> userList(Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
+        validation(principal);
         List<UserResponseDto> users = userService.getAll();
 
         log.info("{}: Users have been retrieved", LogEnum.CONTROLLER);
@@ -87,14 +89,15 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public UserResponseDto getById(@PathVariable String id) {
+    @SecurityRequirement(name = "BearerAuth")
+    public UserResponseDto getById(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
+        validation(principal);
         UserResponseDto user = userService.getById(id);
         log.info("{}: User (id: {}) has been retrieved", LogEnum.CONTROLLER, id);
         return user;
     }
 
     @PutMapping(URI_USERS_WITH_ID)
-    @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "update an user by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated the user",
@@ -107,7 +110,9 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public UserResponseDto update(@PathVariable String id, @RequestBody UserRequestDto userRequestDto) {
+    @SecurityRequirement(name = "BearerAuth")
+    public UserResponseDto update(@PathVariable String id, @RequestBody UserRequestDto userRequestDto, Principal principal) throws UnauthorizedAccessException {
+        validation(principal);
         UserResponseDto user = userService.update(id, userRequestDto);
         log.info("{}: User (id: {}) has been updated", LogEnum.CONTROLLER, user.id());
         return user;
@@ -123,11 +128,15 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
     public void deleteUrlByShortId(@PathVariable String id, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
-        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
-            throw new UnauthorizedAccessException();
-        }
+        validation(principal);
         userService.delete(id);
 
         log.info("{}: User (id: {}) has been deleted", LogEnum.CONTROLLER, id);
+    }
+
+    private void validation(Principal principal) throws UnauthorizedAccessException {
+        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
+            throw new UnauthorizedAccessException();
+        }
     }
 }

@@ -16,9 +16,14 @@ public class SubCategoryEntity {
     @Id
     private String id;
 
-    @Column(nullable = false, name = "sub_category_name")
-    private String subCategoryName;
+    @Column(nullable = false, name = "sub_category_name", unique = true)
+    private String name;
 
     @DBRef
     private CategoryEntity category;
+
+    public SubCategoryEntity(String name, CategoryEntity category) {
+        this.name = name;
+        this.category = category;
+    }
 }

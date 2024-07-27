@@ -2,9 +2,9 @@ package com.teamChallenge.entity.figure;
 
 import com.teamChallenge.dto.request.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
-import com.teamChallenge.entity.figure.sections.Category;
 import com.teamChallenge.entity.figure.sections.Labels;
-import com.teamChallenge.entity.figure.sections.SubCategory;
+import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
+import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
@@ -28,7 +28,7 @@ public class FigureServiceImpl implements FigureService{
     private static final String OBJECT_NAME = "Figure";
 
     @Override
-    public FigureResponseDto createFigure(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int currentPrice, int oldPrice, int amount, String color, List<String> images) throws CustomAlreadyExistException {
+    public FigureResponseDto createFigure(String name, String shortDescription, String longDescription, SubCategoryEntity subCategory, Labels label, int currentPrice, int oldPrice, int amount, String color, List<String> images) throws CustomAlreadyExistException {
         FigureEntity figureEntity = new FigureEntity(name, shortDescription, longDescription,
                 subCategory, null,false, currentPrice, oldPrice, amount, color, images);
 
@@ -55,7 +55,7 @@ public class FigureServiceImpl implements FigureService{
         return figureMapper.toResponseDtoList(figureEntities);
     }
 
-    public List<FigureResponseDto> getAllFiguresByCategory(Category category){
+    public List<FigureResponseDto> getAllFiguresByCategory(CategoryEntity category){
         Optional<List<FigureEntity>> figureEntities = figureRepository.findByCategory(category);
         if (figureEntities.isPresent()){
             log.info("{}: All " + OBJECT_NAME + " by category {} retrieved from db", LogEnum.SERVICE, category);
@@ -64,7 +64,7 @@ public class FigureServiceImpl implements FigureService{
         throw new CustomNotFoundException(OBJECT_NAME + "s");
     }
 
-    public List<FigureResponseDto> getAllFiguresBySubCategory (SubCategory subCategory){
+    public List<FigureResponseDto> getAllFiguresBySubCategory (SubCategoryEntity subCategory){
         Optional<List<FigureEntity>> figureEntities = figureRepository.findBySubCategory(subCategory);
         if (figureEntities.isPresent()){
             log.info("{}: All " + OBJECT_NAME + "s by sub category {} retrieved from db", LogEnum.SERVICE, subCategory);
@@ -74,8 +74,14 @@ public class FigureServiceImpl implements FigureService{
     }
 
     @Override
-    public FigureResponseDto updateFigure(FigureRequestDto figure) {
-        FigureEntity savedFigure = figureRepository.save(figureMapper.toEntity(figure));
+    public FigureResponseDto updateFigure(String id, FigureRequestDto figure) {
+        if (!figureRepository.existsById(id)){
+            throw new CustomNotFoundException(OBJECT_NAME, id);
+        }
+        FigureEntity entity = figureMapper.toEntity(figure);
+        entity.setId(id);
+
+        FigureEntity savedFigure = figureRepository.save(entity);
         log.info("{}: " + OBJECT_NAME + " (id: {}) updated)", LogEnum.SERVICE, savedFigure.getId());
         return figureMapper.toResponseDto(savedFigure);
     }

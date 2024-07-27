@@ -1,9 +1,12 @@
 package com.teamChallenge.controller;
 
+import com.teamChallenge.dto.request.CategoryRequestDto;
+import com.teamChallenge.dto.request.SubCategoryRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
-import com.teamChallenge.entity.figure.sections.Category;
-import com.teamChallenge.entity.figure.sections.SubCategory;
+import com.teamChallenge.entity.figure.sections.category.CategoryMapper;
+import com.teamChallenge.entity.figure.sections.category.CategoryServiceImpl;
+import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryMapper;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
@@ -43,6 +46,9 @@ import java.util.List;
 @RequestMapping("/api/figures")
 public class FigureController {
 
+    private final CategoryMapper categoryMapper;
+    private final SubCategoryMapper subCategoryMapper;
+
     private final FigureServiceImpl figureService;
     private final UserServiceImpl userService;
 
@@ -71,8 +77,8 @@ public class FigureController {
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<FigureResponseDto>> figureListByCategory(@NotNull @Valid @RequestParam Category category) throws CustomNotFoundException {
-        List<FigureResponseDto> figureResponseDtos = figureService.getAllFiguresByCategory(category);
+    public ResponseEntity<List<FigureResponseDto>> figureListByCategory(@NotNull @Valid @RequestParam CategoryRequestDto category) throws CustomNotFoundException {
+        List<FigureResponseDto> figureResponseDtos = figureService.getAllFiguresByCategory(categoryMapper.toEntityFromRequest(category));
 
         log.info("{}: Figures from category {} have been retrieved", LogEnum.CONTROLLER, category);
         return ResponseEntity
@@ -88,8 +94,8 @@ public class FigureController {
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<FigureResponseDto>> figureListByCategory(@Valid @NotNull @RequestParam SubCategory subCategory) throws CustomNotFoundException {
-        List<FigureResponseDto> figureResponseDtos = figureService.getAllFiguresBySubCategory(subCategory);
+    public ResponseEntity<List<FigureResponseDto>> figureListBySubCategory(@Valid @NotNull @RequestParam SubCategoryRequestDto subCategory) throws CustomNotFoundException {
+        List<FigureResponseDto> figureResponseDtos = figureService.getAllFiguresBySubCategory(subCategoryMapper.toEntityFromRequest(subCategory));
 
         log.info("{}: Figures from subCategory {} have been retrieved", LogEnum.CONTROLLER, subCategory);
         return ResponseEntity
@@ -135,7 +141,7 @@ public class FigureController {
             throw new UnauthorizedAccessException();
         }
         FigureResponseDto figure = figureService.createFigure(request.name(), request.shortDescription(), request.longDescription(),
-                request.subCategory(), request.label(), request.currentPrice(), request.oldPrice(), request.amount(), request.color(), request.images());
+                subCategoryMapper.toEntityFromRequest(request.subCategory()), request.label(), request.currentPrice(), request.oldPrice(), request.amount(), request.color(), request.images());
 
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, figure.id());
         return ResponseEntity

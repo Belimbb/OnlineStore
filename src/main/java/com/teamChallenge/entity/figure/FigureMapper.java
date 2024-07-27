@@ -2,6 +2,8 @@ package com.teamChallenge.entity.figure;
 
 import com.teamChallenge.dto.request.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
+import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryMapper;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +13,9 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@AllArgsConstructor
 public class FigureMapper {
+    private final SubCategoryMapper subCategoryMapper;
 
     public FigureResponseDto toResponseDto(FigureEntity entity){
         return new FigureResponseDto(
@@ -19,7 +23,7 @@ public class FigureMapper {
                 entity.getName(),
                 entity.getShortDescription(),
                 entity.getLongDescription(),
-                entity.getSubCategory(),
+                subCategoryMapper.toResponseDto(entity.getSubCategory()),
                 entity.getLabel(),
                 entity.getInWishList(),
                 entity.getCurrentPrice(),
@@ -35,7 +39,7 @@ public class FigureMapper {
                 dto.name(),
                 dto.shortDescription(),
                 dto.longDescription(),
-                dto.subCategory(),
+                subCategoryMapper.toEntityFromRequest(dto.subCategory()),
                 dto.label(),
                 false,
                 dto.currentPrice(),
@@ -52,7 +56,7 @@ public class FigureMapper {
                 dto.name(),
                 dto.shortDescription(),
                 dto.longDescription(),
-                dto.subCategory(),
+                subCategoryMapper.toEntityFromResponse(dto.subCategory()),
                 dto.label(),
                 dto.inWishList(),
                 dto.currentPrice(),
