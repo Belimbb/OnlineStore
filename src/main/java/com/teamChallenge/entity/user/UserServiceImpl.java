@@ -19,6 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -94,7 +95,12 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     public UserResponseDto addFigureToWishList(String email, String figureId) {
         FigureEntity figure = figureService.findById(figureId);
         UserEntity user = findByEmail(email);
-        user.getWhishList().add(figure);
+        List<FigureEntity> whishList = user.getWhishList();
+        if (whishList==null){
+            whishList = new ArrayList<>();
+        }
+        whishList.add(figure);
+        user.setWhishList(whishList);
         return userMapper.toResponseDto(userRepository.save(user));
     }
 
