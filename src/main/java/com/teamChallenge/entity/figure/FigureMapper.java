@@ -39,7 +39,7 @@ public class FigureMapper {
                 dto.name(),
                 dto.shortDescription(),
                 dto.longDescription(),
-                subCategoryMapper.toEntityFromRequest(dto.subCategory()),
+                null,
                 dto.label(),
                 false,
                 dto.currentPrice(),

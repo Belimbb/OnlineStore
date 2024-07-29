@@ -48,8 +48,8 @@ public class OrderController {
             ),
             @ApiResponse(responseCode = "404", description = "Order not found",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CustomErrorResponse.class))
-                    })
+                            schema = @Schema(implementation = CustomErrorResponse.class))}
+            )
     })
     public OrderResponseDto getById(@PathVariable String id) {
         OrderResponseDto order = orderService.getById(id);
@@ -81,7 +81,7 @@ public class OrderController {
     @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "update an order by id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the order",
+            @ApiResponse(responseCode = "200", description = "Updated the order",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = OrderResponseDto.class))}
             ),
@@ -91,8 +91,8 @@ public class OrderController {
             ),
             @ApiResponse(responseCode = "404", description = "Order not found",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CustomErrorResponse.class))
-                    })
+                            schema = @Schema(implementation = CustomErrorResponse.class))}
+            )
     })
     public OrderResponseDto update(@PathVariable String id, @RequestBody OrderRequestDto orderDto) {
         OrderResponseDto order = orderService.update(id, orderDto);
@@ -104,7 +104,7 @@ public class OrderController {
     @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "delete an order by id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the order",
+            @ApiResponse(responseCode = "200", description = "Deleted the order",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = OrderResponseDto.class))}
             ),
@@ -113,7 +113,7 @@ public class OrderController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public ResponseEntity delete(@PathVariable String id) {
+    public ResponseEntity<?> delete(@PathVariable String id) {
         orderService.delete(id);
         log.info("{}: Order (id: {}) has been deleted", LogEnum.CONTROLLER, id);
         return ResponseEntity.ok().build();

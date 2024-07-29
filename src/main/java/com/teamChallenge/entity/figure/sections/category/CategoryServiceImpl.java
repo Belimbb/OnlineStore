@@ -22,7 +22,8 @@ public class CategoryServiceImpl implements CategoryService{
     private static final String OBJECT_NAME = "Category";
 
     @Override
-    public CategoryResponseDto createCategory(String categoryName) throws CustomAlreadyExistException {
+    public CategoryResponseDto createCategory(CategoryRequestDto categoryRequestDto) throws CustomAlreadyExistException {
+        String categoryName = categoryRequestDto.name();
         if (categoryRepository.existsByName(categoryName)){
             throw new CustomAlreadyExistException(OBJECT_NAME, categoryName);
         }
@@ -38,9 +39,8 @@ public class CategoryServiceImpl implements CategoryService{
         return categoryMapper.toResponseDto(category);
     }
 
-    public CategoryResponseDto getByName(String categoryName) throws CustomNotFoundException{
-        CategoryEntity category = categoryRepository.findByName(categoryName).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, categoryName));
-        return categoryMapper.toResponseDto(category);
+    public CategoryEntity getByName(String categoryName) throws CustomNotFoundException {
+        return categoryRepository.findByName(categoryName).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, categoryName));
     }
 
     @Override

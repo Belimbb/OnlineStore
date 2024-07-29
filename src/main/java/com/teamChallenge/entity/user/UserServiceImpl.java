@@ -1,6 +1,7 @@
 package com.teamChallenge.entity.user;
 
 import com.teamChallenge.dto.request.UserRequestDto;
+import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
@@ -53,11 +54,14 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Override
-    public UserResponseDto create (String username, String email, String password) throws CustomAlreadyExistException{
+    public UserResponseDto create (SignupRequestDto signupRequestDto) throws CustomAlreadyExistException{
+        String username = signupRequestDto.getUsername();
+        String email = signupRequestDto.getEmail();
+
         if (existsByUsername(username)){
             throw new CustomAlreadyExistException(OBJECT_NAME, username);
         }
-        UserEntity user = new UserEntity(username, email, passwordEncoder.encode(password));
+        UserEntity user = new UserEntity(username, email, passwordEncoder.encode(signupRequestDto.getPassword()));
         user.setCreatedAt(new Date());
 
         if (email.trim().equalsIgnoreCase(adminEmail)){

@@ -1,16 +1,10 @@
 package com.teamChallenge.controller;
 
 import com.teamChallenge.dto.request.CartRequestDto;
-import com.teamChallenge.dto.response.AdsResponseDto;
 import com.teamChallenge.dto.response.CartResponseDto;
-import com.teamChallenge.entity.figure.FigureMapper;
-import com.teamChallenge.entity.shoppingCart.CartDto;
 import com.teamChallenge.entity.shoppingCart.CartService;
-import com.teamChallenge.entity.user.UserMapper;
-import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.generalExceptions.SomethingWentWrongException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,11 +28,7 @@ public class CartController {
 
     private static final String URI_CART_WITH_ID = "/{id}";
 
-    private final UserServiceImpl userService;
     private final CartService cartService;
-    private final FigureMapper figureMapper;
-
-    private final UserMapper userMapper;
 
     @GetMapping("/all")
     @Operation(summary = "Get all ads")
@@ -87,8 +77,7 @@ public class CartController {
             ),
     })
     public CartResponseDto create(@RequestBody CartRequestDto cartDto) {
-        CartResponseDto cart = cartService.create(userMapper.toEntity(userService.getById(cartDto.userId())),
-                figureMapper.toEntityListFromResponse(cartDto.figures()));
+        CartResponseDto cart = cartService.create(cartDto);
         log.info("{}: Cart (id: {}) has been added", LogEnum.CONTROLLER, cart.id());
         return cart;
     }

@@ -3,6 +3,7 @@ package com.teamChallenge.entity.figure.sections.subCategory;
 import com.teamChallenge.dto.request.SubCategoryRequestDto;
 import com.teamChallenge.dto.response.SubCategoryResponseDto;
 import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
+import com.teamChallenge.entity.figure.sections.category.CategoryServiceImpl;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +15,20 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class SubCategoryServiceImpl implements SubCategoryService{
+public class SubCategoryServiceImpl implements SubCategoryService {
+
     private final SubCategoryRepository subCategoryRepository;
+
     private final SubCategoryMapper subCategoryMapper;
+
+    private final CategoryServiceImpl categoryService;
     private static final String OBJECT_NAME = "SubCategory";
 
     @Override
-    public SubCategoryResponseDto createSubCategory(String subCategoryName, CategoryEntity category) throws CustomAlreadyExistException {
+    public SubCategoryResponseDto createSubCategory(SubCategoryRequestDto subCategoryRequestDto) throws CustomAlreadyExistException {
+        String subCategoryName = subCategoryRequestDto.subCategoryName();
+        CategoryEntity category = categoryService.getByName(subCategoryRequestDto.categoryName());
+
         if (subCategoryRepository.existsByName(subCategoryName)){
             throw new CustomAlreadyExistException(OBJECT_NAME, subCategoryName);
         }
@@ -55,5 +63,9 @@ public class SubCategoryServiceImpl implements SubCategoryService{
         }
 
         subCategoryRepository.deleteById(id);
+    }
+
+    public SubCategoryEntity getByName(String subCategoryName) {
+        return subCategoryRepository.findByName(subCategoryName).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, subCategoryName));
     }
 }

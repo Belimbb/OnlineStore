@@ -10,7 +10,7 @@ import java.util.List;
 public record FigureRequestDto(@NotBlank @Size(max = 50) String name,
                                @NotBlank @Size(min = 10, max = 200) String shortDescription,
                                @NotBlank @Size(min = 10, max = 1000) String longDescription,
-                               @NotNull SubCategoryRequestDto subCategory,
+                               @NotNull String subCategoryName,
                                Labels label,
                                @NotNull int currentPrice,
                                @NotNull int oldPrice,

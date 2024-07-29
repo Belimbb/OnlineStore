@@ -2,9 +2,9 @@ package com.teamChallenge.entity.figure;
 
 import com.teamChallenge.dto.request.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
-import com.teamChallenge.entity.figure.sections.Labels;
 import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
+import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceImpl;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
@@ -25,12 +25,17 @@ public class FigureServiceImpl implements FigureService{
 
     private final FigureMapper figureMapper;
 
+    private final SubCategoryServiceImpl subCategoryService;
+
     private static final String OBJECT_NAME = "Figure";
 
     @Override
-    public FigureResponseDto createFigure(String name, String shortDescription, String longDescription, SubCategoryEntity subCategory, Labels label, int currentPrice, int oldPrice, int amount, String color, List<String> images) throws CustomAlreadyExistException {
-        FigureEntity figureEntity = new FigureEntity(name, shortDescription, longDescription,
-                subCategory, null,false, currentPrice, oldPrice, amount, color, images);
+    public FigureResponseDto createFigure(FigureRequestDto figureRequestDto) throws CustomAlreadyExistException {
+        SubCategoryEntity subCategory = subCategoryService.getByName(figureRequestDto.subCategoryName());
+        String name = figureRequestDto.name();
+        FigureEntity figureEntity = new FigureEntity(name, figureRequestDto.shortDescription(), figureRequestDto.longDescription(),
+                subCategory, null,false, figureRequestDto.currentPrice(), figureRequestDto.oldPrice(),
+                figureRequestDto.amount(), figureRequestDto.color(), figureRequestDto.images());
 
         if (figureRepository.existsByUniqueHash(figureEntity.getUniqueHash())){
             throw new CustomAlreadyExistException(OBJECT_NAME, name);

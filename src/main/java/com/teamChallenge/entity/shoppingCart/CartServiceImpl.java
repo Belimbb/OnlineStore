@@ -10,8 +10,10 @@ import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -44,19 +46,24 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartResponseDto create(UserEntity user, List<FigureEntity> figureList) {
-//        List<FigureEntity> figureList = cartDto.figures()
-//                .stream()
-//                .map(figure -> figureService.findById(figure.getId()))
-//                .toList();
-        if (cartRepository.existsByUser(user)) {
-            CartEntity cart = cartRepository.findByUser(user);
+    public CartResponseDto create(CartRequestDto cartDto) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity currentUser = userService.findByEmail(email);
+
+        List<FigureEntity> figureList = Arrays
+                .stream(cartDto.figuresId())
+                .map(figureService::findById)
+                .toList();
+
+        if (cartRepository.existsByUser(currentUser)) {
+            CartEntity cart = cartRepository.findByUser(currentUser);
             return cartMapper.toResponseDto(addFigures(cart.getId(), figureList));
         }
 
         int totalPrice = figureList.stream().mapToInt(FigureEntity::getCurrentPrice).sum();
-        CartEntity newCart = new CartEntity(user, totalPrice, figureList);
+        CartEntity newCart = new CartEntity(currentUser, totalPrice, figureList);
         CartEntity savedCart = cartRepository.save(newCart);
+
         log.info("{}: " + OBJECT_NAME + " (Id: {}) was created", LogEnum.SERVICE, savedCart.getId());
         return cartMapper.toResponseDto(savedCart);
     }
@@ -65,12 +72,13 @@ public class CartServiceImpl implements CartService {
         if (cartRepository.existsById(cartId)) {
             CartEntity cart = findById(cartId);
             List<FigureEntity> figures = cart.getFigures();
-
             figures.addAll(figureList);
+
             cart.setFigures(figures
                     .stream()
                     .distinct()
                     .toList());
+
             cart.setPrice(figures.stream().mapToInt(FigureEntity::getCurrentPrice).sum());
 
             CartEntity savedCart = cartRepository.save(cart);
@@ -84,10 +92,12 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartResponseDto update(String id, CartRequestDto cartDto) {
         CartEntity cart = findById(id);
-        List<FigureEntity> figureList = cartDto.figures()
-                .stream()
-                .map(figure -> figureService.findById(figure.id()))
+
+        List<FigureEntity> figureList = Arrays
+                .stream(cartDto.figuresId())
+                .map(figureService::findById)
                 .toList();
+
         int totalPrice = figureList.stream().mapToInt(FigureEntity::getCurrentPrice).sum();
 
         cart.setFigures(figureList);

@@ -8,7 +8,7 @@ import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundEx
 import java.util.List;
 
 public interface CategoryService {
-    CategoryResponseDto createCategory(String categoryName) throws CustomAlreadyExistException;
+    CategoryResponseDto createCategory(CategoryRequestDto categoryRequestDto) throws CustomAlreadyExistException;
     CategoryResponseDto getById(String id) throws CustomNotFoundException;
     List<CategoryResponseDto> getAllCategories();
     CategoryResponseDto updateCategory(String id, CategoryRequestDto dto) throws CustomNotFoundException;

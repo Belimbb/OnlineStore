@@ -1,29 +1,25 @@
 package com.teamChallenge.controller;
 
-import com.teamChallenge.dto.response.AdsResponseDto;
 import com.teamChallenge.dto.request.AdsRequestDto;
-import com.teamChallenge.entity.advertisement.AdvertisementDto;
+import com.teamChallenge.dto.response.AdsResponseDto;
 import com.teamChallenge.entity.advertisement.AdvertisementServiceImpl;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -57,7 +53,7 @@ public class AdsController {
             throw new UnauthorizedAccessException();
         }
 
-        AdsResponseDto ads = adsService.createAds(request.text(), request.url());
+        AdsResponseDto ads = adsService.createAds(request);
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, ads.id());
         return ResponseEntity
                 .status(HttpStatus.CREATED)

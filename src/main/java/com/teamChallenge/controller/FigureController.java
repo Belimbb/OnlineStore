@@ -1,11 +1,11 @@
 package com.teamChallenge.controller;
 
 import com.teamChallenge.dto.request.CategoryRequestDto;
+import com.teamChallenge.dto.request.FigureRequestDto;
 import com.teamChallenge.dto.request.SubCategoryRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
 import com.teamChallenge.entity.figure.sections.category.CategoryMapper;
-import com.teamChallenge.entity.figure.sections.category.CategoryServiceImpl;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryMapper;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserServiceImpl;
@@ -14,8 +14,6 @@ import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
-import com.teamChallenge.dto.request.FigureRequestDto;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,14 +21,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -140,8 +135,7 @@ public class FigureController {
         if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
             throw new UnauthorizedAccessException();
         }
-        FigureResponseDto figure = figureService.createFigure(request.name(), request.shortDescription(), request.longDescription(),
-                subCategoryMapper.toEntityFromRequest(request.subCategory()), request.label(), request.currentPrice(), request.oldPrice(), request.amount(), request.color(), request.images());
+        FigureResponseDto figure = figureService.createFigure(request);
 
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, figure.id());
         return ResponseEntity

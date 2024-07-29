@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -43,13 +44,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderResponseDto create(OrderRequestDto OrderRequestDto) {
+    public OrderResponseDto create(OrderRequestDto orderRequestDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity currentUser = userService.findByEmail(email);
 
-        List<FigureEntity> figureList = OrderRequestDto.figureList()
-                .stream()
-                .map(figure -> figureService.findById(figure.id()))
+        List<FigureEntity> figureList = Arrays
+                .stream(orderRequestDto.figuresId())
+                .map(figureService::findById)
                 .toList();
 
         int totalPrice = figureList
@@ -57,7 +58,7 @@ public class OrderServiceImpl implements OrderService {
                 .mapToInt(FigureEntity::getCurrentPrice)
                 .sum();
 
-        OrderEntity newOrder = new OrderEntity(OrderRequestDto.address(), totalPrice, figureList, currentUser);
+        OrderEntity newOrder = new OrderEntity(orderRequestDto.address(), totalPrice, figureList, currentUser);
         orderRepository.save(newOrder);
         log.info("{}: " + OBJECT_NAME + " was created", LogEnum.SERVICE);
         return orderMapper.toResponseDto(newOrder);
@@ -68,9 +69,9 @@ public class OrderServiceImpl implements OrderService {
         OrderEntity order = findById(id);
         order.setAddress(orderRequestDto.address());
 
-        List<FigureEntity> figureList = orderRequestDto.figureList()
-                .stream()
-                .map(figure -> figureService.findById(figure.id()))
+        List<FigureEntity> figureList = Arrays
+                .stream(orderRequestDto.figuresId())
+                .map(figureService::findById)
                 .toList();
         order.setFigureList(figureList);
 
