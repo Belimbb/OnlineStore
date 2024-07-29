@@ -67,6 +67,9 @@ public class FigureEntity {
     @Column
     private List<String> images;
 
+    @Column
+    private int purchaseCount;
+
     @Column(nullable = false)
     @CreatedDate
     private Date createdAt;

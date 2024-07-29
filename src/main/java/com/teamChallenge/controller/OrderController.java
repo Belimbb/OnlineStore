@@ -3,6 +3,7 @@ package com.teamChallenge.controller;
 import com.teamChallenge.dto.request.OrderRequestDto;
 import com.teamChallenge.dto.response.OrderResponseDto;
 import com.teamChallenge.entity.order.OrderService;
+import com.teamChallenge.entity.order.OrderServiceImpl;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
@@ -32,7 +33,7 @@ public class OrderController {
 
     private static final String URI_ORDER_WITH_ID = "/{id}";
 
-    private final OrderService orderService;
+    private final OrderServiceImpl orderService;
     private final UserServiceImpl userService;
 
     @GetMapping

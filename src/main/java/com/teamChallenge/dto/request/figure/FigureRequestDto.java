@@ -1,4 +1,4 @@
-package com.teamChallenge.dto.request;
+package com.teamChallenge.dto.request.figure;
 
 import com.teamChallenge.entity.figure.sections.Labels;
 import jakarta.validation.constraints.NotBlank;

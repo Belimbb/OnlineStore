@@ -59,7 +59,7 @@ public class UserController {
     @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<UserResponseDto> addUser(@Valid @NotNull @RequestBody SignupRequestDto request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
         validation(principal);
-        UserResponseDto user = userService.create(request.getUsername(), request.getEmail(), request.getEmail());
+        UserResponseDto user = userService.create(request);
 
         log.info("{}: User (id: {}) has been added", LogEnum.SERVICE, user.id());
         return ResponseEntity

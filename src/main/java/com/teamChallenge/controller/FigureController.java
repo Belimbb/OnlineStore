@@ -1,7 +1,7 @@
 package com.teamChallenge.controller;
 
 import com.teamChallenge.dto.request.CategoryRequestDto;
-import com.teamChallenge.dto.request.FigureRequestDto;
+import com.teamChallenge.dto.request.figure.FigureRequestDto;
 import com.teamChallenge.dto.request.SubCategoryRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
@@ -59,6 +59,23 @@ public class FigureController {
         List<FigureResponseDto> figureResponseDtos = figureService.getAllFigures(filter);
 
         log.info("{}: Figures have been retrieved", LogEnum.CONTROLLER);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(figureResponseDtos);
+    }
+
+    @GetMapping("/best_sellers")
+    @Operation(summary = "Get best sellers")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of best sellers",
+                    content = { @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
+            )
+    })
+    public ResponseEntity<List<FigureResponseDto>> bestSellers() throws CustomNotFoundException {
+        List<FigureResponseDto> figureResponseDtos = figureService.getFiveBestSellers();
+
+        log.info("{}: Best sellers have been retrieved", LogEnum.CONTROLLER);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(figureResponseDtos);
@@ -129,9 +146,6 @@ public class FigureController {
     })
     @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<FigureResponseDto> addFigure(@Valid @NotNull @RequestBody FigureRequestDto request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
-        //можно и так получать е-мейл, но работа через principal выглядит не так запутанно
-        //String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
         validation(principal);
         FigureResponseDto figure = figureService.createFigure(request);
 

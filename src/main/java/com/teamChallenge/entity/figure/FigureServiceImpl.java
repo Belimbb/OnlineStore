@@ -1,6 +1,6 @@
 package com.teamChallenge.entity.figure;
 
-import com.teamChallenge.dto.request.FigureRequestDto;
+import com.teamChallenge.dto.request.figure.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.sections.Labels;
 import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
@@ -81,6 +81,15 @@ public class FigureServiceImpl implements FigureService{
         if (figureEntities.isPresent()){
             log.info("{}: All " + OBJECT_NAME + "s by sub category {} retrieved from db", LogEnum.SERVICE, subCategory);
             return figureMapper.toResponseDtoList(figureEntities.get());
+        }
+        throw new CustomNotFoundException(OBJECT_NAME);
+    }
+
+    public List<FigureResponseDto> getFiveBestSellers(){
+        Optional<List<FigureEntity>> bestSellers = figureRepository.findFiveBestSellers();
+        if (bestSellers.isPresent()){
+            log.info("{}: All " + OBJECT_NAME + "s that are best sellers retrieved from db", LogEnum.SERVICE);
+            return figureMapper.toResponseDtoList(bestSellers.get());
         }
         throw new CustomNotFoundException(OBJECT_NAME);
     }
