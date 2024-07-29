@@ -49,9 +49,7 @@ public class AdsController {
     })
     @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<AdsResponseDto> addAds(@Valid @NotNull @RequestBody AdsRequestDto request, Principal principal) throws UnauthorizedAccessException {
-        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
-            throw new UnauthorizedAccessException();
-        }
+        validation(principal);
 
         AdsResponseDto ads = adsService.createAds(request);
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, ads.id());
@@ -106,11 +104,15 @@ public class AdsController {
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
     public void deleteAdsById(@PathVariable("adsId") String adsId, Principal principal) throws UnauthorizedAccessException {
-        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
-            throw new UnauthorizedAccessException();
-        }
+        validation(principal);
 
         adsService.deleteAds(adsId);
         log.info("{}: Ads (id: {}) has been deleted", LogEnum.CONTROLLER, adsId);
+    }
+
+    private void validation(Principal principal) throws UnauthorizedAccessException {
+        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
+            throw new UnauthorizedAccessException();
+        }
     }
 }

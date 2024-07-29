@@ -3,6 +3,8 @@ package com.teamChallenge.entity.user;
 import com.teamChallenge.dto.request.UserRequestDto;
 import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.dto.response.UserResponseDto;
+import com.teamChallenge.entity.figure.FigureEntity;
+import com.teamChallenge.entity.figure.FigureServiceImpl;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
@@ -30,6 +32,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     private String adminEmail;
 
     private final UserRepository userRepository;
+    private final FigureServiceImpl figureService;
 
     private final UserMapper userMapper;
 
@@ -90,6 +93,13 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         userRepository.delete(user);
         log.info("{}: " + OBJECT_NAME + " (id: {}) was deleted", LogEnum.SERVICE, id);
         return true;
+    }
+
+    public UserResponseDto addFigureToWishList(String email, String figureId) {
+        FigureEntity figure = figureService.findById(figureId);
+        UserEntity user = findByEmail(email);
+        user.getWhishList().add(figure);
+        return userMapper.toResponseDto(userRepository.save(user));
     }
 
     public boolean existByEmail (String email){
