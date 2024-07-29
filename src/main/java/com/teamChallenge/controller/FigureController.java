@@ -55,8 +55,8 @@ public class FigureController {
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<FigureResponseDto>> figureList() throws CustomNotFoundException {
-        List<FigureResponseDto> figureResponseDtos = figureService.getAllFigures();
+    public ResponseEntity<List<FigureResponseDto>> figureList(@RequestParam(required = false) String filter) throws CustomNotFoundException {
+        List<FigureResponseDto> figureResponseDtos = figureService.getAllFigures(filter);
 
         log.info("{}: Figures have been retrieved", LogEnum.CONTROLLER);
         return ResponseEntity

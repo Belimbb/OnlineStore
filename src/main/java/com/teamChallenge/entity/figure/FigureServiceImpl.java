@@ -2,6 +2,7 @@ package com.teamChallenge.entity.figure;
 
 import com.teamChallenge.dto.request.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
+import com.teamChallenge.entity.figure.sections.Labels;
 import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceImpl;
@@ -10,8 +11,10 @@ import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExi
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +37,7 @@ public class FigureServiceImpl implements FigureService{
         SubCategoryEntity subCategory = subCategoryService.getByName(figureRequestDto.subCategoryName());
         String name = figureRequestDto.name();
         FigureEntity figureEntity = new FigureEntity(name, figureRequestDto.shortDescription(), figureRequestDto.longDescription(),
-                subCategory, null,false, figureRequestDto.currentPrice(), figureRequestDto.oldPrice(),
+                subCategory, figureRequestDto.label(),false, figureRequestDto.currentPrice(), figureRequestDto.oldPrice(),
                 figureRequestDto.amount(), figureRequestDto.color(), figureRequestDto.images());
 
         if (figureRepository.existsByUniqueHash(figureEntity.getUniqueHash())){
@@ -54,7 +57,11 @@ public class FigureServiceImpl implements FigureService{
     }
 
     @Override
-    public List<FigureResponseDto> getAllFigures() {
+    public List<FigureResponseDto> getAllFigures(String filter) {
+        if (filter != null) {
+            return figureMapper.toResponseDtoList(getFigureListByFilter(filter));
+        }
+
         List<FigureEntity> figureEntities = figureRepository.findAll();
         log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
         return figureMapper.toResponseDtoList(figureEntities);
@@ -100,5 +107,33 @@ public class FigureServiceImpl implements FigureService{
 
     public FigureEntity findById(String id) {
         return figureRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
+    }
+
+    public List<FigureEntity> getFigureListByFilter(String filter) {
+        List<FigureEntity> figureList;
+
+        switch (filter) {
+            case "features":
+                figureList = getFigureListByLabelsDESC(new Labels[]{Labels.EXCLUSIVE, Labels.LIMITED});
+                break;
+            default: throw new CustomNotFoundException("filter", filter);
+        }
+
+        log.info("{}: All " + OBJECT_NAME + "s (with filter: " + filter + ") retrieved from db", LogEnum.SERVICE);
+        return figureList;
+    }
+
+    public List<FigureEntity> getFigureListByLabelsDESC(Labels[] labels) {
+        List<FigureEntity> figureList = new ArrayList<>();
+
+        for (Labels label : labels) {
+            List<FigureEntity> tempFigureList = figureRepository.findByLabel(label, Sort.Direction.DESC);
+            figureList.addAll(tempFigureList);
+        }
+
+        return figureList
+                .stream()
+                .distinct()
+                .toList();
     }
 }
