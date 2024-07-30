@@ -1,13 +1,17 @@
 package com.teamChallenge.entity.order;
 
+import com.teamChallenge.dto.request.OrderRequestDto;
+import com.teamChallenge.dto.request.figure.FigureInOrderRequestDto;
+import com.teamChallenge.dto.response.OrderResponseDto;
 import com.teamChallenge.entity.figure.FigureEntity;
-import com.teamChallenge.entity.figure.FigureMapper;
+import com.teamChallenge.entity.figure.FigureServiceImpl;
+import com.teamChallenge.entity.user.UserEntity;
+import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.LogEnum;
-
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,40 +25,59 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderMapper orderMapper;
 
-    private final FigureMapper figureMapper;
+    private final FigureServiceImpl figureService;
+
+    private final UserServiceImpl userService;
 
     private static final String OBJECT_NAME = "Order";
 
     @Override
-    public List<OrderDto> getAll() {
+    public List<OrderResponseDto> getAll() {
         log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
-        return orderMapper.toDtoList(orderRepository.findAll());
+        return orderMapper.toResponseDtoList(orderRepository.findAll());
     }
 
     @Override
-    public OrderDto getById(String id) {
+    public OrderResponseDto getById(String id) {
         log.info("{}: " + OBJECT_NAME + " (id: {}) retrieved from db", LogEnum.SERVICE, id);
-        return orderMapper.toDto(findById(id));
+        return orderMapper.toResponseDto(findById(id));
     }
 
     @Override
-    public OrderDto create(String address, int price, List<FigureEntity> figureList) {
-        OrderEntity newOrder = new OrderEntity(address, price, figureList);
+    public OrderResponseDto create(OrderRequestDto orderRequestDto) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity currentUser = userService.findByEmail(email);
+
+        List<FigureEntity> figureList = getFigureList(orderRequestDto);
+
+        int totalPrice = figureList
+                .stream()
+                .mapToInt(FigureEntity::getCurrentPrice)
+                .sum();
+
+        OrderEntity newOrder = new OrderEntity(orderRequestDto.address(), totalPrice, figureList, currentUser);
         orderRepository.save(newOrder);
         log.info("{}: " + OBJECT_NAME + " was created", LogEnum.SERVICE);
-        return orderMapper.toDto(newOrder);
+        return orderMapper.toResponseDto(newOrder);
     }
 
     @Override
-    public OrderDto create(OrderDto orderDto) {
-        return create(orderDto.address(), orderDto.price(), figureMapper.toEntityList(orderDto.figureList()));
-    }
+    public OrderResponseDto update(String id, OrderRequestDto orderRequestDto) {
+        OrderEntity order = findById(id);
+        order.setAddress(orderRequestDto.address());
 
-    @Override
-    public OrderDto update(OrderDto orderDto) {
-        OrderEntity order = orderRepository.save(orderMapper.toEntity(orderDto));
+        List<FigureEntity> figureList = getFigureList(orderRequestDto);
+        order.setFigureList(figureList);
+
+        int totalPrice = figureList
+                .stream()
+                .mapToInt(FigureEntity::getCurrentPrice)
+                .sum();
+        order.setPrice(totalPrice);
+
+        OrderEntity updatedOrder = orderRepository.save(order);
         log.info("{}: " + OBJECT_NAME + " (id: {}) updated)", LogEnum.SERVICE, order.getId());
-        return orderMapper.toDto(order);
+        return orderMapper.toResponseDto(updatedOrder);
     }
 
     @Override
@@ -66,5 +89,21 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderEntity findById(String id) {
         return orderRepository.findById(id).orElseThrow(()-> new CustomNotFoundException(OBJECT_NAME, id));
+    }
+
+    private List<FigureEntity> getFigureList(OrderRequestDto orderRequestDto){
+        List<FigureInOrderRequestDto> figureDtos = orderRequestDto.figures();
+        List<FigureEntity> figureList = orderRequestDto.figures()
+                .stream()
+                .map(FigureInOrderRequestDto::id)
+                .map(figureService::findById)
+                .toList();
+
+        for (int i = 0; i<figureDtos.size(); i++){
+            FigureEntity entity = figureList.get(i);
+
+            entity.setPurchaseCount(entity.getPurchaseCount()+figureDtos.get(i).amount());
+        }
+        return figureList;
     }
 }

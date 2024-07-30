@@ -1,7 +1,10 @@
 package com.teamChallenge.entity.figure;
 
-import com.teamChallenge.entity.figure.sections.Category;
-import com.teamChallenge.entity.figure.sections.SubCategory;
+import com.teamChallenge.entity.figure.sections.Labels;
+import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
+import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
+import org.springframework.data.mongodb.repository.Aggregation;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,9 +13,16 @@ import java.util.Optional;
 
 @Repository
 public interface FigureRepository extends MongoRepository<FigureEntity, String> {
-    Optional<List<FigureEntity>> findByCategory(Category category);
-    Optional<List<FigureEntity>> findBySubCategory(SubCategory subCategory);
+    Optional<List<FigureEntity>> findByCategory(CategoryEntity category);
+    Optional<List<FigureEntity>> findBySubCategory(SubCategoryEntity subCategory);
     Optional<List<FigureEntity>> findByColor(String color);
+    List<FigureEntity> findByLabel(Labels label, Sort.Direction direction);
+
+    @Aggregation(pipeline = {
+            "{ '$sort': { 'purchaseCount': -1 } }",
+            "{ '$limit': 5 }"
+    })
+    Optional<List<FigureEntity>> findFiveBestSellers();
 
     boolean existsByUniqueHash (String uniqueHash);
 }

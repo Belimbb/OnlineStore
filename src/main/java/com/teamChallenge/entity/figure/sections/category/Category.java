@@ -1,4 +1,4 @@
-package com.teamChallenge.entity.figure.sections;
+package com.teamChallenge.entity.figure.sections.category;
 
 public enum Category {
     CONSTRUCTORS,

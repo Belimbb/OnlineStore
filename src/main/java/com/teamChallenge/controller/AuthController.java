@@ -1,11 +1,12 @@
 package com.teamChallenge.controller;
 
+import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.entity.user.*;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
-import com.teamChallenge.request.auth.LoginRequest;
-import com.teamChallenge.request.auth.SignupRequest;
+import com.teamChallenge.dto.request.auth.LoginRequestDto;
+import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.security.jwt.JwtResponseDto;
 import com.teamChallenge.security.jwt.JwtUtils;
 
@@ -40,8 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirement(name = "")
 @RequestMapping("/auth")
 public class AuthController {
-    private final UserService userService;
-    private final UserMapper userMapper;
+    private final UserServiceImpl userService;
     private final JwtUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
 
@@ -53,18 +53,18 @@ public class AuthController {
             @ApiResponse(responseCode = "4XX", description = "Login failed",
                     content = { @Content(mediaType = "application/json", schema = @Schema(implementation = CustomErrorResponse.class)) })
     })
-    public ResponseEntity<JwtResponseDto> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) throws Exception {
+    public ResponseEntity<JwtResponseDto> authenticateUser(@Valid @RequestBody LoginRequestDto loginRequestDto) throws Exception {
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+                    new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword())
             );
         } catch (AuthenticationException e) {
             throw new Exception("Authentication Exception", e);
         }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserEntity user = userMapper.toEntity(userService.getByEmail(loginRequest.getEmail()));
+        UserEntity user = userService.findByEmail(loginRequestDto.getEmail());
         String jwt = jwtUtils.generateToken(user);
 
         log.info("{}: User (id: {}) has accomplished authentication process", LogEnum.CONTROLLER, user.getId());
@@ -76,12 +76,12 @@ public class AuthController {
     @Operation(summary = "Register user")
     @ApiResponses( value = {
             @ApiResponse(responseCode = "201", description = "Registration successful",
-                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class)) }),
+                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDto.class)) }),
             @ApiResponse(responseCode = "4XX", description = "Registration failed",
                     content = { @Content(mediaType = "application/json", schema = @Schema(implementation = CustomErrorResponse.class)) })
     })
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) throws CustomAlreadyExistException {
-        UserDto userDto = userService.create(signUpRequest.getUsername(), signUpRequest.getEmail(), signUpRequest.getPassword());
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequestDto signUpRequestDto) throws CustomAlreadyExistException {
+        UserResponseDto userDto = userService.create(signUpRequestDto);
         log.info("{}: User (id: {}) has accomplished registration process", LogEnum.CONTROLLER, userDto.id());
         return ResponseEntity.status(201).body(userDto);
     }
