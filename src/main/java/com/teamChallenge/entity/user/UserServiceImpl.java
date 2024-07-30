@@ -61,9 +61,14 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         String username = signupRequestDto.getUsername();
         String email = signupRequestDto.getEmail();
 
-        if (existsByUsername(username)){
-            throw new CustomAlreadyExistException(OBJECT_NAME, username);
+        if (existsByUsername(username)) {
+            throw new CustomAlreadyExistException(OBJECT_NAME, "Username", username);
         }
+
+        if (existByEmail(email)) {
+            throw new CustomAlreadyExistException(OBJECT_NAME, "Email",  email);
+        }
+
         UserEntity user = new UserEntity(username, email, passwordEncoder.encode(signupRequestDto.getPassword()));
         user.setCreatedAt(new Date());
 

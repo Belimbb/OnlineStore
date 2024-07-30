@@ -1,12 +1,8 @@
 package com.teamChallenge.controller;
 
-import com.teamChallenge.dto.request.CategoryRequestDto;
 import com.teamChallenge.dto.request.figure.FigureRequestDto;
-import com.teamChallenge.dto.request.SubCategoryRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
-import com.teamChallenge.entity.figure.sections.category.CategoryMapper;
-import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryMapper;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
@@ -40,9 +36,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/figures")
 public class FigureController {
-
-    private final CategoryMapper categoryMapper;
-    private final SubCategoryMapper subCategoryMapper;
 
     private final FigureServiceImpl figureService;
     private final UserServiceImpl userService;
@@ -89,8 +82,8 @@ public class FigureController {
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<FigureResponseDto>> figureListByCategory(@NotNull @Valid @RequestParam CategoryRequestDto category) throws CustomNotFoundException {
-        List<FigureResponseDto> figureResponseDtos = figureService.getAllFiguresByCategory(categoryMapper.toEntityFromRequest(category));
+    public ResponseEntity<List<FigureResponseDto>> figureListByCategory(@RequestParam String category) throws CustomNotFoundException {
+        List<FigureResponseDto> figureResponseDtos = figureService.getAllFiguresByCategory(category);
 
         log.info("{}: Figures from category {} have been retrieved", LogEnum.CONTROLLER, category);
         return ResponseEntity
@@ -106,8 +99,8 @@ public class FigureController {
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<FigureResponseDto>> figureListBySubCategory(@Valid @NotNull @RequestParam SubCategoryRequestDto subCategory) throws CustomNotFoundException {
-        List<FigureResponseDto> figureResponseDtos = figureService.getAllFiguresBySubCategory(subCategoryMapper.toEntityFromRequest(subCategory));
+    public ResponseEntity<List<FigureResponseDto>> figureListBySubCategory(@RequestParam String subCategory) throws CustomNotFoundException {
+        List<FigureResponseDto> figureResponseDtos = figureService.getAllFiguresBySubCategory(subCategory);
 
         log.info("{}: Figures from subCategory {} have been retrieved", LogEnum.CONTROLLER, subCategory);
         return ResponseEntity
