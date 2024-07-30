@@ -4,6 +4,7 @@ import com.teamChallenge.dto.request.figure.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.sections.Labels;
 import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
+import com.teamChallenge.entity.figure.sections.category.CategoryServiceImpl;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceImpl;
 import com.teamChallenge.exception.LogEnum;
@@ -29,6 +30,8 @@ public class FigureServiceImpl implements FigureService{
     private final FigureMapper figureMapper;
 
     private final SubCategoryServiceImpl subCategoryService;
+
+    private final CategoryServiceImpl categoryService;
 
     private static final String OBJECT_NAME = "Figure";
 
@@ -67,16 +70,18 @@ public class FigureServiceImpl implements FigureService{
         return figureMapper.toResponseDtoList(figureEntities);
     }
 
-    public List<FigureResponseDto> getAllFiguresByCategory(CategoryEntity category){
+    public List<FigureResponseDto> getAllFiguresByCategory(String categoryName){
+        CategoryEntity category = categoryService.getByName(categoryName);
         Optional<List<FigureEntity>> figureEntities = figureRepository.findByCategory(category);
         if (figureEntities.isPresent()){
-            log.info("{}: All " + OBJECT_NAME + " by category {} retrieved from db", LogEnum.SERVICE, category);
+            log.info("{}: All " + OBJECT_NAME + " by category {} retrieved from db", LogEnum.SERVICE, categoryName);
             return figureMapper.toResponseDtoList(figureEntities.get());
         }
         throw new CustomNotFoundException(OBJECT_NAME + "s");
     }
 
-    public List<FigureResponseDto> getAllFiguresBySubCategory (SubCategoryEntity subCategory){
+    public List<FigureResponseDto> getAllFiguresBySubCategory (String subCategoryName){
+        SubCategoryEntity subCategory = subCategoryService.getByName(subCategoryName);
         Optional<List<FigureEntity>> figureEntities = figureRepository.findBySubCategory(subCategory);
         if (figureEntities.isPresent()){
             log.info("{}: All " + OBJECT_NAME + "s by sub category {} retrieved from db", LogEnum.SERVICE, subCategory);
