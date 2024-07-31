@@ -18,6 +18,9 @@ public interface FigureRepository extends MongoRepository<FigureEntity, String> 
     Optional<List<FigureEntity>> findByColor(String color);
     List<FigureEntity> findByLabel(Labels label, Sort.Direction direction);
 
+    void deleteByCategory (CategoryEntity category);
+    void deleteBySubCategory (SubCategoryEntity subCategory);
+
     @Aggregation(pipeline = {
             "{ '$sort': { 'purchaseCount': -1 } }",
             "{ '$limit': 5 }"

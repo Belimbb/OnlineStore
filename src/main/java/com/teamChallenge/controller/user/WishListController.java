@@ -78,7 +78,7 @@ public class WishListController {
     @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<FigureResponseDto> getFigureFromWishListById(@NotBlank @NotNull @PathVariable("figureId") String figureId, Principal principal) throws CustomNotFoundException{
         UserEntity user = userService.findByEmail(principal.getName());
-        FigureResponseDto figure = figureMapper.toResponseDto(getFigureFromWishList(user, figureId));
+        FigureResponseDto figure = figureMapper.toResponseDto(userService.getFigureFromWishList(user, figureId));
         log.info("{}: Figure (id: {}) has been retrieved", LogEnum.SERVICE, figure.id());
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -115,25 +115,16 @@ public class WishListController {
     @SecurityRequirement(name = "BearerAuth")
     public void removeFigureFromWishList(@PathVariable String figureId, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
         validation(principal);
+        String email = principal.getName();
 
-        UserEntity user = userService.findByEmail(principal.getName());
-        user.getWhishList().remove(getFigureFromWishList(user, figureId));
+        userService.removeFigureFromWishList(email, figureId);
 
-        log.info("{}: Figure (id: {}) has been removed from User (id: {}) wish list", LogEnum.CONTROLLER, figureId, user.getId());
+        log.info("{}: Figure (id: {}) has been removed from User (email: {}) wish list", LogEnum.CONTROLLER, figureId, email);
     }
 
     private void validation(Principal principal) throws UnauthorizedAccessException {
         if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
             throw new UnauthorizedAccessException();
         }
-    }
-
-    private FigureEntity getFigureFromWishList(UserEntity user, String figureId){
-        for (FigureEntity entity:user.getWhishList()){
-            if (entity.getId().equals(figureId)){
-                return entity;
-            }
-        }
-        throw new CustomNotFoundException(figureId);
     }
 }

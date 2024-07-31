@@ -2,6 +2,7 @@ package com.teamChallenge.entity.figure.sections.category;
 
 import com.teamChallenge.dto.request.CategoryRequestDto;
 import com.teamChallenge.dto.response.CategoryResponseDto;
+import com.teamChallenge.entity.figure.FigureRepository;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class CategoryServiceImpl implements CategoryService{
+
+    private final FigureRepository figureRepository;
 
     private final CategoryRepository categoryRepository;
 
@@ -34,7 +37,7 @@ public class CategoryServiceImpl implements CategoryService{
 
     @Override
     public CategoryResponseDto getById(String id) throws CustomNotFoundException {
-        CategoryEntity category = categoryRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
+        CategoryEntity category = findById(id);
 
         return categoryMapper.toResponseDto(category);
     }
@@ -61,10 +64,13 @@ public class CategoryServiceImpl implements CategoryService{
 
     @Override
     public void deleteCategory(String id) throws CustomNotFoundException {
-        if (!categoryRepository.existsById(id)){
-            throw new CustomNotFoundException(OBJECT_NAME, id);
-        }
+        CategoryEntity category = findById(id);
+        figureRepository.deleteByCategory(category);
 
         categoryRepository.deleteById(id);
+    }
+
+    private CategoryEntity findById (String id){
+        return categoryRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
     }
 }
