@@ -6,6 +6,7 @@ import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.figure.FigureMapper;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserEntity;
+import com.teamChallenge.entity.user.UserRepository;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
@@ -41,6 +42,7 @@ public class WishListController {
 
     private final UserServiceImpl userService;
     private final FigureMapper figureMapper;
+    private final UserRepository userRepository;
 
     @PostMapping(URI_FIGURES_WITH_ID)
     @Operation(summary = "Add figure to wish list")
@@ -117,7 +119,10 @@ public class WishListController {
         validation(principal);
 
         UserEntity user = userService.findByEmail(principal.getName());
-        user.getWhishList().remove(getFigureFromWishList(user, figureId));
+        List<FigureEntity> whishList = user.getWhishList();
+        whishList.remove(getFigureFromWishList(user, figureId));
+        user.setWhishList(whishList);
+        userRepository.save(user);
 
         log.info("{}: Figure (id: {}) has been removed from User (id: {}) wish list", LogEnum.CONTROLLER, figureId, user.getId());
     }
