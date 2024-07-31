@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -105,6 +106,21 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         UserEntity user = findByEmail(email);
         user.getWhishList().add(figure);
         return userMapper.toResponseDto(userRepository.save(user));
+    }
+
+    public FigureEntity getFigureFromWishList(UserEntity user, String figureId){
+        for (FigureEntity entity:user.getWhishList()){
+            if (entity.getId().equals(figureId)){
+                return entity;
+            }
+        }
+        throw new CustomNotFoundException(figureId);
+    }
+
+    public void removeFigureFromWishList(String email, String figureId) {
+        UserEntity user = findByEmail(email);
+        user.getWhishList().remove(getFigureFromWishList(user, figureId));
+        userRepository.save(user);
     }
 
     public boolean existByEmail (String email){

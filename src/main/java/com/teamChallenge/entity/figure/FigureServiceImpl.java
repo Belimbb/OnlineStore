@@ -90,15 +90,6 @@ public class FigureServiceImpl implements FigureService{
         throw new CustomNotFoundException(OBJECT_NAME);
     }
 
-    public List<FigureResponseDto> getFiveBestSellers(){
-        Optional<List<FigureEntity>> bestSellers = figureRepository.findFiveBestSellers();
-        if (bestSellers.isPresent()){
-            log.info("{}: All " + OBJECT_NAME + "s that are best sellers retrieved from db", LogEnum.SERVICE);
-            return figureMapper.toResponseDtoList(bestSellers.get());
-        }
-        throw new CustomNotFoundException(OBJECT_NAME);
-    }
-
     @Override
     public FigureResponseDto updateFigure(String id, FigureRequestDto figure) {
         if (!figureRepository.existsById(id)){
@@ -130,10 +121,14 @@ public class FigureServiceImpl implements FigureService{
             case "features":
                 figureList = getFigureListByLabelsDESC(new Labels[]{Labels.EXCLUSIVE, Labels.LIMITED});
                 break;
+            case "bestsellers":
+                figureList = getFiveBestSellers();
+                break;
+
             default: throw new CustomNotFoundException("filter", filter);
         }
 
-        log.info("{}: All " + OBJECT_NAME + "s (with filter: " + filter + ") retrieved from db", LogEnum.SERVICE);
+        log.info("{}: All " + OBJECT_NAME + "s (with filter: {}) retrieved from db", LogEnum.SERVICE, filter);
         return figureList;
     }
 
@@ -149,5 +144,14 @@ public class FigureServiceImpl implements FigureService{
                 .stream()
                 .distinct()
                 .toList();
+    }
+
+    private List<FigureEntity> getFiveBestSellers(){
+        Optional<List<FigureEntity>> bestSellers = figureRepository.findFiveBestSellers();
+        if (bestSellers.isPresent()){
+            log.info("{}: All " + OBJECT_NAME + "s that are best sellers retrieved from db", LogEnum.SERVICE);
+            return bestSellers.get();
+        }
+        throw new CustomNotFoundException(OBJECT_NAME);
     }
 }
