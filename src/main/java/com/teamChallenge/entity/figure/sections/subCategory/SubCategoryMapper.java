@@ -29,7 +29,7 @@ public class SubCategoryMapper {
     public SubCategoryEntity toEntityFromRequest(SubCategoryRequestDto dto){
         return new SubCategoryEntity(
                 dto.subCategoryName(),
-                categoryMapper.toEntityFromResponse(categoryService.getByName(dto.categoryName()))
+                categoryService.getByName(dto.categoryName())
         );
     }
 

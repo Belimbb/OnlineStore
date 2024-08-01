@@ -1,12 +1,8 @@
 package com.teamChallenge.controller;
 
-import com.teamChallenge.dto.request.CategoryRequestDto;
-import com.teamChallenge.dto.request.SubCategoryRequestDto;
+import com.teamChallenge.dto.request.figure.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
-import com.teamChallenge.entity.figure.sections.category.CategoryMapper;
-import com.teamChallenge.entity.figure.sections.category.CategoryServiceImpl;
-import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryMapper;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
@@ -14,8 +10,6 @@ import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
-import com.teamChallenge.dto.request.FigureRequestDto;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,14 +17,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -46,28 +37,26 @@ import java.util.List;
 @RequestMapping("/api/figures")
 public class FigureController {
 
-    private final CategoryMapper categoryMapper;
-    private final SubCategoryMapper subCategoryMapper;
-
     private final FigureServiceImpl figureService;
     private final UserServiceImpl userService;
 
     @GetMapping("/all")
-    @Operation(summary = "Get all figures")
+    @Operation(summary = "Get all figures. You can filter like \"bestseller\" or \"features\" to get specific list of figure")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List figures",
                     content = { @Content(mediaType = "application/json",
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<FigureResponseDto>> figureList() throws CustomNotFoundException {
-        List<FigureResponseDto> figureResponseDtos = figureService.getAllFigures();
+    public ResponseEntity<List<FigureResponseDto>> figureList(@RequestParam(required = false) String filter) throws CustomNotFoundException {
+        List<FigureResponseDto> figureResponseDtos = figureService.getAllFigures(filter);
 
         log.info("{}: Figures have been retrieved", LogEnum.CONTROLLER);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(figureResponseDtos);
     }
+
 
     @GetMapping("/all/by_category")
     @Operation(summary = "Get all figures by category")
@@ -77,8 +66,8 @@ public class FigureController {
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<FigureResponseDto>> figureListByCategory(@NotNull @Valid @RequestParam CategoryRequestDto category) throws CustomNotFoundException {
-        List<FigureResponseDto> figureResponseDtos = figureService.getAllFiguresByCategory(categoryMapper.toEntityFromRequest(category));
+    public ResponseEntity<List<FigureResponseDto>> figureListByCategory(@RequestParam String category) throws CustomNotFoundException {
+        List<FigureResponseDto> figureResponseDtos = figureService.getAllFiguresByCategory(category);
 
         log.info("{}: Figures from category {} have been retrieved", LogEnum.CONTROLLER, category);
         return ResponseEntity
@@ -94,8 +83,8 @@ public class FigureController {
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<FigureResponseDto>> figureListBySubCategory(@Valid @NotNull @RequestParam SubCategoryRequestDto subCategory) throws CustomNotFoundException {
-        List<FigureResponseDto> figureResponseDtos = figureService.getAllFiguresBySubCategory(subCategoryMapper.toEntityFromRequest(subCategory));
+    public ResponseEntity<List<FigureResponseDto>> figureListBySubCategory(@RequestParam String subCategory) throws CustomNotFoundException {
+        List<FigureResponseDto> figureResponseDtos = figureService.getAllFiguresBySubCategory(subCategory);
 
         log.info("{}: Figures from subCategory {} have been retrieved", LogEnum.CONTROLLER, subCategory);
         return ResponseEntity
@@ -134,12 +123,8 @@ public class FigureController {
     })
     @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<FigureResponseDto> addFigure(@Valid @NotNull @RequestBody FigureRequestDto request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
-        //можно и так получать е-мейл, но работа через principal выглядит не так запутанно
-        //String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
         validation(principal);
-        FigureResponseDto figure = figureService.createFigure(request.name(), request.shortDescription(), request.longDescription(),
-                subCategoryMapper.toEntityFromRequest(request.subCategory()), request.label(), request.currentPrice(), request.oldPrice(), request.amount(), request.color(), request.images());
+        FigureResponseDto figure = figureService.createFigure(request);
 
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, figure.id());
         return ResponseEntity

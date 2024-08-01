@@ -1,6 +1,7 @@
 package com.teamChallenge.entity.user;
 
 import com.teamChallenge.dto.request.UserRequestDto;
+import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -57,11 +59,19 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Override
-    public UserResponseDto create (String username, String email, String password) throws CustomAlreadyExistException{
-        if (existsByUsername(username)){
-            throw new CustomAlreadyExistException(OBJECT_NAME, username);
+    public UserResponseDto create (SignupRequestDto signupRequestDto) throws CustomAlreadyExistException{
+        String username = signupRequestDto.getUsername();
+        String email = signupRequestDto.getEmail();
+
+        if (existsByUsername(username)) {
+            throw new CustomAlreadyExistException(OBJECT_NAME, "Username", username);
         }
-        UserEntity user = new UserEntity(username, email, passwordEncoder.encode(password));
+
+        if (existByEmail(email)) {
+            throw new CustomAlreadyExistException(OBJECT_NAME, "Email",  email);
+        }
+
+        UserEntity user = new UserEntity(username, email, passwordEncoder.encode(signupRequestDto.getPassword()));
         user.setCreatedAt(new Date());
 
         if (email.trim().equalsIgnoreCase(adminEmail)){
@@ -102,6 +112,21 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         whishList.add(figure);
         user.setWhishList(whishList);
         return userMapper.toResponseDto(userRepository.save(user));
+    }
+
+    public FigureEntity getFigureFromWishList(UserEntity user, String figureId){
+        for (FigureEntity entity:user.getWhishList()){
+            if (entity.getId().equals(figureId)){
+                return entity;
+            }
+        }
+        throw new CustomNotFoundException(figureId);
+    }
+
+    public void removeFigureFromWishList(String email, String figureId) {
+        UserEntity user = findByEmail(email);
+        user.getWhishList().remove(getFigureFromWishList(user, figureId));
+        userRepository.save(user);
     }
 
     public boolean existByEmail (String email){

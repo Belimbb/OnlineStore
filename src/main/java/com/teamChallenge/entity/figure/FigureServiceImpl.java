@@ -1,17 +1,21 @@
 package com.teamChallenge.entity.figure;
 
-import com.teamChallenge.dto.request.FigureRequestDto;
+import com.teamChallenge.dto.request.figure.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.sections.Labels;
 import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
+import com.teamChallenge.entity.figure.sections.category.CategoryServiceImpl;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
+import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceImpl;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -25,12 +29,19 @@ public class FigureServiceImpl implements FigureService{
 
     private final FigureMapper figureMapper;
 
+    private final SubCategoryServiceImpl subCategoryService;
+
+    private final CategoryServiceImpl categoryService;
+
     private static final String OBJECT_NAME = "Figure";
 
     @Override
-    public FigureResponseDto createFigure(String name, String shortDescription, String longDescription, SubCategoryEntity subCategory, Labels label, int currentPrice, int oldPrice, int amount, String color, List<String> images) throws CustomAlreadyExistException {
-        FigureEntity figureEntity = new FigureEntity(name, shortDescription, longDescription,
-                subCategory, null,false, currentPrice, oldPrice, amount, color, images);
+    public FigureResponseDto createFigure(FigureRequestDto figureRequestDto) throws CustomAlreadyExistException {
+        SubCategoryEntity subCategory = subCategoryService.getByName(figureRequestDto.subCategoryName());
+        String name = figureRequestDto.name();
+        FigureEntity figureEntity = new FigureEntity(name, figureRequestDto.shortDescription(), figureRequestDto.longDescription(),
+                subCategory, figureRequestDto.label(),false, figureRequestDto.currentPrice(), figureRequestDto.oldPrice(),
+                figureRequestDto.amount(), figureRequestDto.color(), figureRequestDto.images());
 
         if (figureRepository.existsByUniqueHash(figureEntity.getUniqueHash())){
             throw new CustomAlreadyExistException(OBJECT_NAME, name);
@@ -49,22 +60,28 @@ public class FigureServiceImpl implements FigureService{
     }
 
     @Override
-    public List<FigureResponseDto> getAllFigures() {
+    public List<FigureResponseDto> getAllFigures(String filter) {
+        if (filter != null) {
+            return figureMapper.toResponseDtoList(getFigureListByFilter(filter));
+        }
+
         List<FigureEntity> figureEntities = figureRepository.findAll();
         log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
         return figureMapper.toResponseDtoList(figureEntities);
     }
 
-    public List<FigureResponseDto> getAllFiguresByCategory(CategoryEntity category){
+    public List<FigureResponseDto> getAllFiguresByCategory(String categoryName){
+        CategoryEntity category = categoryService.getByName(categoryName);
         Optional<List<FigureEntity>> figureEntities = figureRepository.findByCategory(category);
         if (figureEntities.isPresent()){
-            log.info("{}: All " + OBJECT_NAME + " by category {} retrieved from db", LogEnum.SERVICE, category);
+            log.info("{}: All " + OBJECT_NAME + " by category {} retrieved from db", LogEnum.SERVICE, categoryName);
             return figureMapper.toResponseDtoList(figureEntities.get());
         }
         throw new CustomNotFoundException(OBJECT_NAME + "s");
     }
 
-    public List<FigureResponseDto> getAllFiguresBySubCategory (SubCategoryEntity subCategory){
+    public List<FigureResponseDto> getAllFiguresBySubCategory (String subCategoryName){
+        SubCategoryEntity subCategory = subCategoryService.getByName(subCategoryName);
         Optional<List<FigureEntity>> figureEntities = figureRepository.findBySubCategory(subCategory);
         if (figureEntities.isPresent()){
             log.info("{}: All " + OBJECT_NAME + "s by sub category {} retrieved from db", LogEnum.SERVICE, subCategory);
@@ -95,5 +112,46 @@ public class FigureServiceImpl implements FigureService{
 
     public FigureEntity findById(String id) {
         return figureRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
+    }
+
+    public List<FigureEntity> getFigureListByFilter(String filter) {
+        List<FigureEntity> figureList;
+
+        switch (filter) {
+            case "features":
+                figureList = getFigureListByLabelsDESC(new Labels[]{Labels.EXCLUSIVE, Labels.LIMITED});
+                break;
+            case "bestsellers":
+                figureList = getFiveBestSellers();
+                break;
+
+            default: throw new CustomNotFoundException("filter", filter);
+        }
+
+        log.info("{}: All " + OBJECT_NAME + "s (with filter: {}) retrieved from db", LogEnum.SERVICE, filter);
+        return figureList;
+    }
+
+    public List<FigureEntity> getFigureListByLabelsDESC(Labels[] labels) {
+        List<FigureEntity> figureList = new ArrayList<>();
+
+        for (Labels label : labels) {
+            List<FigureEntity> tempFigureList = figureRepository.findByLabel(label, Sort.Direction.DESC);
+            figureList.addAll(tempFigureList);
+        }
+
+        return figureList
+                .stream()
+                .distinct()
+                .toList();
+    }
+
+    private List<FigureEntity> getFiveBestSellers(){
+        Optional<List<FigureEntity>> bestSellers = figureRepository.findFiveBestSellers();
+        if (bestSellers.isPresent()){
+            log.info("{}: All " + OBJECT_NAME + "s that are best sellers retrieved from db", LogEnum.SERVICE);
+            return bestSellers.get();
+        }
+        throw new CustomNotFoundException(OBJECT_NAME);
     }
 }

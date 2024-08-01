@@ -1,6 +1,5 @@
 package com.teamChallenge.entity.shoppingCart;
 
-import com.teamChallenge.dto.request.CartRequestDto;
 import com.teamChallenge.dto.response.CartResponseDto;
 import com.teamChallenge.entity.figure.FigureMapper;
 import lombok.AllArgsConstructor;
@@ -14,13 +13,8 @@ import java.util.stream.Collectors;
 @Component
 @AllArgsConstructor
 public class CartMapper {
-    private final FigureMapper figureMapper;
 
-    public CartEntity toEntity (CartRequestDto dto){
-        return new CartEntity(
-                figureMapper.toEntityListFromResponse(dto.figures())
-        );
-    }
+    private final FigureMapper figureMapper;
 
     public CartResponseDto toResponseDto(CartEntity entity){
         return new CartResponseDto(
@@ -28,12 +22,6 @@ public class CartMapper {
                 figureMapper.toResponseDtoList(entity.getFigures()),
                 entity.getPrice()
         );
-    }
-
-    public List<CartEntity> toEntityList (List<CartRequestDto> dtos){
-        return dtos.stream()
-                .map(this::toEntity)
-                .collect(Collectors.toList());
     }
 
     public List<CartResponseDto> toDtoList (List<CartEntity> entities){

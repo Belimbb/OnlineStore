@@ -22,8 +22,8 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     private static final String OBJECT_NAME = "Advertisement";
 
     @Override
-    public AdsResponseDto createAds(String text, String url) {
-        AdvertisementEntity advertisement = new AdvertisementEntity(text, url);
+    public AdsResponseDto createAds(AdsRequestDto adsRequestDto) {
+        AdvertisementEntity advertisement = new AdvertisementEntity(adsRequestDto.text(), adsRequestDto.url());
         advertisementRepository.save(advertisement);
         log.info("{}: " + OBJECT_NAME + " (id: {}) was created", LogEnum.SERVICE, advertisement.getId());
         return advertisementMapper.toResponseDto(advertisement);

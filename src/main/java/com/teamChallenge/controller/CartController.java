@@ -1,17 +1,12 @@
 package com.teamChallenge.controller;
 
 import com.teamChallenge.dto.request.CartRequestDto;
-import com.teamChallenge.dto.response.AdsResponseDto;
 import com.teamChallenge.dto.response.CartResponseDto;
-import com.teamChallenge.entity.figure.FigureMapper;
-import com.teamChallenge.entity.shoppingCart.CartDto;
 import com.teamChallenge.entity.shoppingCart.CartService;
 import com.teamChallenge.entity.user.Roles;
-import com.teamChallenge.entity.user.UserMapper;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.generalExceptions.SomethingWentWrongException;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -38,10 +33,8 @@ public class CartController {
     private static final String URI_CART_WITH_ID = "/{id}";
 
     private final UserServiceImpl userService;
-    private final CartService cartService;
-    private final FigureMapper figureMapper;
 
-    private final UserMapper userMapper;
+    private final CartService cartService;
 
     @GetMapping("/all")
     @Operation(summary = "Get all ads")
@@ -77,6 +70,7 @@ public class CartController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "create a cart")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created the cart",
@@ -88,17 +82,16 @@ public class CartController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
     })
-    @SecurityRequirement(name = "BearerAuth")
     public CartResponseDto create(@RequestBody CartRequestDto cartDto, Principal principal) throws UnauthorizedAccessException {
         validation(principal);
 
-        CartResponseDto cart = cartService.create(userMapper.toEntity(userService.getById(cartDto.userId())),
-                figureMapper.toEntityListFromResponse(cartDto.figures()));
+        CartResponseDto cart = cartService.create(cartDto);
         log.info("{}: Cart (id: {}) has been added", LogEnum.CONTROLLER, cart.id());
         return cart;
     }
 
     @PutMapping(URI_CART_WITH_ID)
+    @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "update a cart by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated the cart",
@@ -114,7 +107,6 @@ public class CartController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    @SecurityRequirement(name = "BearerAuth")
     public CartResponseDto update(@PathVariable String id, @RequestBody CartRequestDto cartDto, Principal principal) throws UnauthorizedAccessException {
         validation(principal);
         CartResponseDto cart = cartService.update(id, cartDto);
@@ -123,6 +115,7 @@ public class CartController {
     }
 
     @DeleteMapping(URI_CART_WITH_ID)
+    @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "delete a cart by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Deleted the cart",
@@ -134,7 +127,6 @@ public class CartController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    @SecurityRequirement(name = "BearerAuth")
     public void delete(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
         validation(principal);
         cartService.delete(id);

@@ -3,6 +3,7 @@ package com.teamChallenge.controller;
 import com.teamChallenge.dto.request.OrderRequestDto;
 import com.teamChallenge.dto.response.OrderResponseDto;
 import com.teamChallenge.entity.order.OrderService;
+import com.teamChallenge.entity.order.OrderServiceImpl;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
@@ -32,7 +33,7 @@ public class OrderController {
 
     private static final String URI_ORDER_WITH_ID = "/{id}";
 
-    private final OrderService orderService;
+    private final OrderServiceImpl orderService;
     private final UserServiceImpl userService;
 
     @GetMapping
@@ -53,8 +54,8 @@ public class OrderController {
             ),
             @ApiResponse(responseCode = "404", description = "Order not found",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CustomErrorResponse.class))
-                    })
+                            schema = @Schema(implementation = CustomErrorResponse.class))}
+            )
     })
     public OrderResponseDto getById(@PathVariable String id) {
         OrderResponseDto order = orderService.getById(id);
@@ -64,6 +65,7 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "create an order")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created the order",
@@ -75,10 +77,8 @@ public class OrderController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
     })
-    @SecurityRequirement(name = "BearerAuth")
     public OrderResponseDto create(@RequestBody OrderRequestDto orderDto, Principal principal) throws UnauthorizedAccessException {
         validation(principal);
-
         OrderResponseDto order = orderService.create(orderDto);
         log.info("{}: Order (id: {}) has been added", LogEnum.CONTROLLER, order.id());
         return order;
@@ -88,7 +88,7 @@ public class OrderController {
     @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "update an order by id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the order",
+            @ApiResponse(responseCode = "200", description = "Updated the order",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = OrderResponseDto.class))}
             ),
@@ -98,8 +98,8 @@ public class OrderController {
             ),
             @ApiResponse(responseCode = "404", description = "Order not found",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CustomErrorResponse.class))
-                    })
+                            schema = @Schema(implementation = CustomErrorResponse.class))}
+            )
     })
     public OrderResponseDto update(@PathVariable String id, @RequestBody OrderRequestDto orderDto, Principal principal) throws UnauthorizedAccessException {
         validation(principal);
@@ -112,7 +112,7 @@ public class OrderController {
     @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "delete an order by id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the order",
+            @ApiResponse(responseCode = "200", description = "Deleted the order",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = OrderResponseDto.class))}
             ),
@@ -121,7 +121,7 @@ public class OrderController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public ResponseEntity delete(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
+    public ResponseEntity<?> delete(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
         validation(principal);
         orderService.delete(id);
         log.info("{}: Order (id: {}) has been deleted", LogEnum.CONTROLLER, id);

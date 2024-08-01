@@ -1,6 +1,6 @@
 package com.teamChallenge.entity.figure;
 
-import com.teamChallenge.dto.request.FigureRequestDto;
+import com.teamChallenge.dto.request.figure.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryMapper;
 import lombok.AllArgsConstructor;
@@ -39,7 +39,7 @@ public class FigureMapper {
                 dto.name(),
                 dto.shortDescription(),
                 dto.longDescription(),
-                subCategoryMapper.toEntityFromRequest(dto.subCategory()),
+                null,
                 dto.label(),
                 false,
                 dto.currentPrice(),

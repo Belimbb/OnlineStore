@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -39,10 +40,10 @@ public class FigureEntity {
     @Column (nullable = false)
     private String longDescription;
 
-    @Column (nullable = false)
+    @DBRef
     private CategoryEntity category;
 
-    @Column (nullable = false)
+    @DBRef
     private SubCategoryEntity subCategory;
 
     @Column
@@ -65,6 +66,9 @@ public class FigureEntity {
 
     @Column
     private List<String> images;
+
+    @Column
+    private int purchaseCount;
 
     @Column(nullable = false)
     @CreatedDate

@@ -81,7 +81,7 @@ public class AuthController {
                     content = { @Content(mediaType = "application/json", schema = @Schema(implementation = CustomErrorResponse.class)) })
     })
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequestDto signUpRequestDto) throws CustomAlreadyExistException {
-        UserResponseDto userDto = userService.create(signUpRequestDto.getUsername(), signUpRequestDto.getEmail(), signUpRequestDto.getPassword());
+        UserResponseDto userDto = userService.create(signUpRequestDto);
         log.info("{}: User (id: {}) has accomplished registration process", LogEnum.CONTROLLER, userDto.id());
         return ResponseEntity.status(201).body(userDto);
     }

@@ -68,6 +68,22 @@ public class OpenAPIConfig {
     }
 
     @Bean
+    public GroupedOpenApi apiCategoriesV1() {
+        return GroupedOpenApi.builder()
+                .group("Categories API V1")
+                .pathsToMatch("/api/categories/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi apiSubCategoriesV1() {
+        return GroupedOpenApi.builder()
+                .group("SubCategories API V1")
+                .pathsToMatch("/api/subCategories/**")
+                .build();
+    }
+
+    @Bean
     @Primary
     public OpenAPI customOpenAPIv1() {
         return new OpenAPI()
