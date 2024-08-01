@@ -10,7 +10,7 @@ import java.util.List;
 public interface FigureService {
     FigureResponseDto createFigure (FigureRequestDto figureRequestDto) throws CustomAlreadyExistException;
     FigureResponseDto getById (String id) throws CustomNotFoundException;
-    List<FigureResponseDto> getAllFigures (String filter);
+    List<FigureResponseDto> getAllFigures (String filter, String label, String startPrice, String endPrice, String page, String size);
     FigureResponseDto updateFigure (String id, FigureRequestDto dto) throws CustomNotFoundException;
     void deleteFigure (String id) throws CustomNotFoundException;
 }

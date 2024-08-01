@@ -48,8 +48,11 @@ public class FigureController {
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<FigureResponseDto>> figureList(@RequestParam(required = false) String filter) throws CustomNotFoundException {
-        List<FigureResponseDto> figureResponseDtos = figureService.getAllFigures(filter);
+    public ResponseEntity<List<FigureResponseDto>> figureList(@RequestParam(required = false) String filter, @RequestParam(required = false) String label,
+                                                              @RequestParam(required = false) String start_price, @RequestParam(required = false) String end_price,
+                                                              @RequestParam(defaultValue = "0") String page, @RequestParam(defaultValue = "10") String size)
+            throws CustomNotFoundException {
+        List<FigureResponseDto> figureResponseDtos = figureService.getAllFigures(filter, label, start_price, end_price, page, size);
 
         log.info("{}: Figures have been retrieved", LogEnum.CONTROLLER);
         return ResponseEntity
