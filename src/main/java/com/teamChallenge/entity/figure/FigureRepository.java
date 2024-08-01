@@ -27,6 +27,9 @@ public interface FigureRepository extends MongoRepository<FigureEntity, String> 
     Page<FigureEntity> findByCurrentPriceLessThan(int price, Pageable pageable);
     Page<FigureEntity> findByCurrentPriceLessThanAndLabel(int price, Labels label, Pageable pageable);
 
+    void deleteByCategory (CategoryEntity category);
+    void deleteBySubCategory (SubCategoryEntity subCategory);
+
     @Aggregation(pipeline = {
             "{ '$sort': { 'purchaseCount': -1 } }",
             "{ '$limit': 5 }"

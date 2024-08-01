@@ -41,7 +41,7 @@ public class FigureController {
     private final UserServiceImpl userService;
 
     @GetMapping("/all")
-    @Operation(summary = "Get all figures")
+    @Operation(summary = "Get all figures. You can filter like \"bestseller\" or \"features\" to get specific list of figure")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List figures",
                     content = { @Content(mediaType = "application/json",
@@ -60,22 +60,6 @@ public class FigureController {
                 .body(figureResponseDtos);
     }
 
-    @GetMapping("/best_sellers")
-    @Operation(summary = "Get best sellers")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of best sellers",
-                    content = { @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
-            )
-    })
-    public ResponseEntity<List<FigureResponseDto>> bestSellers() throws CustomNotFoundException {
-        List<FigureResponseDto> figureResponseDtos = figureService.getFiveBestSellers();
-
-        log.info("{}: Best sellers have been retrieved", LogEnum.CONTROLLER);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(figureResponseDtos);
-    }
 
     @GetMapping("/all/by_category")
     @Operation(summary = "Get all figures by category")
