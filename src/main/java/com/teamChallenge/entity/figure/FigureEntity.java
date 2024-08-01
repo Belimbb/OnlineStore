@@ -1,9 +1,9 @@
 package com.teamChallenge.entity.figure;
 
-import com.teamChallenge.entity.figure.sections.Category;
 import com.teamChallenge.entity.figure.sections.Labels;
-import com.teamChallenge.entity.figure.sections.SubCategory;
 
+import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
+import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
 import jakarta.persistence.*;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -39,11 +40,11 @@ public class FigureEntity {
     @Column (nullable = false)
     private String longDescription;
 
-    @Column (nullable = false)
-    private Category category;
+    @DBRef
+    private CategoryEntity category;
 
-    @Column (nullable = false)
-    private SubCategory subCategory;
+    @DBRef
+    private SubCategoryEntity subCategory;
 
     @Column
     private Labels label;
@@ -66,6 +67,9 @@ public class FigureEntity {
     @Column
     private List<String> images;
 
+    @Column
+    private int purchaseCount;
+
     @Column(nullable = false)
     @CreatedDate
     private Date createdAt;
@@ -81,22 +85,24 @@ public class FigureEntity {
     }
 
     private String generateUniqueHash() {
-        String data = name + shortDescription + longDescription + category.name() + subCategory.name() + currentPrice + oldPrice + amount + color;
+        String data = name + shortDescription + longDescription + category.getName() + subCategory.getName() + currentPrice + oldPrice + amount + color;
         return DigestUtils.sha256Hex(data);
     }
 
-    public FigureEntity(String name, String shortDescription, String longDescription, SubCategory subCategory,
+    public FigureEntity(String name, String shortDescription, String longDescription, SubCategoryEntity subCategory,
                         Labels label, Boolean inWishList, int currentPrice, int oldPrice, int amount, String color, List<String> images) {
         setup(name, shortDescription, longDescription, subCategory, label, inWishList, currentPrice, oldPrice, amount, color, images);
     }
 
-    public FigureEntity(String id, String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int currentPrice, int oldPrice, int amount, String color, List<String> images, Date createdAt) {
-        setup(name, shortDescription, longDescription, subCategory, label,false, currentPrice, oldPrice, amount, color, images);
+    public FigureEntity(String id, String name, String shortDescription, String longDescription,
+                        SubCategoryEntity subCategory, Labels label, Boolean inWishList, int currentPrice, int oldPrice,
+                        int amount, String color, List<String> images, Date createdAt) {
+        setup(name, shortDescription, longDescription, subCategory, label, inWishList, currentPrice, oldPrice, amount, color, images);
         this.setId(id);
         this.setCreatedAt(createdAt);
     }
 
-    private void setup(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label,Boolean inWishList, int currentPrice, int oldPrice, int amount, String color, List<String> images){
+    private void setup(String name, String shortDescription, String longDescription, SubCategoryEntity subCategory, Labels label,Boolean inWishList, int currentPrice, int oldPrice, int amount, String color, List<String> images){
         this.setName(name);
         this.setShortDescription(shortDescription);
         this.setLongDescription(longDescription);

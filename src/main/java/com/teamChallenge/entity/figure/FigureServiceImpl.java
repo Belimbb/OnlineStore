@@ -1,17 +1,21 @@
 package com.teamChallenge.entity.figure;
 
-import com.teamChallenge.entity.figure.sections.Category;
+import com.teamChallenge.dto.request.figure.FigureRequestDto;
+import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.sections.Labels;
-import com.teamChallenge.entity.figure.sections.SubCategory;
+import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
+import com.teamChallenge.entity.figure.sections.category.CategoryServiceImpl;
+import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
+import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceImpl;
 import com.teamChallenge.exception.LogEnum;
-
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -25,12 +29,19 @@ public class FigureServiceImpl implements FigureService{
 
     private final FigureMapper figureMapper;
 
+    private final SubCategoryServiceImpl subCategoryService;
+
+    private final CategoryServiceImpl categoryService;
+
     private static final String OBJECT_NAME = "Figure";
 
     @Override
-    public FigureDto createFigure(String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int currentPrice, int oldPrice, int amount, String color, List<String> images) throws CustomAlreadyExistException {
-        FigureEntity figureEntity = new FigureEntity(name, shortDescription, longDescription,
-                subCategory, null,false, currentPrice, oldPrice, amount, color, images);
+    public FigureResponseDto createFigure(FigureRequestDto figureRequestDto) throws CustomAlreadyExistException {
+        SubCategoryEntity subCategory = subCategoryService.getByName(figureRequestDto.subCategoryName());
+        String name = figureRequestDto.name();
+        FigureEntity figureEntity = new FigureEntity(name, figureRequestDto.shortDescription(), figureRequestDto.longDescription(),
+                subCategory, figureRequestDto.label(),false, figureRequestDto.currentPrice(), figureRequestDto.oldPrice(),
+                figureRequestDto.amount(), figureRequestDto.color(), figureRequestDto.images());
 
         if (figureRepository.existsByUniqueHash(figureEntity.getUniqueHash())){
             throw new CustomAlreadyExistException(OBJECT_NAME, name);
@@ -38,46 +49,58 @@ public class FigureServiceImpl implements FigureService{
         figureEntity.setCreatedAt(new Date());
         figureRepository.save(figureEntity);
         log.info("{}: " + OBJECT_NAME + " (Name: {}) was created", LogEnum.SERVICE, name);
-        return figureMapper.toDto(figureEntity);
+        return figureMapper.toResponseDto(figureEntity);
     }
 
     @Override
-    public FigureDto getById(String id){
+    public FigureResponseDto getById(String id){
         FigureEntity figure = findById(id);
         log.info("{}: " + OBJECT_NAME + " retrieved from db by id {}", LogEnum.SERVICE, id);
-        return figureMapper.toDto(figure);
+        return figureMapper.toResponseDto(figure);
     }
 
     @Override
-    public List<FigureDto> getAllFigures() {
+    public List<FigureResponseDto> getAllFigures(String filter) {
+        if (filter != null) {
+            return figureMapper.toResponseDtoList(getFigureListByFilter(filter));
+        }
+
         List<FigureEntity> figureEntities = figureRepository.findAll();
         log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
-        return figureMapper.toDtoList(figureEntities);
+        return figureMapper.toResponseDtoList(figureEntities);
     }
 
-    public List<FigureDto> getAllFiguresByCategory(Category category){
+    public List<FigureResponseDto> getAllFiguresByCategory(String categoryName){
+        CategoryEntity category = categoryService.getByName(categoryName);
         Optional<List<FigureEntity>> figureEntities = figureRepository.findByCategory(category);
         if (figureEntities.isPresent()){
-            log.info("{}: All " + OBJECT_NAME + " by category {} retrieved from db", LogEnum.SERVICE, category);
-            return figureMapper.toDtoList(figureEntities.get());
+            log.info("{}: All " + OBJECT_NAME + " by category {} retrieved from db", LogEnum.SERVICE, categoryName);
+            return figureMapper.toResponseDtoList(figureEntities.get());
         }
         throw new CustomNotFoundException(OBJECT_NAME + "s");
     }
 
-    public List<FigureDto> getAllFiguresBySubCategory (SubCategory subCategory){
+    public List<FigureResponseDto> getAllFiguresBySubCategory (String subCategoryName){
+        SubCategoryEntity subCategory = subCategoryService.getByName(subCategoryName);
         Optional<List<FigureEntity>> figureEntities = figureRepository.findBySubCategory(subCategory);
         if (figureEntities.isPresent()){
             log.info("{}: All " + OBJECT_NAME + "s by sub category {} retrieved from db", LogEnum.SERVICE, subCategory);
-            return figureMapper.toDtoList(figureEntities.get());
+            return figureMapper.toResponseDtoList(figureEntities.get());
         }
         throw new CustomNotFoundException(OBJECT_NAME);
     }
 
     @Override
-    public FigureDto updateFigure(FigureDto figureDto) {
-        FigureEntity savedFigure = figureRepository.save(figureMapper.toEntity(figureDto));
+    public FigureResponseDto updateFigure(String id, FigureRequestDto figure) {
+        if (!figureRepository.existsById(id)){
+            throw new CustomNotFoundException(OBJECT_NAME, id);
+        }
+        FigureEntity entity = figureMapper.toEntity(figure);
+        entity.setId(id);
+
+        FigureEntity savedFigure = figureRepository.save(entity);
         log.info("{}: " + OBJECT_NAME + " (id: {}) updated)", LogEnum.SERVICE, savedFigure.getId());
-        return figureMapper.toDto(savedFigure);
+        return figureMapper.toResponseDto(savedFigure);
     }
 
     @Override
@@ -87,7 +110,48 @@ public class FigureServiceImpl implements FigureService{
         log.info("{}: " + OBJECT_NAME + " (id: {}) deleted", LogEnum.SERVICE, id);
     }
 
-    private FigureEntity findById(String id) {
+    public FigureEntity findById(String id) {
         return figureRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
+    }
+
+    public List<FigureEntity> getFigureListByFilter(String filter) {
+        List<FigureEntity> figureList;
+
+        switch (filter) {
+            case "features":
+                figureList = getFigureListByLabelsDESC(new Labels[]{Labels.EXCLUSIVE, Labels.LIMITED});
+                break;
+            case "bestsellers":
+                figureList = getFiveBestSellers();
+                break;
+
+            default: throw new CustomNotFoundException("filter", filter);
+        }
+
+        log.info("{}: All " + OBJECT_NAME + "s (with filter: {}) retrieved from db", LogEnum.SERVICE, filter);
+        return figureList;
+    }
+
+    public List<FigureEntity> getFigureListByLabelsDESC(Labels[] labels) {
+        List<FigureEntity> figureList = new ArrayList<>();
+
+        for (Labels label : labels) {
+            List<FigureEntity> tempFigureList = figureRepository.findByLabel(label, Sort.Direction.DESC);
+            figureList.addAll(tempFigureList);
+        }
+
+        return figureList
+                .stream()
+                .distinct()
+                .toList();
+    }
+
+    private List<FigureEntity> getFiveBestSellers(){
+        Optional<List<FigureEntity>> bestSellers = figureRepository.findFiveBestSellers();
+        if (bestSellers.isPresent()){
+            log.info("{}: All " + OBJECT_NAME + "s that are best sellers retrieved from db", LogEnum.SERVICE);
+            return bestSellers.get();
+        }
+        throw new CustomNotFoundException(OBJECT_NAME);
     }
 }

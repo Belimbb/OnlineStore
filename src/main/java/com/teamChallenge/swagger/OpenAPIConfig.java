@@ -44,6 +44,46 @@ public class OpenAPIConfig {
     }
 
     @Bean
+    public GroupedOpenApi apiCartsV1() {
+        return GroupedOpenApi.builder()
+                .group("Carts API V1")
+                .pathsToMatch("/api/carts/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi apiOrdersV1() {
+        return GroupedOpenApi.builder()
+                .group("Orders API V1")
+                .pathsToMatch("/api/orders/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi apiUsersV1() {
+        return GroupedOpenApi.builder()
+                .group("Users API V1")
+                .pathsToMatch("/api/users/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi apiCategoriesV1() {
+        return GroupedOpenApi.builder()
+                .group("Categories API V1")
+                .pathsToMatch("/api/categories/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi apiSubCategoriesV1() {
+        return GroupedOpenApi.builder()
+                .group("SubCategories API V1")
+                .pathsToMatch("/api/subCategories/**")
+                .build();
+    }
+
+    @Bean
     @Primary
     public OpenAPI customOpenAPIv1() {
         return new OpenAPI()

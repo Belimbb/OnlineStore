@@ -1,17 +1,16 @@
 package com.teamChallenge.entity.figure;
 
-import com.teamChallenge.entity.figure.sections.Labels;
-import com.teamChallenge.entity.figure.sections.SubCategory;
+import com.teamChallenge.dto.request.figure.FigureRequestDto;
+import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface FigureService {
-    FigureDto createFigure (String name, String shortDescription, String longDescription, SubCategory subCategory, Labels label, int currentPrice, int oldPrice, int amount, String color, List<String> images) throws CustomAlreadyExistException;
-    FigureDto getById (String id) throws CustomNotFoundException;
-    List<FigureDto> getAllFigures ();
-    FigureDto updateFigure (FigureDto figureDto);
-    void deleteFigure (String id);
+    FigureResponseDto createFigure (FigureRequestDto figureRequestDto) throws CustomAlreadyExistException;
+    FigureResponseDto getById (String id) throws CustomNotFoundException;
+    List<FigureResponseDto> getAllFigures (String filter);
+    FigureResponseDto updateFigure (String id, FigureRequestDto dto) throws CustomNotFoundException;
+    void deleteFigure (String id) throws CustomNotFoundException;
 }

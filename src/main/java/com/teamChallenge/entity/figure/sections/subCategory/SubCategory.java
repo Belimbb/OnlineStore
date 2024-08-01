@@ -1,5 +1,6 @@
-package com.teamChallenge.entity.figure.sections;
+package com.teamChallenge.entity.figure.sections.subCategory;
 
+import com.teamChallenge.entity.figure.sections.category.Category;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

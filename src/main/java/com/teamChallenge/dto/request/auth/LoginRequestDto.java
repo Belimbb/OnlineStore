@@ -1,5 +1,6 @@
-package com.teamChallenge.request.auth;
+package com.teamChallenge.dto.request.auth;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -9,14 +10,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class LoginRequest {
-
-    @NotBlank
-    @Size (min = 2, max = 50)
-    private String username;
+public class LoginRequestDto {
 
     @NotBlank
     @Email
+    @Schema(example = "string@gmail.com")
     private String email;
 
     @NotBlank
