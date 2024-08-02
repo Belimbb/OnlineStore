@@ -7,12 +7,18 @@ import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
 import com.teamChallenge.entity.figure.sections.category.CategoryServiceImpl;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceImpl;
+import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
+import com.teamChallenge.exception.exceptions.generalExceptions.CustomNullPointerException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,6 +38,8 @@ public class FigureServiceImpl implements FigureService{
     private final SubCategoryServiceImpl subCategoryService;
 
     private final CategoryServiceImpl categoryService;
+
+    private final UserServiceImpl userService;
 
     private static final String OBJECT_NAME = "Figure";
 
@@ -53,21 +61,50 @@ public class FigureServiceImpl implements FigureService{
     }
 
     @Override
-    public FigureResponseDto getById(String id){
+    public FigureResponseDto getById(String id) {
         FigureEntity figure = findById(id);
         log.info("{}: " + OBJECT_NAME + " retrieved from db by id {}", LogEnum.SERVICE, id);
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if (!email.equals("anonymousUser") && !email.isBlank()) {
+            userService.addFigureToRecentlyViewedList(email, figure);
+        }
+
         return figureMapper.toResponseDto(figure);
     }
 
-    @Override
-    public List<FigureResponseDto> getAllFigures(String filter) {
-        if (filter != null) {
-            return figureMapper.toResponseDtoList(getFigureListByFilter(filter));
-        }
+    public void addFigureToUserWishList(String email, String figureId) {
+        FigureEntity figure = findById(figureId);
+        userService.addFigureToWishList(email, figure);
+    }
 
-        List<FigureEntity> figureEntities = figureRepository.findAll();
-        log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
-        return figureMapper.toResponseDtoList(figureEntities);
+    @Override
+    public List<FigureResponseDto> getAllFigures(String filter, String labelName, String startPrice, String endPrice, String pageStr, String sizeStr) {
+        int page = getIntegerFromString(pageStr);
+        int size = getIntegerFromString(sizeStr);
+
+        Pageable pageable = PageRequest.of(page, size);
+        boolean isSortByPrice = (startPrice != null || endPrice != null);
+
+        if (labelName != null) {
+            if (isSortByPrice) {
+                return figureMapper.toResponseDtoList(getFigureListByPriceRangeAndLabel(startPrice, endPrice, labelName, pageable));
+            }
+
+            return figureMapper.toResponseDtoList(getFigureListByLabelDESC(labelName, pageable));
+
+        } else if (filter != null) {
+            return figureMapper.toResponseDtoList(getFigureListByFilter(filter, pageable));
+
+        } else if (isSortByPrice) {
+            return figureMapper.toResponseDtoList(getFigureListByPriceRange(startPrice, endPrice, pageable));
+
+        } else {
+            Page<FigureEntity> figurePage = figureRepository.findAll(pageable);
+            log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
+            return figureMapper.toResponseDtoList(figurePage);
+        }
     }
 
     public List<FigureResponseDto> getAllFiguresByCategory(String categoryName){
@@ -114,7 +151,7 @@ public class FigureServiceImpl implements FigureService{
         return figureRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
     }
 
-    public List<FigureEntity> getFigureListByFilter(String filter) {
+    public List<FigureEntity> getFigureListByFilter(String filter, Pageable pageable) {
         List<FigureEntity> figureList;
 
         switch (filter) {
@@ -137,13 +174,88 @@ public class FigureServiceImpl implements FigureService{
 
         for (Labels label : labels) {
             List<FigureEntity> tempFigureList = figureRepository.findByLabel(label, Sort.Direction.DESC);
-            figureList.addAll(tempFigureList);
+            figureList.addAll(tempFigureList.stream().toList());
         }
 
         return figureList
                 .stream()
                 .distinct()
                 .toList();
+    }
+
+    public Page<FigureEntity> getFigureListByLabelDESC(String labelName, Pageable pageable) {
+        Labels label = getLabelFromString(labelName);
+        Page<FigureEntity> figurePage = figureRepository.findByLabel(label, Sort.Direction.DESC, pageable);
+        log.info("{}: All " + OBJECT_NAME + "s (with label '" + labelName + "') retrieved from db", LogEnum.SERVICE);
+        return figurePage;
+    }
+
+    public Labels getLabelFromString(String label) {
+        try {
+            return Labels.valueOf(label);
+        }   catch (IllegalArgumentException ex) {
+            throw new CustomNotFoundException("Label with 'name' " + label);
+        }
+    }
+
+    public Integer getIntegerFromString(String strNumber) {
+        try {
+            return Integer.parseInt(strNumber);
+        }   catch (NullPointerException | NumberFormatException ex) {
+            throw new CustomNullPointerException(strNumber);
+        }
+    }
+
+    public Page<FigureEntity> getFigureListByPriceRange(String startPriceStr, String endPriceStr, Pageable pageable) {
+        if (startPriceStr != null && endPriceStr != null) {
+            int startPrice = getIntegerFromString(startPriceStr);
+            int endPrice = getIntegerFromString(endPriceStr);
+
+            Page<FigureEntity> figurePage = figureRepository.findByCurrentPriceBetween(startPrice, endPrice, pageable);
+            log.info("{}: All " + OBJECT_NAME + "s (with start price '" + startPrice
+                    + "' and end price '" + endPrice + "') retrieved from db", LogEnum.SERVICE);
+            return figurePage;
+        }   else if (startPriceStr != null) {
+            int startPrice = getIntegerFromString(startPriceStr);
+
+            Page<FigureEntity> figurePage = figureRepository.findByCurrentPriceGreaterThan(startPrice, pageable);
+            log.info("{}: All " + OBJECT_NAME + "s (with start price '" + startPrice + "') retrieved from db", LogEnum.SERVICE);
+            return figurePage;
+        }   else {
+            int endPrice = getIntegerFromString(endPriceStr);
+
+            Page<FigureEntity> figurePage = figureRepository.findByCurrentPriceLessThan(endPrice, pageable);
+            log.info("{}: All " + OBJECT_NAME + "s (with end price '" + endPrice + "') retrieved from db", LogEnum.SERVICE);
+            return figurePage;
+        }
+    }
+
+    public Page<FigureEntity> getFigureListByPriceRangeAndLabel(String startPriceStr, String endPriceStr, String labelName, Pageable pageable) {
+        Labels label = getLabelFromString(labelName);
+
+        if (startPriceStr != null && endPriceStr != null) {
+            int startPrice = getIntegerFromString(startPriceStr);
+            int endPrice = getIntegerFromString(endPriceStr);
+
+            Page<FigureEntity> figurePage = figureRepository.findByCurrentPriceBetweenAndLabel(startPrice, endPrice, label, pageable);
+            log.info("{}: All " + OBJECT_NAME + "s (with label '" + labelName + "', with start price '" + startPrice
+                    + "' and end price '" + endPrice + "') retrieved from db", LogEnum.SERVICE);
+            return figurePage;
+        }   else if (startPriceStr != null) {
+            int startPrice = getIntegerFromString(startPriceStr);
+
+            Page<FigureEntity> figurePage = figureRepository.findByCurrentPriceGreaterThanAndLabel(startPrice, label, pageable);
+            log.info("{}: All " + OBJECT_NAME + "s (with label '" + labelName + "', with start price '" + startPrice
+                    + ") retrieved from db", LogEnum.SERVICE);
+            return figurePage;
+        }   else {
+            int endPrice = getIntegerFromString(endPriceStr);
+
+            Page<FigureEntity> figurePage = figureRepository.findByCurrentPriceLessThanAndLabel(endPrice, label, pageable);
+            log.info("{}: All " + OBJECT_NAME + "s (with label '" + labelName + "' and end price '" + endPrice
+                    + "') retrieved from db", LogEnum.SERVICE);
+            return figurePage;
+        }
     }
 
     private List<FigureEntity> getFiveBestSellers(){

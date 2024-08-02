@@ -48,8 +48,11 @@ public class FigureController {
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<FigureResponseDto>> figureList(@RequestParam(required = false) String filter) throws CustomNotFoundException {
-        List<FigureResponseDto> figureResponseDtos = figureService.getAllFigures(filter);
+    public ResponseEntity<List<FigureResponseDto>> figureList(@RequestParam(required = false) String filter, @RequestParam(required = false) String label,
+                                                              @RequestParam(required = false) String start_price, @RequestParam(required = false) String end_price,
+                                                              @RequestParam(defaultValue = "0") String page, @RequestParam(defaultValue = "10") String size)
+            throws CustomNotFoundException {
+        List<FigureResponseDto> figureResponseDtos = figureService.getAllFigures(filter, label, start_price, end_price, page, size);
 
         log.info("{}: Figures have been retrieved", LogEnum.CONTROLLER);
         return ResponseEntity
@@ -103,6 +106,7 @@ public class FigureController {
                             schema = @Schema(implementation = CustomErrorResponse.class)) })
 
     })
+    @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<FigureResponseDto> getFigureById(@NotBlank @NotNull @PathVariable("figureId") String figureId) throws CustomNotFoundException{
         FigureResponseDto figure = figureService.getById(figureId);
         log.info("{}: Figure (id: {}) has been retrieved", LogEnum.SERVICE, figure.id());
@@ -152,5 +156,22 @@ public class FigureController {
         if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
             throw new UnauthorizedAccessException();
         }
+    }
+
+    @PostMapping("{id}")
+    @Operation(summary = "Add figure to wish list")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Figure added"),
+            @ApiResponse(responseCode = "400", description = "Validation errors",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CustomErrorResponse.class))})
+    })
+    @SecurityRequirement(name = "BearerAuth")
+    public ResponseEntity<?> addFigureToWishList(@PathVariable String figureId, Principal principal) throws UnauthorizedAccessException {
+        validation(principal);
+        figureService.addFigureToUserWishList(principal.getName(), figureId);
+
+        log.info("{}: Figure (id: {}) has been added to User (email: {}) wish list", LogEnum.SERVICE, figureId, principal.getName());
+        return ResponseEntity.ok().build();
     }
 }
