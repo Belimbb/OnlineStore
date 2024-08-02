@@ -55,6 +55,10 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userMapper.toResponseDto(findById(id));
     }
 
+    public UserResponseDto getByEmail(String email){
+        return userMapper.toResponseDto(findByEmail(email));
+    }
+
     @Override
     public UserResponseDto create (SignupRequestDto signupRequestDto) throws CustomAlreadyExistException{
         String username = signupRequestDto.getUsername();
@@ -101,7 +105,12 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     public UserResponseDto addFigureToWishList(String email, FigureEntity figure) {
         UserEntity user = findByEmail(email);
-        user.getWhishList().add(figure);
+        List<FigureEntity> whishList = user.getWhishList();
+        if (whishList==null){
+            whishList = new ArrayList<>();
+        }
+        whishList.add(figure);
+        user.setWhishList(whishList);
         return userMapper.toResponseDto(userRepository.save(user));
     }
 

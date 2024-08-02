@@ -150,6 +150,7 @@ public class FigureServiceImpl implements FigureService{
         List<FigureEntity> figureList = switch (filter) {
             case "features" -> getFigureListByLabelsDESC(new Labels[]{Labels.EXCLUSIVE, Labels.LIMITED});
             case "bestsellers" -> getFiveBestSellers();
+            case "in stock" -> getInStockOnly();
             case "hot deals" -> getFigureListByLabelDESC(Labels.SALE.name());
             default -> throw new CustomNotFoundException("filter", filter);
         };
@@ -172,7 +173,7 @@ public class FigureServiceImpl implements FigureService{
     public List<FigureEntity> getFigureListByLabelDESC(String labelName) {
         Labels label = getLabelFromString(labelName);
         List<FigureEntity> figurePage = figureRepository.findByLabel(label, Sort.Direction.DESC);
-        log.info("{}: All " + OBJECT_NAME + "s (with label '" + labelName + "') retrieved from db", LogEnum.SERVICE);
+        log.info("{}: All " + OBJECT_NAME + "s (with label '{}') retrieved from db", LogEnum.SERVICE, labelName);
         return figurePage;
     }
 
@@ -216,6 +217,15 @@ public class FigureServiceImpl implements FigureService{
                     .filter(figure -> endPrice > figure.getCurrentPrice())
                     .toList();
         }
+    }
+
+    private List<FigureEntity> getInStockOnly(){
+        Optional<List<FigureEntity>> figures = figureRepository.findByAmountGreaterThan(0);
+        if (figures.isPresent()){
+            log.info("{}: All " + OBJECT_NAME + "s that are in stock retrieved from db", LogEnum.SERVICE);
+            return figures.get();
+        }
+        throw new CustomNotFoundException(OBJECT_NAME);
     }
 
     private List<FigureEntity> getFiveBestSellers(){
