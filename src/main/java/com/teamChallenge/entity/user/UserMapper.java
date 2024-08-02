@@ -23,7 +23,8 @@ public class UserMapper {
                 user.getPassword(),
                 user.getRole(),
                 user.getCreatedAt(),
-                figureMapper.toResponseDtoList(user.getWhishList())
+                figureMapper.toResponseDtoList(user.getWhishList()),
+                figureMapper.toResponseDtoList(user.getRecentlyViewed())
         );
     }
 
@@ -35,7 +36,9 @@ public class UserMapper {
                 null,
                 userResponseDto.role(),
                 userResponseDto.createdAt(),
-                figureMapper.toEntityListFromResponse(userResponseDto.wishList()));
+                figureMapper.toEntityListFromResponse(userResponseDto.wishList()),
+                figureMapper.toEntityListFromResponse(userResponseDto.recentlyViewed())
+        );
     }
 
     public List<UserResponseDto> toResponseDtoList(List<UserEntity> users) {

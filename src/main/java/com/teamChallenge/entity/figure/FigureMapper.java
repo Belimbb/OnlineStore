@@ -3,8 +3,10 @@ package com.teamChallenge.entity.figure;
 import com.teamChallenge.dto.request.figure.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryMapper;
+import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class FigureMapper {
     private final SubCategoryMapper subCategoryMapper;
+    private final SubCategoryServiceImpl subCategoryService;
 
     public FigureResponseDto toResponseDto(FigureEntity entity){
         return new FigureResponseDto(
@@ -39,7 +42,7 @@ public class FigureMapper {
                 dto.name(),
                 dto.shortDescription(),
                 dto.longDescription(),
-                null,
+                subCategoryService.getByName(dto.subCategoryName()),
                 dto.label(),
                 false,
                 dto.currentPrice(),
@@ -66,6 +69,12 @@ public class FigureMapper {
                 dto.images(),
                 new Date()
         );
+    }
+
+    public List<FigureResponseDto> toResponseDtoList (Page<FigureEntity> entities){
+        return entities == null ? null : entities.stream()
+                .map(this::toResponseDto)
+                .collect(Collectors.toList());
     }
 
     public List<FigureResponseDto> toResponseDtoList (List<FigureEntity> entities){

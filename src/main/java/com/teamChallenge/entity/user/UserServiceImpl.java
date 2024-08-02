@@ -4,7 +4,6 @@ import com.teamChallenge.dto.request.UserRequestDto;
 import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.entity.figure.FigureEntity;
-import com.teamChallenge.entity.figure.FigureServiceImpl;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
@@ -14,13 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +32,6 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     private String adminEmail;
 
     private final UserRepository userRepository;
-    private final FigureServiceImpl figureService;
 
     private final UserMapper userMapper;
 
@@ -55,6 +53,10 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     public UserResponseDto getById(String id) {
         log.info("{}: request on retrieving " + OBJECT_NAME + " by id {} was sent", LogEnum.SERVICE, id);
         return userMapper.toResponseDto(findById(id));
+    }
+
+    public UserResponseDto getByEmail(String email){
+        return userMapper.toResponseDto(findByEmail(email));
     }
 
     @Override
@@ -101,10 +103,14 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return true;
     }
 
-    public UserResponseDto addFigureToWishList(String email, String figureId) {
-        FigureEntity figure = figureService.findById(figureId);
+    public UserResponseDto addFigureToWishList(String email, FigureEntity figure) {
         UserEntity user = findByEmail(email);
-        user.getWhishList().add(figure);
+        List<FigureEntity> whishList = user.getWhishList();
+        if (whishList==null){
+            whishList = new ArrayList<>();
+        }
+        whishList.add(figure);
+        user.setWhishList(whishList);
         return userMapper.toResponseDto(userRepository.save(user));
     }
 
@@ -158,5 +164,25 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     public UserEntity getByUsername(String username) {
         log.info("{}: request on retrieving " + OBJECT_NAME + " by username {} was sent", LogEnum.SERVICE, username);
         return userRepository.findByUsername(username).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, username));
+    }
+
+    public void addFigureToRecentlyViewedList(String userEmail, FigureEntity figure) {
+        UserEntity user = findByEmail(userEmail);
+        List<FigureEntity> recentlyViewedList = user.getRecentlyViewed();
+
+        if (recentlyViewedList == null) {
+            recentlyViewedList = new ArrayList<>();
+        }
+
+        if (recentlyViewedList.size() == 5) {
+            recentlyViewedList.removeLast();
+        }
+
+        if (!recentlyViewedList.contains(figure)) {
+            recentlyViewedList.add(0, figure);
+            user.setRecentlyViewed(recentlyViewedList);
+            userRepository.save(user);
+            log.info("{}: add figure (figureId: {}) to " + OBJECT_NAME + " (userId: {}) recently viewed list was sent", LogEnum.SERVICE, figure.getId(), user.getId());
+        }
     }
 }
