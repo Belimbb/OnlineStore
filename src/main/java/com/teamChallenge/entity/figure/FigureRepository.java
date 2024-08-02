@@ -17,7 +17,8 @@ import java.util.Optional;
 public interface FigureRepository extends MongoRepository<FigureEntity, String> {
     Optional<List<FigureEntity>> findByCategory(CategoryEntity category);
     Optional<List<FigureEntity>> findBySubCategory(SubCategoryEntity subCategory);
-    Optional<List<FigureEntity>> findByColor(String color);
+    Optional<List<FigureEntity>> findByAmountGreaterThan(int amount);
+
     List<FigureEntity> findByLabel(Labels label, Sort.Direction direction);
     Page<FigureEntity> findByLabel(Labels label, Sort.Direction direction, Pageable pageable);
     Page<FigureEntity> findByCurrentPriceBetween(int startPrice, int endPrice, Pageable pageable);

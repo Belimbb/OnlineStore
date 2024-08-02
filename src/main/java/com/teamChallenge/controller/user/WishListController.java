@@ -62,25 +62,6 @@ public class WishListController {
                 .body(figure);
     }
 
-    @GetMapping("")
-    @Operation(summary = "Get all figures from wish list")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List figures from wish list",
-                    content = { @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
-            )
-    })
-    @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<List<FigureResponseDto>> figureListFromWishList(Principal principal) throws CustomNotFoundException {
-        UserEntity user = userService.findByEmail(principal.getName());
-        List<FigureResponseDto> figureResponseDtos = figureMapper.toResponseDtoList(user.getWhishList());
-
-        log.info("{}: Figures from User (id: {}) wish list have been retrieved", LogEnum.CONTROLLER, user.getId());
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(figureResponseDtos);
-    }
-
     @DeleteMapping(URI_FIGURES_WITH_ID)
     @Operation(summary = "Remove figure from wish list")
     @ApiResponses(value = {
