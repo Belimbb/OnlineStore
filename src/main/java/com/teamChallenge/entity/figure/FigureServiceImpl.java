@@ -7,13 +7,18 @@ import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
 import com.teamChallenge.entity.figure.sections.category.CategoryServiceImpl;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceImpl;
+import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNullPointerException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,6 +38,8 @@ public class FigureServiceImpl implements FigureService{
     private final SubCategoryServiceImpl subCategoryService;
 
     private final CategoryServiceImpl categoryService;
+
+    private final UserServiceImpl userService;
 
     private static final String OBJECT_NAME = "Figure";
 
@@ -54,10 +61,22 @@ public class FigureServiceImpl implements FigureService{
     }
 
     @Override
-    public FigureResponseDto getById(String id){
+    public FigureResponseDto getById(String id) {
         FigureEntity figure = findById(id);
         log.info("{}: " + OBJECT_NAME + " retrieved from db by id {}", LogEnum.SERVICE, id);
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if (!email.equals("anonymousUser") && !email.isBlank()) {
+            userService.addFigureToRecentlyViewedList(email, figure);
+        }
+
         return figureMapper.toResponseDto(figure);
+    }
+
+    public void addFigureToUserWishList(String email, String figureId) {
+        FigureEntity figure = findById(figureId);
+        userService.addFigureToWishList(email, figure);
     }
 
     @Override
@@ -132,12 +151,12 @@ public class FigureServiceImpl implements FigureService{
         return figureRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
     }
 
-    public Page<FigureEntity> getFigureListByFilter(String filter, Pageable pageable) {
-        Page<FigureEntity> figureList;
+    public List<FigureEntity> getFigureListByFilter(String filter, Pageable pageable) {
+        List<FigureEntity> figureList;
 
         switch (filter) {
             case "features":
-                figureList = getFigureListByLabelsDESC(new Labels[]{Labels.EXCLUSIVE, Labels.LIMITED}, pageable);
+                figureList = getFigureListByLabelsDESC(new Labels[]{Labels.EXCLUSIVE, Labels.LIMITED});
                 break;
             case "bestsellers":
                 figureList = getFiveBestSellers();
@@ -150,18 +169,18 @@ public class FigureServiceImpl implements FigureService{
         return figureList;
     }
 
-    public Page<FigureEntity> getFigureListByLabelsDESC(Labels[] labels, Pageable pageable) {
+    public List<FigureEntity> getFigureListByLabelsDESC(Labels[] labels) {
         List<FigureEntity> figureList = new ArrayList<>();
 
         for (Labels label : labels) {
-            Page<FigureEntity> tempFigureList = figureRepository.findByLabel(label, Sort.Direction.DESC, pageable);
+            List<FigureEntity> tempFigureList = figureRepository.findByLabel(label, Sort.Direction.DESC);
             figureList.addAll(tempFigureList.stream().toList());
         }
 
-        return new PageImpl<>(figureList
+        return figureList
                 .stream()
                 .distinct()
-                .toList(), pageable, figureList.size());
+                .toList();
     }
 
     public Page<FigureEntity> getFigureListByLabelDESC(String labelName, Pageable pageable) {

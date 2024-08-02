@@ -12,8 +12,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -48,10 +50,14 @@ public class UserEntity {
     @Column
     private List<FigureEntity> whishList;
 
+    @DBRef
+    private List<FigureEntity> recentlyViewed;
+
     public UserEntity(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
         role = Roles.USER;
+        recentlyViewed = new ArrayList<>();
     }
 }
