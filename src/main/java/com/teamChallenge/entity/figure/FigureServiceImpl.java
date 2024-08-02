@@ -152,18 +152,12 @@ public class FigureServiceImpl implements FigureService{
     }
 
     public List<FigureEntity> getFigureListByFilter(String filter, Pageable pageable) {
-        List<FigureEntity> figureList;
-
-        switch (filter) {
-            case "features":
-                figureList = getFigureListByLabelsDESC(new Labels[]{Labels.EXCLUSIVE, Labels.LIMITED});
-                break;
-            case "bestsellers":
-                figureList = getFiveBestSellers();
-                break;
-
-            default: throw new CustomNotFoundException("filter", filter);
-        }
+        List<FigureEntity> figureList = switch (filter) {
+            case "features" -> getFigureListByLabelsDESC(new Labels[]{Labels.EXCLUSIVE, Labels.LIMITED});
+            case "bestsellers" -> getFiveBestSellers();
+            case "in stock" -> getInStockOnly();
+            default -> throw new CustomNotFoundException("filter", filter);
+        };
 
         log.info("{}: All " + OBJECT_NAME + "s (with filter: {}) retrieved from db", LogEnum.SERVICE, filter);
         return figureList;
@@ -186,7 +180,7 @@ public class FigureServiceImpl implements FigureService{
     public Page<FigureEntity> getFigureListByLabelDESC(String labelName, Pageable pageable) {
         Labels label = getLabelFromString(labelName);
         Page<FigureEntity> figurePage = figureRepository.findByLabel(label, Sort.Direction.DESC, pageable);
-        log.info("{}: All " + OBJECT_NAME + "s (with label '" + labelName + "') retrieved from db", LogEnum.SERVICE);
+        log.info("{}: All " + OBJECT_NAME + "s (with label '{}') retrieved from db", LogEnum.SERVICE, labelName);
         return figurePage;
     }
 
@@ -212,20 +206,19 @@ public class FigureServiceImpl implements FigureService{
             int endPrice = getIntegerFromString(endPriceStr);
 
             Page<FigureEntity> figurePage = figureRepository.findByCurrentPriceBetween(startPrice, endPrice, pageable);
-            log.info("{}: All " + OBJECT_NAME + "s (with start price '" + startPrice
-                    + "' and end price '" + endPrice + "') retrieved from db", LogEnum.SERVICE);
+            log.info("{}: All " + OBJECT_NAME + "s (with start price '{}' and end price '{}') retrieved from db", LogEnum.SERVICE, startPrice, endPrice);
             return figurePage;
         }   else if (startPriceStr != null) {
             int startPrice = getIntegerFromString(startPriceStr);
 
             Page<FigureEntity> figurePage = figureRepository.findByCurrentPriceGreaterThan(startPrice, pageable);
-            log.info("{}: All " + OBJECT_NAME + "s (with start price '" + startPrice + "') retrieved from db", LogEnum.SERVICE);
+            log.info("{}: All " + OBJECT_NAME + "s (with start price '{}') retrieved from db", LogEnum.SERVICE, startPrice);
             return figurePage;
         }   else {
             int endPrice = getIntegerFromString(endPriceStr);
 
             Page<FigureEntity> figurePage = figureRepository.findByCurrentPriceLessThan(endPrice, pageable);
-            log.info("{}: All " + OBJECT_NAME + "s (with end price '" + endPrice + "') retrieved from db", LogEnum.SERVICE);
+            log.info("{}: All " + OBJECT_NAME + "s (with end price '{}') retrieved from db", LogEnum.SERVICE, endPrice);
             return figurePage;
         }
     }
@@ -238,24 +231,30 @@ public class FigureServiceImpl implements FigureService{
             int endPrice = getIntegerFromString(endPriceStr);
 
             Page<FigureEntity> figurePage = figureRepository.findByCurrentPriceBetweenAndLabel(startPrice, endPrice, label, pageable);
-            log.info("{}: All " + OBJECT_NAME + "s (with label '" + labelName + "', with start price '" + startPrice
-                    + "' and end price '" + endPrice + "') retrieved from db", LogEnum.SERVICE);
+            log.info("{}: All " + OBJECT_NAME + "s (with label '{}', with start price '{}' and end price '{}') retrieved from db", LogEnum.SERVICE, labelName, startPrice, endPrice);
             return figurePage;
         }   else if (startPriceStr != null) {
             int startPrice = getIntegerFromString(startPriceStr);
 
             Page<FigureEntity> figurePage = figureRepository.findByCurrentPriceGreaterThanAndLabel(startPrice, label, pageable);
-            log.info("{}: All " + OBJECT_NAME + "s (with label '" + labelName + "', with start price '" + startPrice
-                    + ") retrieved from db", LogEnum.SERVICE);
+            log.info("{}: All " + OBJECT_NAME + "s (with label '{}', with start price '{}) retrieved from db", LogEnum.SERVICE, labelName, startPrice);
             return figurePage;
         }   else {
             int endPrice = getIntegerFromString(endPriceStr);
 
             Page<FigureEntity> figurePage = figureRepository.findByCurrentPriceLessThanAndLabel(endPrice, label, pageable);
-            log.info("{}: All " + OBJECT_NAME + "s (with label '" + labelName + "' and end price '" + endPrice
-                    + "') retrieved from db", LogEnum.SERVICE);
+            log.info("{}: All " + OBJECT_NAME + "s (with label '{}' and end price '{}') retrieved from db", LogEnum.SERVICE, labelName, endPrice);
             return figurePage;
         }
+    }
+
+    private List<FigureEntity> getInStockOnly(){
+        Optional<List<FigureEntity>> figures = figureRepository.findByAmountGreaterThan(0);
+        if (figures.isPresent()){
+            log.info("{}: All " + OBJECT_NAME + "s that are in stock retrieved from db", LogEnum.SERVICE);
+            return figures.get();
+        }
+        throw new CustomNotFoundException(OBJECT_NAME);
     }
 
     private List<FigureEntity> getFiveBestSellers(){

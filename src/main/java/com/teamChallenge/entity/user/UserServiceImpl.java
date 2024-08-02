@@ -55,6 +55,10 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userMapper.toResponseDto(findById(id));
     }
 
+    public UserResponseDto getByEmail(String email){
+        return userMapper.toResponseDto(findByEmail(email));
+    }
+
     @Override
     public UserResponseDto create (SignupRequestDto signupRequestDto) throws CustomAlreadyExistException{
         String username = signupRequestDto.getUsername();
