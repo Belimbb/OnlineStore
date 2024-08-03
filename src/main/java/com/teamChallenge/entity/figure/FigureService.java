@@ -8,9 +8,9 @@ import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundEx
 import java.util.List;
 
 public interface FigureService {
-    FigureResponseDto createFigure (FigureRequestDto figureRequestDto) throws CustomAlreadyExistException;
+    FigureResponseDto create(FigureRequestDto figureRequestDto) throws CustomAlreadyExistException;
     FigureResponseDto getById (String id) throws CustomNotFoundException;
-    List<FigureResponseDto> getAllFigures (String filter, String label, String startPrice, String endPrice, String page, String size);
-    FigureResponseDto updateFigure (String id, FigureRequestDto dto) throws CustomNotFoundException;
-    void deleteFigure (String id) throws CustomNotFoundException;
+    List<FigureResponseDto> getAll(String filter, String label, String startPrice, String endPrice, String page, String size);
+    FigureResponseDto update(String id, FigureRequestDto dto) throws CustomNotFoundException;
+    void delete(String id) throws CustomNotFoundException;
 }

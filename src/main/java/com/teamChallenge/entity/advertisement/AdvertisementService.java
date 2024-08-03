@@ -6,9 +6,9 @@ import com.teamChallenge.dto.response.AdsResponseDto;
 import java.util.List;
 
 public interface AdvertisementService {
-    AdsResponseDto createAds (AdsRequestDto adsRequestDto);
+    AdsResponseDto create(AdsRequestDto adsRequestDto);
     AdsResponseDto getById (String id);
     List<AdsResponseDto> getAll();
-    AdsResponseDto updateAds(AdsRequestDto adsDto);
-    void deleteAds(String id);
+    AdsResponseDto update(AdsRequestDto adsDto);
+    void delete(String id);
 }

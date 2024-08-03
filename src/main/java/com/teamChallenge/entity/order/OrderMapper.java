@@ -18,35 +18,35 @@ public class OrderMapper {
 
     private final UserMapper userMapper;
 
-    public OrderResponseDto toResponseDto(OrderEntity order) {
+    public OrderResponseDto toResponseDto(OrderEntity entity) {
         return new OrderResponseDto(
-                order.getId(),
-                order.getAddress(),
-                order.getPrice(),
-                order.getStatus(),
-                figureMapper.toResponseDtoList(order.getFigureList()),
-                userMapper.toResponseDto(order.getUser()));
+                entity.getId(),
+                entity.getAddress(),
+                entity.getPrice(),
+                entity.getStatus(),
+                figureMapper.toResponseDtoList(entity.getFigureList()),
+                userMapper.toResponseDto(entity.getUser()));
     }
 
-    public OrderEntity toEntity(OrderResponseDto orderResponseDto) {
+    public OrderEntity toEntity(OrderResponseDto dto) {
         return new OrderEntity(
-                orderResponseDto.id(),
-                orderResponseDto.address(),
-                orderResponseDto.price(),
-                orderResponseDto.status(),
-                figureMapper.toEntityListFromResponse(orderResponseDto.figureList()),
-                userMapper.toEntity(orderResponseDto.userResponseDto()));
+                dto.id(),
+                dto.address(),
+                dto.price(),
+                dto.status(),
+                figureMapper.toEntityListFromResponse(dto.figureList()),
+                userMapper.toEntity(dto.userResponseDto()));
     }
 
-    public List<OrderResponseDto> toResponseDtoList(List<OrderEntity> orders) {
-        return orders
+    public List<OrderResponseDto> toResponseDtoList(List<OrderEntity> entities) {
+        return entities
                 .stream()
                 .map(this::toResponseDto)
                 .toList();
     }
 
-    public List<OrderEntity> toEntityListFromResponse(List<OrderResponseDto> orderResponseDto) {
-        return orderResponseDto.stream()
+    public List<OrderEntity> toEntityListFromResponse(List<OrderResponseDto> dtos) {
+        return dtos.stream()
                 .map(this::toEntity)
                 .toList();
     }
