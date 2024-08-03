@@ -15,41 +15,41 @@ public class UserMapper {
 
     private final FigureMapper figureMapper;
 
-    public UserResponseDto toResponseDto(UserEntity user) {
+    public UserResponseDto toResponseDto(UserEntity entity) {
         return new UserResponseDto(
-                user.getId(),
-                user.getEmail(),
-                user.getUsername(),
-                user.getPassword(),
-                user.getRole(),
-                user.getCreatedAt(),
-                figureMapper.toResponseDtoList(user.getWhishList()),
-                figureMapper.toResponseDtoList(user.getRecentlyViewed())
+                entity.getId(),
+                entity.getEmail(),
+                entity.getUsername(),
+                entity.getPassword(),
+                entity.getRole(),
+                entity.getCreatedAt(),
+                figureMapper.toResponseDtoList(entity.getWhishList()),
+                figureMapper.toResponseDtoList(entity.getRecentlyViewed())
         );
     }
 
-    public UserEntity toEntity(UserResponseDto userResponseDto) {
+    public UserEntity toEntity(UserResponseDto dto) {
         return new UserEntity(
-                userResponseDto.id(),
-                userResponseDto.username(),
-                userResponseDto.email(),
+                dto.id(),
+                dto.username(),
+                dto.email(),
                 null,
-                userResponseDto.role(),
-                userResponseDto.createdAt(),
-                figureMapper.toEntityListFromResponse(userResponseDto.wishList()),
-                figureMapper.toEntityListFromResponse(userResponseDto.recentlyViewed())
+                dto.role(),
+                dto.createdAt(),
+                figureMapper.toEntityListFromResponse(dto.wishList()),
+                figureMapper.toEntityListFromResponse(dto.recentlyViewed())
         );
     }
 
-    public List<UserResponseDto> toResponseDtoList(List<UserEntity> users) {
-        return users
+    public List<UserResponseDto> toResponseDtoList(List<UserEntity> entities) {
+        return entities
                 .stream()
                 .map(this::toResponseDto)
                 .toList();
     }
 
-    public List<UserEntity> toEntityListFromResponse(List<UserResponseDto> userResponseDto) {
-        return userResponseDto.stream()
+    public List<UserEntity> toEntityListFromResponse(List<UserResponseDto> dtos) {
+        return dtos.stream()
                 .map(this::toEntity)
                 .toList();
     }

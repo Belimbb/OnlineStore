@@ -56,7 +56,7 @@ public class FigureController {
     @SecurityRequirement(name = secReq)
     public ResponseEntity<FigureResponseDto> addFigure(@Valid @NotNull @RequestBody FigureRequestDto request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
         validation(principal);
-        FigureResponseDto figure = figureService.createFigure(request);
+        FigureResponseDto figure = figureService.create(request);
 
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, figure.id());
         return ResponseEntity
@@ -65,7 +65,7 @@ public class FigureController {
     }
 
     @GetMapping("/all")
-    @Operation(summary = "Get all figures. You can filter like \"bestseller\" or \"features\" to get specific list of figure")
+    @Operation(summary = "Get all figures. Now available those filters: \"features\", \"bestsellers\", \"in stock\", \"hot deals\"")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List figures",
                     content = { @Content(mediaType = mediaType,
@@ -76,7 +76,7 @@ public class FigureController {
                                                               @RequestParam(required = false) String start_price, @RequestParam(required = false) String end_price,
                                                               @RequestParam(defaultValue = "0") String page, @RequestParam(defaultValue = "10") String size)
             throws CustomNotFoundException {
-        List<FigureResponseDto> figureResponseDtos = figureService.getAllFigures(filter, label, start_price, end_price, page, size);
+        List<FigureResponseDto> figureResponseDtos = figureService.getAll(filter, label, start_price, end_price, page, size);
 
         log.info("{}: Figures have been retrieved", LogEnum.CONTROLLER);
         return ResponseEntity
@@ -153,7 +153,7 @@ public class FigureController {
                                                           Principal principal) throws CustomNotFoundException, UnauthorizedAccessException{
         validation(principal);
 
-        FigureResponseDto figureResponseDto = figureService.updateFigure(figureId, figureDto);
+        FigureResponseDto figureResponseDto = figureService.update(figureId, figureDto);
         log.info("{}: Figure (id: {}) has been updated", LogEnum.CONTROLLER, figureId);
 
         return ResponseEntity
@@ -172,7 +172,7 @@ public class FigureController {
     @SecurityRequirement(name = "BearerAuth")
     public void deleteUrlByShortId(@PathVariable("figureId") String figureId, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
         validation(principal);
-        figureService.deleteFigure(figureId);
+        figureService.delete(figureId);
 
         log.info("{}: Figure (id: {}) has been deleted", LogEnum.CONTROLLER, figureId);
     }
@@ -192,7 +192,7 @@ public class FigureController {
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<?> addFigureToWishList(@PathVariable String figureId, Principal principal) throws UnauthorizedAccessException {
+    public ResponseEntity<?> addFigureToWishList(@PathVariable ("id")String figureId, Principal principal) throws UnauthorizedAccessException {
         validation(principal);
         figureService.addFigureToUserWishList(principal.getName(), figureId);
 

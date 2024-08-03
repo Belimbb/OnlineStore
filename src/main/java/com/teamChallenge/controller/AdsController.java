@@ -51,7 +51,7 @@ public class AdsController {
     public ResponseEntity<AdsResponseDto> addAds(@Valid @NotNull @RequestBody AdsRequestDto request, Principal principal) throws UnauthorizedAccessException {
         validation(principal);
 
-        AdsResponseDto ads = adsService.createAds(request);
+        AdsResponseDto ads = adsService.create(request);
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, ads.id());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -106,7 +106,7 @@ public class AdsController {
     public void deleteAdsById(@PathVariable("adsId") String adsId, Principal principal) throws UnauthorizedAccessException {
         validation(principal);
 
-        adsService.deleteAds(adsId);
+        adsService.delete(adsId);
         log.info("{}: Ads (id: {}) has been deleted", LogEnum.CONTROLLER, adsId);
     }
 
