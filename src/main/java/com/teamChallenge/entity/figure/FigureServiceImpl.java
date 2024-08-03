@@ -44,9 +44,7 @@ public class FigureServiceImpl implements FigureService{
     public FigureResponseDto create(FigureRequestDto figureRequestDto) throws CustomAlreadyExistException {
         SubCategoryEntity subCategory = subCategoryService.getByName(figureRequestDto.subCategoryName());
         String name = figureRequestDto.name();
-        FigureEntity figureEntity = new FigureEntity(name, figureRequestDto.shortDescription(), figureRequestDto.longDescription(),
-                subCategory, figureRequestDto.label(),false, figureRequestDto.currentPrice(), figureRequestDto.oldPrice(),
-                figureRequestDto.amount(), figureRequestDto.color(), figureRequestDto.images());
+        FigureEntity figureEntity = figureMapper.toEntity(figureRequestDto);
 
         if (figureRepository.existsByUniqueHash(figureEntity.getUniqueHash())){
             throw new CustomAlreadyExistException(OBJECT_NAME, name);
