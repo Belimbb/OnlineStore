@@ -37,7 +37,7 @@ public class CartController {
     private final CartService cartService;
 
     @GetMapping("/all")
-    @Operation(summary = "Get all ads")
+    @Operation(summary = "Get all carts")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of carts",
                     content = { @Content(mediaType = "application/json",

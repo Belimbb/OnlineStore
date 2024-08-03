@@ -84,6 +84,14 @@ public class OpenAPIConfig {
     }
 
     @Bean
+    public GroupedOpenApi apiBannersV1() {
+        return GroupedOpenApi.builder()
+                .group("Banners API V1")
+                .pathsToMatch("/api/banners/**")
+                .build();
+    }
+
+    @Bean
     @Primary
     public OpenAPI customOpenAPIv1() {
         return new OpenAPI()
