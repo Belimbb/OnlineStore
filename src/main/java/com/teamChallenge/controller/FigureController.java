@@ -192,7 +192,7 @@ public class FigureController {
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<?> addFigureToWishList(@PathVariable String figureId, Principal principal) throws UnauthorizedAccessException {
+    public ResponseEntity<?> addFigureToWishList(@PathVariable ("id")String figureId, Principal principal) throws UnauthorizedAccessException {
         validation(principal);
         figureService.addFigureToUserWishList(principal.getName(), figureId);
 
