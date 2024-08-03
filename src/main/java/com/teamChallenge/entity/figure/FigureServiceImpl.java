@@ -10,6 +10,7 @@ import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceIm
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
+import com.teamChallenge.exception.exceptions.generalExceptions.CustomBadRequestException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNullPointerException;
 import lombok.RequiredArgsConstructor;
@@ -78,9 +79,7 @@ public class FigureServiceImpl implements FigureService{
 
     @Override
     public List<FigureResponseDto> getAllFigures(String filter, String labelName, String startPrice, String endPrice, String pageStr, String sizeStr) {
-        int page = getIntegerFromString(pageStr);
-        int size = getIntegerFromString(sizeStr);
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = getPageable(getIntegerFromString(pageStr), getIntegerFromString(sizeStr));
         List<FigureEntity> figureList;
 
         if (labelName != null) {
@@ -242,5 +241,13 @@ public class FigureServiceImpl implements FigureService{
         int end = Math.min((start + pageable.getPageSize()), figureList.size());
         List<FigureEntity> paginatedFigureList = start > end ? new ArrayList<>() : figureList.subList(start, end);
         return new PageImpl<>(paginatedFigureList, pageable, figureList.size());
+    }
+
+    public Pageable getPageable(int page, int size) {
+        if (page >= 0 && size > 0 && size <= 18) {
+            return PageRequest.of(page, size);
+        }
+        throw new CustomBadRequestException("The pagination elements (page and size values) must satisfy the following: " +
+                "page value must be greater than (or equal to) 0, size value must be greater than 0 and less than (or equal to) 18.");
     }
 }
