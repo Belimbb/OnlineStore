@@ -41,7 +41,7 @@ public class FigureServiceImpl implements FigureService{
     private static final String OBJECT_NAME = "Figure";
 
     @Override
-    public FigureResponseDto createFigure(FigureRequestDto figureRequestDto) throws CustomAlreadyExistException {
+    public FigureResponseDto create(FigureRequestDto figureRequestDto) throws CustomAlreadyExistException {
         SubCategoryEntity subCategory = subCategoryService.getByName(figureRequestDto.subCategoryName());
         String name = figureRequestDto.name();
         FigureEntity figureEntity = new FigureEntity(name, figureRequestDto.shortDescription(), figureRequestDto.longDescription(),
@@ -77,7 +77,7 @@ public class FigureServiceImpl implements FigureService{
     }
 
     @Override
-    public List<FigureResponseDto> getAllFigures(String filter, String labelName, String startPrice, String endPrice, String pageStr, String sizeStr) {
+    public List<FigureResponseDto> getAll(String filter, String labelName, String startPrice, String endPrice, String pageStr, String sizeStr) {
         int page = getIntegerFromString(pageStr);
         int size = getIntegerFromString(sizeStr);
         Pageable pageable = PageRequest.of(page, size);
@@ -123,7 +123,7 @@ public class FigureServiceImpl implements FigureService{
     }
 
     @Override
-    public FigureResponseDto updateFigure(String id, FigureRequestDto figure) {
+    public FigureResponseDto update(String id, FigureRequestDto figure) {
         if (!figureRepository.existsById(id)){
             throw new CustomNotFoundException(OBJECT_NAME, id);
         }
@@ -136,7 +136,7 @@ public class FigureServiceImpl implements FigureService{
     }
 
     @Override
-    public void deleteFigure(String id) {
+    public void delete(String id) {
         FigureEntity figure = findById(id);
         figureRepository.delete(figure);
         log.info("{}: " + OBJECT_NAME + " (id: {}) deleted", LogEnum.SERVICE, id);

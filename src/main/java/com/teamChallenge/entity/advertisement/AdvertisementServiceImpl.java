@@ -22,7 +22,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     private static final String OBJECT_NAME = "Advertisement";
 
     @Override
-    public AdsResponseDto createAds(AdsRequestDto adsRequestDto) {
+    public AdsResponseDto create(AdsRequestDto adsRequestDto) {
         AdvertisementEntity advertisement = new AdvertisementEntity(adsRequestDto.text(), adsRequestDto.url());
         advertisementRepository.save(advertisement);
         log.info("{}: " + OBJECT_NAME + " (id: {}) was created", LogEnum.SERVICE, advertisement.getId());
@@ -43,14 +43,14 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     }
 
     @Override
-    public AdsResponseDto updateAds(AdsRequestDto adsDto) {
+    public AdsResponseDto update(AdsRequestDto adsDto) {
         AdvertisementEntity advertisement = advertisementRepository.save(advertisementMapper.toEntity(adsDto));
         log.info("{}: " + OBJECT_NAME +" (id: {}) updated)", LogEnum.SERVICE, advertisement.getId());
         return advertisementMapper.toResponseDto(advertisement);
     }
 
     @Override
-    public void deleteAds(String id) {
+    public void delete(String id) {
         AdvertisementEntity advertisement = findById(id);
         advertisementRepository.delete(advertisement);
         log.info("{}: " + OBJECT_NAME + " (id: {}) deleted", LogEnum.SERVICE, id);
