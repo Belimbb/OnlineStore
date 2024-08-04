@@ -250,4 +250,8 @@ public class FigureServiceImpl implements FigureService{
         throw new CustomBadRequestException("The pagination elements (page and size values) must satisfy the following: " +
                 "page value must be greater than (or equal to) 0, size value must be greater than 0 and less than (or equal to) 18.");
     }
+
+    public boolean existById(String id) {
+        return figureRepository.existsById(id);
+    }
 }

@@ -83,8 +83,6 @@ public class CartController {
             ),
     })
     public CartResponseDto create(@RequestBody CartRequestDto cartDto, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
-
         CartResponseDto cart = cartService.create(cartDto);
         log.info("{}: Cart (id: {}) has been added", LogEnum.CONTROLLER, cart.id());
         return cart;
@@ -108,7 +106,6 @@ public class CartController {
                     })
     })
     public CartResponseDto update(@PathVariable String id, @RequestBody CartRequestDto cartDto, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
         CartResponseDto cart = cartService.update(id, cartDto);
         log.info("{}: Cart (id: {}) has been updated", LogEnum.CONTROLLER, cart.id());
         return cart;
@@ -128,7 +125,6 @@ public class CartController {
                     })
     })
     public void delete(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
         cartService.delete(id);
         log.info("{}: Cart (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }
