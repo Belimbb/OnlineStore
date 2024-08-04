@@ -4,6 +4,7 @@ import com.teamChallenge.entity.figure.sections.Labels;
 
 import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
+import com.teamChallenge.entity.user.review.ReviewEntity;
 import jakarta.persistence.*;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -71,6 +72,9 @@ public class FigureEntity {
     @Column
     private int purchaseCount;
 
+    @DBRef
+    private List<ReviewEntity> reviews;
+
     @Column(nullable = false)
     @CreatedDate
     private Date createdAt;
@@ -110,10 +114,12 @@ public class FigureEntity {
     public FigureEntity(String id, String name, String shortDescription, String longDescription,
                         SubCategoryEntity subCategory, Labels label, int currentPrice, int oldPrice,
                         int amount, Map<String, String> basicCharacteristics,
-                        Map<String, String> dimensions, List<String> images, Date createdAt) {
+                        Map<String, String> dimensions, List<String> images,
+                        List<ReviewEntity> reviews, Date createdAt) {
         setup(name, shortDescription, longDescription, subCategory, label, currentPrice, oldPrice,
                 amount, basicCharacteristics, dimensions, images);
         this.setId(id);
+        this.setReviews(reviews);
         this.setCreatedAt(createdAt);
     }
 
