@@ -19,6 +19,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Document(collection = "figures")
 @Data
@@ -49,9 +50,6 @@ public class FigureEntity {
     @Column
     private Labels label;
 
-    @Column
-    private Boolean inWishList = false;
-
     @Column (nullable = false)
     private int currentPrice;
 
@@ -61,11 +59,14 @@ public class FigureEntity {
     @Column (nullable = false)
     private int amount;
 
-    @Column(nullable = false)
-    private String color;
-
     @Column
     private List<String> images;
+
+    @Column
+    private Map<String, String> basicCharacteristics;
+
+    @Column
+    private Map<String, String> dimensions;
 
     @Column
     private int purchaseCount;
@@ -85,35 +86,51 @@ public class FigureEntity {
     }
 
     private String generateUniqueHash() {
-        String data = name + shortDescription + longDescription + category.getName() + subCategory.getName() + currentPrice + oldPrice + amount + color;
+        String data = name + shortDescription + longDescription + category.getName() + subCategory.getName() + currentPrice + oldPrice + amount;
         return DigestUtils.sha256Hex(data);
     }
 
+    public void setBasicCharacteristic(String theme, String material, String characterName,
+                                       String productType, String typeOfFigure, String country){
+        basicCharacteristics = Map.of("Theme", theme, "Material", material, "Character name", characterName,
+                "Product type", productType, "Type of figure", typeOfFigure, "Country", country);
+    }
+
+    public void setDimensions(String packageSize, String toySize){
+        dimensions = Map.of("Package size", packageSize, "Toy size", toySize);
+    }
+
     public FigureEntity(String name, String shortDescription, String longDescription, SubCategoryEntity subCategory,
-                        Labels label, Boolean inWishList, int currentPrice, int oldPrice, int amount, String color, List<String> images) {
-        setup(name, shortDescription, longDescription, subCategory, label, inWishList, currentPrice, oldPrice, amount, color, images);
+                        Labels label, int currentPrice, int oldPrice, int amount,
+                        Map<String, String> basicCharacteristics, Map<String, String> dimensions, List<String> images) {
+        setup(name, shortDescription, longDescription, subCategory, label, currentPrice, oldPrice,
+                amount, basicCharacteristics, dimensions, images);
     }
 
     public FigureEntity(String id, String name, String shortDescription, String longDescription,
-                        SubCategoryEntity subCategory, Labels label, Boolean inWishList, int currentPrice, int oldPrice,
-                        int amount, String color, List<String> images, Date createdAt) {
-        setup(name, shortDescription, longDescription, subCategory, label, inWishList, currentPrice, oldPrice, amount, color, images);
+                        SubCategoryEntity subCategory, Labels label, int currentPrice, int oldPrice,
+                        int amount, Map<String, String> basicCharacteristics,
+                        Map<String, String> dimensions, List<String> images, Date createdAt) {
+        setup(name, shortDescription, longDescription, subCategory, label, currentPrice, oldPrice,
+                amount, basicCharacteristics, dimensions, images);
         this.setId(id);
         this.setCreatedAt(createdAt);
     }
 
-    private void setup(String name, String shortDescription, String longDescription, SubCategoryEntity subCategory, Labels label,Boolean inWishList, int currentPrice, int oldPrice, int amount, String color, List<String> images){
+    private void setup(String name, String shortDescription, String longDescription, SubCategoryEntity subCategory,
+                       Labels label, int currentPrice, int oldPrice, int amount,
+                       Map<String, String> basicCharacteristics, Map<String, String> dimensions, List<String> images){
         this.setName(name);
         this.setShortDescription(shortDescription);
         this.setLongDescription(longDescription);
         this.setCategory(subCategory.getCategory());
         this.setSubCategory(subCategory);
         this.setLabel(label);
-        this.setInWishList(inWishList);
         this.setCurrentPrice(currentPrice);
         this.setOldPrice(oldPrice);
         this.setAmount(amount);
-        this.setColor(color);
+        this.basicCharacteristics = basicCharacteristics;
+        this.dimensions = dimensions;
         this.setImages(images);
         this.setUniqueHash(generateUniqueHash());
     }

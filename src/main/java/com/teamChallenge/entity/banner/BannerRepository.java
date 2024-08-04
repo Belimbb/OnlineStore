@@ -5,4 +5,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BannerRepository extends MongoRepository<BannerEntity, String> {
+    boolean existsByUniqueHash (String uniqueHash);
 }

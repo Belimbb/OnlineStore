@@ -65,6 +65,11 @@ public class GlobalExceptionHandler {
         return getErrorsMap(ex, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(CustomBadRequestException.class)
+    public ResponseEntity<Map<String, List<String>>> badRequestException(CustomBadRequestException ex) {
+        return getErrorsMap(ex, HttpStatus.BAD_REQUEST);
+    }
+
     /* User exceptions */
 
     @ExceptionHandler(UserIncorrectPasswordException.class)
