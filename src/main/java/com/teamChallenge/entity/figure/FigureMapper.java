@@ -32,8 +32,6 @@ public class FigureMapper {
                 entity.getCurrentPrice(),
                 entity.getOldPrice(),
                 entity.getAmount(),
-                entity.getBasicCharacteristics(),
-                entity.getDimensions(),
                 entity.getImages()
                 );
     }
@@ -48,9 +46,6 @@ public class FigureMapper {
                 dto.currentPrice(),
                 dto.oldPrice(),
                 dto.amount(),
-                Map.of("Theme", dto.theme(), "Material", dto.material(), "Character name", dto.characterName(),
-                        "Product type", dto.productType(), "Type of figure", dto.typeOfFigure(), "Country", dto.country()),
-                Map.of("Package size", dto.packageSize(), "Toy size", dto.toySize()),
                 dto.images()
         );
     }
@@ -66,8 +61,6 @@ public class FigureMapper {
                 dto.currentPrice(),
                 dto.oldPrice(),
                 dto.amount(),
-                dto.basicCharacteristics(),
-                dto.dimensions(),
                 dto.images(),
                 new Date()
         );

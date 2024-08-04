@@ -15,10 +15,5 @@ public record FigureRequestDto(@NotBlank @Size(max = 50) String name,
                                @NotNull int currentPrice,
                                @NotNull int oldPrice,
                                @NotNull int amount,
-                               //basic characteristic
-                               @NotBlank String theme, @NotBlank String material, @NotBlank String characterName,
-                               @NotBlank String productType, @NotBlank String typeOfFigure, @NotBlank String country,
-                               //dimensions
-                               @NotBlank String packageSize, @NotBlank String toySize,
                                List<String> images) {
 }
