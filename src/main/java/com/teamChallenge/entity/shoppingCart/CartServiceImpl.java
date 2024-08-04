@@ -2,7 +2,6 @@ package com.teamChallenge.entity.shoppingCart;
 
 import com.teamChallenge.dto.request.CartRequestDto;
 import com.teamChallenge.dto.response.CartResponseDto;
-import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
 import com.teamChallenge.entity.user.UserEntity;
 import com.teamChallenge.entity.user.UserServiceImpl;
@@ -13,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -50,36 +49,44 @@ public class CartServiceImpl implements CartService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity currentUser = userService.findByEmail(email);
 
-        List<FigureEntity> figureList = Arrays
-                .stream(cartDto.figuresId())
-                .map(figureService::findById)
-                .toList();
+        Map<String, Integer> figureMap = cartDto.figureIdAndAmountMap();
+
+        for (Map.Entry<String, Integer> entry : figureMap.entrySet()) {
+            if (!figureService.existById(entry.getKey())) {
+                figureMap.remove(entry.getKey());
+            }
+        }
 
         if (cartRepository.existsByUser(currentUser)) {
             CartEntity cart = cartRepository.findByUser(currentUser);
-            return cartMapper.toResponseDto(addFigures(cart.getId(), figureList));
+            return cartMapper.toResponseDto(addFigures(cart.getId(), figureMap));
         }
 
-        int totalPrice = figureList.stream().mapToInt(FigureEntity::getCurrentPrice).sum();
-        CartEntity newCart = new CartEntity(currentUser, totalPrice, figureList);
+        int totalPrice = figureMap.keySet().stream().mapToInt(key -> figureService.findById(key).getCurrentPrice() * figureMap.get(key)).sum();
+        CartEntity newCart = new CartEntity(currentUser, totalPrice, figureMap);
         CartEntity savedCart = cartRepository.save(newCart);
 
         log.info("{}: " + OBJECT_NAME + " (Id: {}) was created", LogEnum.SERVICE, savedCart.getId());
         return cartMapper.toResponseDto(savedCart);
     }
 
-    private CartEntity addFigures(String cartId, List<FigureEntity> figureList) {
+    private CartEntity addFigures(String cartId, Map<String, Integer> map) {
         if (cartRepository.existsById(cartId)) {
             CartEntity cart = findById(cartId);
-            List<FigureEntity> figures = cart.getFigures();
-            figures.addAll(figureList);
+            Map<String, Integer> figureIdAndAmountMap = cart.getFigureIdAndAmountMap();
 
-            cart.setFigures(figures
-                    .stream()
-                    .distinct()
-                    .toList());
+            for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                String key = entry.getKey();
+                if (figureIdAndAmountMap.containsKey(key)) {
+                    int existAmount = entry.getValue();
+                    figureIdAndAmountMap.replace(key, existAmount + figureIdAndAmountMap.get(key));
+                    map.remove(key);
+                }
+            }
 
-            cart.setPrice(figures.stream().mapToInt(FigureEntity::getCurrentPrice).sum());
+            figureIdAndAmountMap.putAll(map);
+            int totalPrice = figureIdAndAmountMap.keySet().stream().mapToInt(key -> figureService.findById(key).getCurrentPrice() * figureIdAndAmountMap.get(key)).sum();
+            cart.setPrice(totalPrice);
 
             CartEntity savedCart = cartRepository.save(cart);
             log.info("{}: " + OBJECT_NAME + " (Id: {}) updated figure list and total price throughout create method", LogEnum.SERVICE, savedCart.getId());
@@ -92,15 +99,16 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartResponseDto update(String id, CartRequestDto cartDto) {
         CartEntity cart = findById(id);
+        Map<String, Integer> figureIdAndAmountMap = cartDto.figureIdAndAmountMap();
 
-        List<FigureEntity> figureList = Arrays
-                .stream(cartDto.figuresId())
-                .map(figureService::findById)
-                .toList();
+        for (Map.Entry<String, Integer> entry : figureIdAndAmountMap.entrySet()) {
+            if (!figureService.existById(entry.getKey())) {
+                figureIdAndAmountMap.remove(entry.getKey());
+            }
+        }
 
-        int totalPrice = figureList.stream().mapToInt(FigureEntity::getCurrentPrice).sum();
-
-        cart.setFigures(figureList);
+        cart.setFigureIdAndAmountMap(figureIdAndAmountMap);
+        int totalPrice = figureIdAndAmountMap.keySet().stream().mapToInt(key -> figureService.findById(key).getCurrentPrice() * figureIdAndAmountMap.get(key)).sum();
         cart.setPrice(totalPrice);
 
         CartEntity updatedCart = cartRepository.save(cart);

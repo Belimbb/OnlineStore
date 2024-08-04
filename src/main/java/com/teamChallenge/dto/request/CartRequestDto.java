@@ -1,6 +1,6 @@
 package com.teamChallenge.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import java.util.Map;
 
-public record CartRequestDto(@NotBlank String[] figuresId) {
+public record CartRequestDto(Map<String, Integer> figureIdAndAmountMap) {
 }
