@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,7 +31,15 @@ public class FigureMapper {
                 entity.getCurrentPrice(),
                 entity.getOldPrice(),
                 entity.getAmount(),
-                entity.getImages()
+                entity.getImages(),
+                entity.getTheme(),
+                entity.getMaterial(),
+                entity.getCharacterName(),
+                entity.getProductType(),
+                entity.getTypeOfFigure(),
+                entity.getCountry(),
+                entity.getPackageSize(),
+                entity.getToySize()
                 );
     }
 
@@ -46,7 +53,15 @@ public class FigureMapper {
                 dto.currentPrice(),
                 dto.oldPrice(),
                 dto.amount(),
-                dto.images()
+                dto.images(),
+                dto.theme(),
+                dto.material(),
+                dto.characterName(),
+                dto.productType(),
+                dto.typeOfFigure(),
+                dto.country(),
+                dto.packageSize(),
+                dto.toySize()
         );
     }
 
@@ -62,6 +77,14 @@ public class FigureMapper {
                 dto.oldPrice(),
                 dto.amount(),
                 dto.images(),
+                dto.theme(),
+                dto.material(),
+                dto.characterName(),
+                dto.productType(),
+                dto.typeOfFigure(),
+                dto.country(),
+                dto.packageSize(),
+                dto.toySize(),
                 new Date()
         );
     }
