@@ -4,6 +4,7 @@ import com.teamChallenge.dto.request.UserRequestDto;
 import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.entity.figure.FigureEntity;
+import com.teamChallenge.entity.user.review.ReviewEntity;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
@@ -184,5 +185,23 @@ public class UserServiceImpl implements UserDetailsService, UserService {
             userRepository.save(user);
             log.info("{}: add figure (figureId: {}) to " + OBJECT_NAME + " (userId: {}) recently viewed list was sent", LogEnum.SERVICE, figure.getId(), user.getId());
         }
+    }
+
+    public void addReviewToUser(UserEntity user, ReviewEntity review) {
+        List<ReviewEntity> reviewList = user.getReviews();
+        reviewList.add(review);
+        user.setReviews(reviewList);
+        userRepository.save(user);
+    }
+
+    public void removeReviewFromUser(UserEntity user, ReviewEntity review) {
+        List<ReviewEntity> reviewList = user.getReviews();
+        if (reviewList.contains(review)) {
+            reviewList.remove(review);
+            user.setReviews(reviewList);
+            userRepository.save(user);
+        }
+
+        throw new CustomNotFoundException("Review in the user's review list", review.getId());
     }
 }

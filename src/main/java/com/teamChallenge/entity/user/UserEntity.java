@@ -1,6 +1,7 @@
 package com.teamChallenge.entity.user;
 
 import com.teamChallenge.entity.figure.FigureEntity;
+import com.teamChallenge.entity.user.review.ReviewEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
@@ -46,6 +47,9 @@ public class UserEntity {
     @Column(nullable = false)
     @CreatedDate
     private Date createdAt;
+
+    @DBRef
+    private List<ReviewEntity> reviews;
 
     @Column
     private List<FigureEntity> whishList;
