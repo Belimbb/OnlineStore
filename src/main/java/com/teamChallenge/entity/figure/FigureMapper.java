@@ -4,6 +4,7 @@ import com.teamChallenge.dto.request.figure.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryMapper;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceImpl;
+import com.teamChallenge.entity.user.review.ReviewMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -17,8 +18,12 @@ import java.util.stream.Collectors;
 @Component
 @AllArgsConstructor
 public class FigureMapper {
+
     private final SubCategoryMapper subCategoryMapper;
+
     private final SubCategoryServiceImpl subCategoryService;
+
+    private final ReviewMapper reviewMapper;
 
     public FigureResponseDto toResponseDto(FigureEntity entity){
         return new FigureResponseDto(
@@ -39,7 +44,8 @@ public class FigureMapper {
                 entity.getTypeOfFigure(),
                 entity.getCountry(),
                 entity.getPackageSize(),
-                entity.getToySize()
+                entity.getToySize(),
+                reviewMapper.toResponseDtoList(entity.getReviews())
                 );
     }
 
@@ -85,6 +91,7 @@ public class FigureMapper {
                 dto.country(),
                 dto.packageSize(),
                 dto.toySize(),
+                reviewMapper.toEntityListFromResponse(dto.reviewResponseDtoList()),
                 new Date()
         );
     }

@@ -12,5 +12,6 @@ public record UserResponseDto(String id,
                               Roles role,
                               Date createdAt,
                               List<FigureResponseDto> wishList,
-                              List<FigureResponseDto> recentlyViewed) {
+                              List<FigureResponseDto> recentlyViewed,
+                              List<ReviewResponseDto> reviewResponseDtoList) {
 }
