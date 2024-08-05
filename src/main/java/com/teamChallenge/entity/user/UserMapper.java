@@ -2,6 +2,7 @@ package com.teamChallenge.entity.user;
 
 import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.entity.figure.FigureMapper;
+import com.teamChallenge.entity.user.review.ReviewMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,8 @@ public class UserMapper {
 
     private final FigureMapper figureMapper;
 
+    private final ReviewMapper reviewMapper;
+
     public UserResponseDto toResponseDto(UserEntity entity) {
         return new UserResponseDto(
                 entity.getId(),
@@ -24,7 +27,8 @@ public class UserMapper {
                 entity.getRole(),
                 entity.getCreatedAt(),
                 figureMapper.toResponseDtoList(entity.getWhishList()),
-                figureMapper.toResponseDtoList(entity.getRecentlyViewed())
+                figureMapper.toResponseDtoList(entity.getRecentlyViewed()),
+                reviewMapper.toResponseDtoList(entity.getReviews())
         );
     }
 
@@ -36,6 +40,7 @@ public class UserMapper {
                 null,
                 dto.role(),
                 dto.createdAt(),
+                reviewMapper.toEntityListFromResponse(dto.reviewResponseDtoList()),
                 figureMapper.toEntityListFromResponse(dto.wishList()),
                 figureMapper.toEntityListFromResponse(dto.recentlyViewed())
         );

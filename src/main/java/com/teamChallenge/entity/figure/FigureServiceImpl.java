@@ -8,6 +8,7 @@ import com.teamChallenge.entity.figure.sections.category.CategoryServiceImpl;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceImpl;
 import com.teamChallenge.entity.user.UserServiceImpl;
+import com.teamChallenge.entity.user.review.ReviewEntity;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomBadRequestException;
@@ -251,5 +252,23 @@ public class FigureServiceImpl implements FigureService{
 
     public boolean existById(String id) {
         return figureRepository.existsById(id);
+    }
+
+    public void addReviewToFigure(FigureEntity figure, ReviewEntity review) {
+        List<ReviewEntity> reviewList = figure.getReviews();
+        reviewList.add(review);
+        figure.setReviews(reviewList);
+        figureRepository.save(figure);
+    }
+
+    public void removeReviewFromFigure(FigureEntity figure, ReviewEntity review) {
+        List<ReviewEntity> reviewList = figure.getReviews();
+        if (reviewList.contains(review)) {
+            reviewList.remove(review);
+            figure.setReviews(reviewList);
+            figureRepository.save(figure);
+        }
+
+        throw new CustomNotFoundException("Review in the figure's review list", review.getId());
     }
 }

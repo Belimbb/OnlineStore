@@ -6,6 +6,7 @@ import com.teamChallenge.entity.figure.FigureServiceImpl;
 import com.teamChallenge.entity.user.UserEntity;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.LogEnum;
+import com.teamChallenge.exception.exceptions.generalExceptions.CustomBadRequestException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,21 +50,20 @@ public class CartServiceImpl implements CartService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity currentUser = userService.findByEmail(email);
 
-        Map<String, Integer> figureMap = cartDto.figureIdAndAmountMap();
+        Map<String, Integer> figureIdAndAmountMap = cartDto.figureIdAndAmountMap();
+        figureIdAndAmountMap.entrySet().removeIf(entry -> !figureService.existById(entry.getKey()));
 
-        for (Map.Entry<String, Integer> entry : figureMap.entrySet()) {
-            if (!figureService.existById(entry.getKey())) {
-                figureMap.remove(entry.getKey());
-            }
+        if (figureIdAndAmountMap.isEmpty()) {
+            throw new CustomBadRequestException("This request is not valid");
         }
 
         if (cartRepository.existsByUser(currentUser)) {
             CartEntity cart = cartRepository.findByUser(currentUser);
-            return cartMapper.toResponseDto(addFigures(cart.getId(), figureMap));
+            return cartMapper.toResponseDto(addFigures(cart.getId(), figureIdAndAmountMap));
         }
 
-        int totalPrice = figureMap.keySet().stream().mapToInt(key -> figureService.findById(key).getCurrentPrice() * figureMap.get(key)).sum();
-        CartEntity newCart = new CartEntity(currentUser, totalPrice, figureMap);
+        int totalPrice = figureIdAndAmountMap.keySet().stream().mapToInt(key -> figureService.findById(key).getCurrentPrice() * figureIdAndAmountMap.get(key)).sum();
+        CartEntity newCart = new CartEntity(currentUser, totalPrice, figureIdAndAmountMap);
         CartEntity savedCart = cartRepository.save(newCart);
 
         log.info("{}: " + OBJECT_NAME + " (Id: {}) was created", LogEnum.SERVICE, savedCart.getId());
@@ -100,11 +100,10 @@ public class CartServiceImpl implements CartService {
     public CartResponseDto update(String id, CartRequestDto cartDto) {
         CartEntity cart = findById(id);
         Map<String, Integer> figureIdAndAmountMap = cartDto.figureIdAndAmountMap();
+        figureIdAndAmountMap.entrySet().removeIf(entry -> !figureService.existById(entry.getKey()));
 
-        for (Map.Entry<String, Integer> entry : figureIdAndAmountMap.entrySet()) {
-            if (!figureService.existById(entry.getKey())) {
-                figureIdAndAmountMap.remove(entry.getKey());
-            }
+        if (figureIdAndAmountMap.isEmpty()) {
+            throw new CustomBadRequestException("This request is not valid");
         }
 
         cart.setFigureIdAndAmountMap(figureIdAndAmountMap);
