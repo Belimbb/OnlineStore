@@ -92,6 +92,14 @@ public class OpenAPIConfig {
     }
 
     @Bean
+    public GroupedOpenApi apiReviewsV1() {
+        return GroupedOpenApi.builder()
+                .group("Reviews API V1")
+                .pathsToMatch("/api/reviews/**")
+                .build();
+    }
+
+    @Bean
     @Primary
     public OpenAPI customOpenAPIv1() {
         return new OpenAPI()

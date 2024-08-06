@@ -1,5 +1,6 @@
 package com.teamChallenge.entity.user;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.user.review.ReviewEntity;
 import jakarta.persistence.Column;
@@ -49,6 +50,7 @@ public class UserEntity {
     private Date createdAt;
 
     @DBRef
+    @JsonManagedReference
     private List<ReviewEntity> reviews;
 
     @Column

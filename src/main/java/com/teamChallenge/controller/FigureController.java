@@ -10,6 +10,7 @@ import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,6 +40,7 @@ public class FigureController {
 
     private final FigureServiceImpl figureService;
     private final UserServiceImpl userService;
+    private final AuthUtil authUtil;
 
     private final String mediaType = "application/json";
     private final String secReq = "BearerAuth";
@@ -55,7 +57,8 @@ public class FigureController {
     })
     @SecurityRequirement(name = secReq)
     public ResponseEntity<FigureResponseDto> addFigure(@Valid @NotNull @RequestBody FigureRequestDto request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
+
         FigureResponseDto figure = figureService.create(request);
 
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, figure.id());
@@ -151,7 +154,7 @@ public class FigureController {
     public ResponseEntity<FigureResponseDto> updateFigure(@PathVariable("figureId") String figureId,
                                                           @NotNull @RequestBody FigureRequestDto figureDto,
                                                           Principal principal) throws CustomNotFoundException, UnauthorizedAccessException{
-        validation(principal);
+        authUtil.validateAdminRole(principal);
 
         FigureResponseDto figureResponseDto = figureService.update(figureId, figureDto);
         log.info("{}: Figure (id: {}) has been updated", LogEnum.CONTROLLER, figureId);
@@ -171,16 +174,10 @@ public class FigureController {
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
     public void deleteUrlByShortId(@PathVariable("figureId") String figureId, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
         figureService.delete(figureId);
 
         log.info("{}: Figure (id: {}) has been deleted", LogEnum.CONTROLLER, figureId);
-    }
-
-    private void validation(Principal principal) throws UnauthorizedAccessException {
-        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
-            throw new UnauthorizedAccessException();
-        }
     }
 
     @PostMapping("{id}")
@@ -193,7 +190,8 @@ public class FigureController {
     })
     @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<?> addFigureToWishList(@PathVariable ("id")String figureId, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
+
         figureService.addFigureToUserWishList(principal.getName(), figureId);
 
         log.info("{}: Figure (id: {}) has been added to User (email: {}) wish list", LogEnum.SERVICE, figureId, principal.getName());

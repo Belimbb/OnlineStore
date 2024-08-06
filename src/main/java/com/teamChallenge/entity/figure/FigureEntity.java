@@ -1,5 +1,6 @@
 package com.teamChallenge.entity.figure;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.teamChallenge.entity.figure.sections.Labels;
 
 import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
@@ -69,6 +70,7 @@ public class FigureEntity {
     private int purchaseCount;
 
     @DBRef
+    @JsonManagedReference
     private List<ReviewEntity> reviews;
 
     @Column(nullable = false)

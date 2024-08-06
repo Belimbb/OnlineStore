@@ -3,7 +3,6 @@ package com.teamChallenge.controller.user;
 import com.teamChallenge.dto.request.UserRequestDto;
 import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.dto.response.UserResponseDto;
-import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
@@ -11,6 +10,7 @@ import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExi
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
 
+import com.teamChallenge.security.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -44,7 +44,7 @@ public class UserController {
     private static final String URI_USERS_WITH_ID = "/{id}";
 
     private final UserServiceImpl userService;
-
+    private final AuthUtil authUtil;
 
     @PostMapping("/add")
     @Operation(summary = "Add new User")
@@ -58,7 +58,8 @@ public class UserController {
     })
     @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<UserResponseDto> addUser(@Valid @NotNull @RequestBody SignupRequestDto request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
+
         UserResponseDto user = userService.create(request);
 
         log.info("{}: User (id: {}) has been added", LogEnum.SERVICE, user.id());
@@ -77,7 +78,8 @@ public class UserController {
     })
     @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<List<UserResponseDto>> userList(Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
+
         List<UserResponseDto> users = userService.getAll();
 
         log.info("{}: Users have been retrieved", LogEnum.CONTROLLER);
@@ -97,7 +99,8 @@ public class UserController {
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
     @SecurityRequirement(name = "BearerAuth")
     public UserResponseDto getById(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
+
         UserResponseDto user = userService.getById(id);
         log.info("{}: User (id: {}) has been retrieved", LogEnum.CONTROLLER, id);
         return user;
@@ -118,7 +121,8 @@ public class UserController {
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
     @SecurityRequirement(name = "BearerAuth")
     public UserResponseDto update(@PathVariable String id, @RequestBody UserRequestDto userRequestDto, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
+
         UserResponseDto user = userService.update(id, userRequestDto);
         log.info("{}: User (id: {}) has been updated", LogEnum.CONTROLLER, user.id());
         return user;
@@ -134,15 +138,9 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
     public void delete(@PathVariable String id, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
         userService.delete(id);
 
         log.info("{}: User (id: {}) has been deleted", LogEnum.CONTROLLER, id);
-    }
-
-    private void validation(Principal principal) throws UnauthorizedAccessException {
-        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
-            throw new UnauthorizedAccessException();
-        }
     }
 }

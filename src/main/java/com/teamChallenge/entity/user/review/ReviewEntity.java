@@ -1,5 +1,6 @@
 package com.teamChallenge.entity.user.review;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.user.UserEntity;
 import jakarta.persistence.Column;
@@ -30,6 +31,7 @@ public class ReviewEntity {
     private byte score;
 
     @DBRef
+    @JsonBackReference
     private UserEntity user;
 
     @Column(nullable = false)
@@ -43,6 +45,7 @@ public class ReviewEntity {
     private String disadvantages;
 
     @DBRef
+    @JsonBackReference
     private FigureEntity figure;
 
     public ReviewEntity(byte score, UserEntity user, String advantages, String disadvantages, FigureEntity figure) {
