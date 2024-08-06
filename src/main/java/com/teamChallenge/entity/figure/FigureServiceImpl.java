@@ -256,6 +256,9 @@ public class FigureServiceImpl implements FigureService{
 
     public void addReviewToFigure(FigureEntity figure, ReviewEntity review) {
         List<ReviewEntity> reviewList = figure.getReviews();
+        if (reviewList==null){
+            reviewList=new ArrayList<>();
+        }
         reviewList.add(review);
         figure.setReviews(reviewList);
         figureRepository.save(figure);
@@ -263,6 +266,8 @@ public class FigureServiceImpl implements FigureService{
 
     public void removeReviewFromFigure(FigureEntity figure, ReviewEntity review) {
         List<ReviewEntity> reviewList = figure.getReviews();
+
+        assert reviewList != null;
         if (reviewList.contains(review)) {
             reviewList.remove(review);
             figure.setReviews(reviewList);

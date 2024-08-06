@@ -9,6 +9,7 @@ import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -35,6 +36,9 @@ public class OrderController {
 
     private final OrderServiceImpl orderService;
     private final UserServiceImpl userService;
+    private final AuthUtil authUtil;
+
+    private final String secReq = "BearerAuth";
 
     @GetMapping
     @Operation(description = "get all orders")
@@ -65,7 +69,6 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "create an order")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created the order",
@@ -77,15 +80,16 @@ public class OrderController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
     })
+    @SecurityRequirement(name = secReq)
     public OrderResponseDto create(@RequestBody OrderRequestDto orderDto, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
+
         OrderResponseDto order = orderService.create(orderDto);
         log.info("{}: Order (id: {}) has been added", LogEnum.CONTROLLER, order.id());
         return order;
     }
 
     @PutMapping(URI_ORDER_WITH_ID)
-    @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "update an order by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated the order",
@@ -101,15 +105,16 @@ public class OrderController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             )
     })
+    @SecurityRequirement(name = secReq)
     public OrderResponseDto update(@PathVariable String id, @RequestBody OrderRequestDto orderDto, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
+
         OrderResponseDto order = orderService.update(id, orderDto);
         log.info("{}: Order (id: {}) has been updated", LogEnum.CONTROLLER, order.id());
         return order;
     }
 
     @DeleteMapping(URI_ORDER_WITH_ID)
-    @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "delete an order by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Deleted the order",
@@ -121,16 +126,12 @@ public class OrderController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
+    @SecurityRequirement(name = secReq)
     public ResponseEntity<?> delete(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
+
         orderService.delete(id);
         log.info("{}: Order (id: {}) has been deleted", LogEnum.CONTROLLER, id);
         return ResponseEntity.ok().build();
-    }
-
-    private void validation(Principal principal) throws UnauthorizedAccessException {
-        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
-            throw new UnauthorizedAccessException();
-        }
     }
 }

@@ -9,6 +9,7 @@ import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -38,6 +39,7 @@ public class WishListController {
     private static final String URI_FIGURES_WITH_ID = "/{figureId}";
 
     private final UserServiceImpl userService;
+    private final AuthUtil authUtil;
 
     private final FigureMapper figureMapper;
 
@@ -72,17 +74,12 @@ public class WishListController {
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
     public void removeFigureFromWishList(@PathVariable String figureId, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
+
         String email = principal.getName();
 
         userService.removeFigureFromWishList(email, figureId);
 
         log.info("{}: Figure (id: {}) has been removed from User (email: {}) wish list", LogEnum.CONTROLLER, figureId, email);
-    }
-
-    private void validation(Principal principal) throws UnauthorizedAccessException {
-        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
-            throw new UnauthorizedAccessException();
-        }
     }
 }

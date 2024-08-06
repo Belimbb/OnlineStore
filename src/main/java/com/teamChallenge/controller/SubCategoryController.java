@@ -5,6 +5,8 @@ import com.teamChallenge.dto.response.SubCategoryResponseDto;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -29,6 +32,9 @@ public class SubCategoryController {
     private static final String URI_SUB_CATEGORY_WITH_ID = "/{id}";
 
     private final SubCategoryService subCategoryService;
+    private final AuthUtil authUtil;
+
+    private final String secReq = "BearerAuth";
 
     @GetMapping
     @Operation(description = "get all subCategories")
@@ -59,7 +65,6 @@ public class SubCategoryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "create a subCategory")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created the subCategory",
@@ -71,14 +76,16 @@ public class SubCategoryController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
     })
-    public SubCategoryResponseDto create(@RequestBody SubCategoryRequestDto subCategoryRequestDto) {
+    @SecurityRequirement(name = secReq)
+    public SubCategoryResponseDto create(@RequestBody SubCategoryRequestDto subCategoryRequestDto, Principal principal) throws UnauthorizedAccessException {
+        authUtil.validateAdminRole(principal);
+
         SubCategoryResponseDto subCategoryResponseDto = subCategoryService.createSubCategory(subCategoryRequestDto);
         log.info("{}: SubCategory (id: {}) has been added", LogEnum.CONTROLLER, subCategoryResponseDto.id());
         return subCategoryResponseDto;
     }
 
     @PutMapping(URI_SUB_CATEGORY_WITH_ID)
-    @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "update a subCategory by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated the subCategory",
@@ -94,14 +101,16 @@ public class SubCategoryController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             )
     })
-    public SubCategoryResponseDto update(@RequestBody SubCategoryRequestDto subCategoryRequestDto, @PathVariable String id) {
+    @SecurityRequirement(name = secReq)
+    public SubCategoryResponseDto update(@RequestBody SubCategoryRequestDto subCategoryRequestDto, @PathVariable String id, Principal principal) throws UnauthorizedAccessException {
+        authUtil.validateAdminRole(principal);
+
         SubCategoryResponseDto subCategoryResponseDto = subCategoryService.updateSubCategory(id, subCategoryRequestDto);
         log.info("{}: SubCategory (id: {}) has been updated", LogEnum.CONTROLLER, id);
         return subCategoryResponseDto;
     }
 
     @DeleteMapping(URI_SUB_CATEGORY_WITH_ID)
-    @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "delete a subCategory by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Deleted the subCategory",
@@ -113,7 +122,10 @@ public class SubCategoryController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             )
     })
-    public ResponseEntity<?> delete(@PathVariable String id) {
+    @SecurityRequirement(name = secReq)
+    public ResponseEntity<?> delete(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
+        authUtil.validateAdminRole(principal);
+
         subCategoryService.deleteSubCategory(id);
         log.info("{}: SubCategory (id: {}) has been deleted", LogEnum.CONTROLLER, id);
         return ResponseEntity.ok().build();

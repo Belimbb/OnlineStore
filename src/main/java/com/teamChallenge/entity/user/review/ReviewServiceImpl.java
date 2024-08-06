@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -55,10 +56,12 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         ReviewEntity newReview = new ReviewEntity(reviewRequestDto.score(), user, reviewRequestDto.advantages(), reviewRequestDto.disadvantages(), figure);
-        figureService.addReviewToFigure(figure, newReview);
-        userService.addReviewToUser(user, newReview);
+        newReview.setCreationDate(new Date());
 
         ReviewEntity savedReview = reviewRepository.save(newReview);
+        figureService.addReviewToFigure(figure, savedReview);
+        userService.addReviewToUser(user, savedReview);
+
         log.info("{}: " + OBJECT_NAME + " (Id: {}) was created", LogEnum.SERVICE, savedReview.getId());
         return reviewMapper.toResponseDto(savedReview);
     }
@@ -87,7 +90,7 @@ public class ReviewServiceImpl implements ReviewService {
         log.info("{}: " + OBJECT_NAME + " (id: {}) was deleted", LogEnum.SERVICE, id);
     }
 
-    private ReviewEntity findById(String id) {
+    public ReviewEntity findById(String id) {
         return reviewRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
     }
 }
