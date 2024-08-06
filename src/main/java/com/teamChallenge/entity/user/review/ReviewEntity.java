@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.Objects;
 
 @Document(collection = "reviews")
 @Data
@@ -54,5 +55,18 @@ public class ReviewEntity {
         this.advantages = advantages;
         this.disadvantages = disadvantages;
         this.figure = figure;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ReviewEntity that = (ReviewEntity) o;
+        return score == that.score && Objects.equals(creationDate, that.creationDate) && Objects.equals(advantages, that.advantages) && Objects.equals(disadvantages, that.disadvantages);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(score, creationDate, advantages, disadvantages);
     }
 }

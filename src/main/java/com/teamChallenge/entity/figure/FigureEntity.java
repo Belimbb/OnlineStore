@@ -21,6 +21,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Document(collection = "figures")
 @Data
@@ -73,6 +76,12 @@ public class FigureEntity {
     @JsonManagedReference
     private List<ReviewEntity> reviews;
 
+    @Column
+    private double averageRating;
+
+    @Column
+    private Map<Byte, Integer> ratingDistribution;
+
     @Column(nullable = false)
     @CreatedDate
     private Date createdAt;
@@ -85,6 +94,25 @@ public class FigureEntity {
         if (uniqueHash==null||uniqueHash.isBlank()){
             this.uniqueHash = generateUniqueHash();
         }
+    }
+
+    private void updateRating(){
+        this.averageRating = reviews.stream()
+                .mapToInt(ReviewEntity::getScore)
+                .average()
+                .orElse(0.0);
+
+        this.ratingDistribution = reviews.stream()
+                .collect(Collectors.groupingBy(
+                        ReviewEntity::getScore,
+                        Collectors.reducing(0, e -> 1, Integer::sum)
+                ));
+    }
+
+    public void setReviews(List<ReviewEntity> reviews) {
+        this.reviews = reviews;
+
+        updateRating();
     }
 
     private String generateUniqueHash() {
@@ -111,6 +139,8 @@ public class FigureEntity {
         this.setId(id);
         this.setReviews(reviews);
         this.setCreatedAt(createdAt);
+
+        updateRating();
     }
 
     private void setup(String name, String shortDescription, String longDescription, SubCategoryEntity subCategory,
@@ -136,5 +166,18 @@ public class FigureEntity {
         this.setPackageSize(packageSize);
         this.setToySize(toySize);
         this.setUniqueHash(generateUniqueHash());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FigureEntity entity = (FigureEntity) o;
+        return Objects.equals(uniqueHash, entity.uniqueHash);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(uniqueHash);
     }
 }

@@ -45,7 +45,9 @@ public class FigureMapper {
                 entity.getCountry(),
                 entity.getPackageSize(),
                 entity.getToySize(),
-                reviewMapper.toResponseDtoList(entity.getReviews())
+                reviewMapper.toResponseDtoList(entity.getReviews()),
+                entity.getAverageRating(),
+                entity.getRatingDistribution()
                 );
     }
 

@@ -180,7 +180,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         }
 
         if (!recentlyViewedList.contains(figure)) {
-            recentlyViewedList.add(0, figure);
+            recentlyViewedList.addFirst(figure);
             user.setRecentlyViewed(recentlyViewedList);
             userRepository.save(user);
             log.info("{}: add figure (figureId: {}) to " + OBJECT_NAME + " (userId: {}) recently viewed list was sent", LogEnum.SERVICE, figure.getId(), user.getId());
