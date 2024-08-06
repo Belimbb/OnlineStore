@@ -180,7 +180,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         }
 
         if (!recentlyViewedList.contains(figure)) {
-            recentlyViewedList.add(0, figure);
+            recentlyViewedList.addFirst(figure);
             user.setRecentlyViewed(recentlyViewedList);
             userRepository.save(user);
             log.info("{}: add figure (figureId: {}) to " + OBJECT_NAME + " (userId: {}) recently viewed list was sent", LogEnum.SERVICE, figure.getId(), user.getId());
@@ -189,6 +189,9 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     public void addReviewToUser(UserEntity user, ReviewEntity review) {
         List<ReviewEntity> reviewList = user.getReviews();
+        if (reviewList==null){
+            reviewList = new ArrayList<>();
+        }
         reviewList.add(review);
         user.setReviews(reviewList);
         userRepository.save(user);
@@ -196,6 +199,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     public void removeReviewFromUser(UserEntity user, ReviewEntity review) {
         List<ReviewEntity> reviewList = user.getReviews();
+
+        assert reviewList != null;
         if (reviewList.contains(review)) {
             reviewList.remove(review);
             user.setReviews(reviewList);

@@ -24,6 +24,12 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 
+/**
+ * Need update. Security and Service use
+ */
+
+
+
 @RestController
 @RequestMapping("/api/carts")
 @Slf4j
@@ -127,11 +133,5 @@ public class CartController {
     public void delete(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
         cartService.delete(id);
         log.info("{}: Cart (id: {}) has been deleted", LogEnum.CONTROLLER, id);
-    }
-
-    private void validation(Principal principal) throws UnauthorizedAccessException {
-        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
-            throw new UnauthorizedAccessException();
-        }
     }
 }
