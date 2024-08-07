@@ -96,6 +96,17 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userMapper.toResponseDto(user);
     }
 
+    public UserResponseDto update(UserEntity user) {
+        String id = user.getId();
+        if (!userRepository.existsById(id)){
+            throw new CustomNotFoundException(OBJECT_NAME, id);
+        }
+        userRepository.save(user);
+
+        log.info("{}: " + OBJECT_NAME + " (id: {}) was updated (from entity)", LogEnum.SERVICE, id);
+        return userMapper.toResponseDto(user);
+    }
+
     @Override
     public boolean delete(String id) {
         UserEntity user = findById(id);
