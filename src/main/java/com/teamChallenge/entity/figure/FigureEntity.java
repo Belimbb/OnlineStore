@@ -1,6 +1,7 @@
 package com.teamChallenge.entity.figure;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.teamChallenge.entity.figure.additionalInfo.AdditionalInfo;
 import com.teamChallenge.entity.figure.sections.Labels;
 
 import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
@@ -66,8 +67,7 @@ public class FigureEntity {
     @Column
     private List<String> images;
 
-    @Column (nullable = false)
-    private String theme, material, characterName, productType, typeOfFigure, country, packageSize, toySize;
+    private AdditionalInfo additionalInfo;
 
     @Column
     private int purchaseCount;
@@ -121,21 +121,17 @@ public class FigureEntity {
     }
 
     public FigureEntity(String name, String shortDescription, String longDescription, SubCategoryEntity subCategory,
-                        Labels label, int currentPrice, int oldPrice, int amount, List<String> images,
-                        String theme, String material, String characterName, String productType, String typeOfFigure,
-                        String country, String packageSize, String toySize) {
+                        Labels label, int currentPrice, int oldPrice, int amount, List<String> images, AdditionalInfo additionalInfo) {
         setup(name, shortDescription, longDescription, subCategory, label, currentPrice, oldPrice,
-                amount, images, theme, material, characterName, productType, typeOfFigure, country, packageSize, toySize);
+                amount, images, additionalInfo);
     }
 
     public FigureEntity(String id, String name, String shortDescription, String longDescription,
                         SubCategoryEntity subCategory, Labels label, int currentPrice, int oldPrice,
-                        int amount, List<String> images,
-                        String theme, String material, String characterName, String productType, String typeOfFigure,
-                        String country, String packageSize, String toySize,
+                        int amount, List<String> images, AdditionalInfo additionalInfo,
                         List<ReviewEntity> reviews, Date createdAt) {
         setup(name, shortDescription, longDescription, subCategory, label, currentPrice, oldPrice,
-                amount, images, theme, material, characterName, productType, typeOfFigure, country, packageSize, toySize);
+                amount, images, additionalInfo);
         this.setId(id);
         this.setReviews(reviews);
         this.setCreatedAt(createdAt);
@@ -144,9 +140,7 @@ public class FigureEntity {
     }
 
     private void setup(String name, String shortDescription, String longDescription, SubCategoryEntity subCategory,
-                       Labels label, int currentPrice, int oldPrice, int amount, List<String> images,
-                       String theme, String material, String characterName, String productType, String typeOfFigure,
-                       String country, String packageSize, String toySize){
+                       Labels label, int currentPrice, int oldPrice, int amount, List<String> images, AdditionalInfo additionalInfo){
         this.setName(name);
         this.setShortDescription(shortDescription);
         this.setLongDescription(longDescription);
@@ -157,14 +151,7 @@ public class FigureEntity {
         this.setOldPrice(oldPrice);
         this.setAmount(amount);
         this.setImages(images);
-        this.setTheme(theme);
-        this.setMaterial(material);
-        this.setCharacterName(characterName);
-        this.setProductType(productType);
-        this.setTypeOfFigure(typeOfFigure);
-        this.setCountry(country);
-        this.setPackageSize(packageSize);
-        this.setToySize(toySize);
+        this.setAdditionalInfo(additionalInfo);
         this.setUniqueHash(generateUniqueHash());
     }
 
