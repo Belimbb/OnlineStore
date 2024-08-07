@@ -2,6 +2,7 @@ package com.teamChallenge.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.teamChallenge.entity.figure.FigureEntity;
+import com.teamChallenge.entity.user.address.AddressInfo;
 import com.teamChallenge.entity.user.review.ReviewEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
@@ -45,6 +46,8 @@ public class UserEntity {
 
     @Column(nullable = false)
     private Roles role;
+
+    private AddressInfo addressInfo;
 
     @Column(nullable = false)
     @CreatedDate
