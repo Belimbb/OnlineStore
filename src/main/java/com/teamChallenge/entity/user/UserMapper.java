@@ -15,7 +15,6 @@ import java.util.List;
 public class UserMapper {
 
     private final FigureMapper figureMapper;
-
     private final ReviewMapper reviewMapper;
 
     public UserResponseDto toResponseDto(UserEntity entity) {
@@ -25,6 +24,7 @@ public class UserMapper {
                 entity.getUsername(),
                 entity.getPassword(),
                 entity.getRole(),
+                entity.getAddressInfo(),
                 entity.getCreatedAt(),
                 figureMapper.toResponseDtoList(entity.getWhishList()),
                 figureMapper.toResponseDtoList(entity.getRecentlyViewed()),
@@ -39,6 +39,7 @@ public class UserMapper {
                 dto.email(),
                 null,
                 dto.role(),
+                dto.addressInfo(),
                 dto.createdAt(),
                 reviewMapper.toEntityListFromResponse(dto.reviewResponseDtoList()),
                 figureMapper.toEntityListFromResponse(dto.wishList()),

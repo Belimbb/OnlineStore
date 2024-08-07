@@ -2,6 +2,7 @@ package com.teamChallenge.entity.order;
 
 import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.user.UserEntity;
+import com.teamChallenge.entity.user.address.AddressInfo;
 import jakarta.persistence.Column;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
@@ -23,7 +24,7 @@ public class OrderEntity {
     private String id;
 
     @Column(nullable = false)
-    private String address;
+    private AddressInfo address;
 
     @Column(nullable = false)
     private int price;
@@ -37,7 +38,7 @@ public class OrderEntity {
     @DBRef
     private UserEntity user;
 
-    public OrderEntity(String address, int price, List<FigureEntity> figureList, UserEntity user) {
+    public OrderEntity(AddressInfo address, int price, List<FigureEntity> figureList, UserEntity user) {
         this.address = address;
         this.price = price;
         status = Statuses.NEW;

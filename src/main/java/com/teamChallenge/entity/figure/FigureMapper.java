@@ -36,15 +36,8 @@ public class FigureMapper {
                 entity.getCurrentPrice(),
                 entity.getOldPrice(),
                 entity.getAmount(),
+                entity.getAdditionalInfo(),
                 entity.getImages(),
-                entity.getTheme(),
-                entity.getMaterial(),
-                entity.getCharacterName(),
-                entity.getProductType(),
-                entity.getTypeOfFigure(),
-                entity.getCountry(),
-                entity.getPackageSize(),
-                entity.getToySize(),
                 reviewMapper.toResponseDtoList(entity.getReviews()),
                 entity.getAverageRating(),
                 entity.getRatingDistribution()
@@ -62,14 +55,7 @@ public class FigureMapper {
                 dto.oldPrice(),
                 dto.amount(),
                 dto.images(),
-                dto.theme(),
-                dto.material(),
-                dto.characterName(),
-                dto.productType(),
-                dto.typeOfFigure(),
-                dto.country(),
-                dto.packageSize(),
-                dto.toySize()
+                dto.additionalInfo()
         );
     }
 
@@ -85,14 +71,7 @@ public class FigureMapper {
                 dto.oldPrice(),
                 dto.amount(),
                 dto.images(),
-                dto.theme(),
-                dto.material(),
-                dto.characterName(),
-                dto.productType(),
-                dto.typeOfFigure(),
-                dto.country(),
-                dto.packageSize(),
-                dto.toySize(),
+                dto.additionalInfo(),
                 reviewMapper.toEntityListFromResponse(dto.reviewResponseDtoList()),
                 new Date()
         );
