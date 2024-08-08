@@ -22,6 +22,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -49,9 +50,9 @@ public class AuthController {
     @Operation(summary = "Login user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Login successful",
-                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = JwtResponseDto.class)) }),
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = JwtResponseDto.class)) }),
             @ApiResponse(responseCode = "4XX", description = "Login failed",
-                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = CustomErrorResponse.class)) })
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CustomErrorResponse.class)) })
     })
     public ResponseEntity<JwtResponseDto> authenticateUser(@Valid @RequestBody LoginRequestDto loginRequestDto) throws Exception {
         Authentication authentication;
@@ -76,9 +77,9 @@ public class AuthController {
     @Operation(summary = "Register user")
     @ApiResponses( value = {
             @ApiResponse(responseCode = "201", description = "Registration successful",
-                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDto.class)) }),
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserResponseDto.class)) }),
             @ApiResponse(responseCode = "4XX", description = "Registration failed",
-                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = CustomErrorResponse.class)) })
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CustomErrorResponse.class)) })
     })
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequestDto signUpRequestDto) throws CustomAlreadyExistException {
         UserResponseDto userDto = userService.create(signUpRequestDto);

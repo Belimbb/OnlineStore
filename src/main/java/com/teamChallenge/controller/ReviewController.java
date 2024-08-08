@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -40,26 +41,26 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/reviews")
 public class ReviewController {
+    private final static String SEC_REC = "BearerAuth";
+    private static final String URI_WITH_ID = "/{id}";
+
     private final FigureServiceImpl figureService;
     private final UserServiceImpl userService;
     private final ReviewServiceImpl reviewService;
     private final AuthUtil authUtil;
 
-    private final String mediaType = "application/json";
-    private final String secReq = "BearerAuth";
-
     @PostMapping
+    @SecurityRequirement(name = SEC_REC)
     @Operation(summary = "Add review")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Added Review",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = FigureResponseDto.class))}),
             @ApiResponse(responseCode = "400", description = "Validation errors",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    @SecurityRequirement(name = secReq)
-    public ResponseEntity<FigureResponseDto> addReview(@RequestBody ReviewRequestDto review) throws CustomAlreadyExistException, UnauthorizedAccessException {
+    public ResponseEntity<FigureResponseDto> create(@RequestBody ReviewRequestDto review) throws CustomAlreadyExistException, UnauthorizedAccessException {
         ReviewResponseDto reviewDto = reviewService.create(review);
         FigureResponseDto figure = figureService.getById(review.figureId());
 
@@ -73,11 +74,11 @@ public class ReviewController {
     @Operation(summary = "Get all reviews")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of reviews",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = ReviewResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<ReviewResponseDto>> reviewList() throws CustomNotFoundException {
+    public ResponseEntity<List<ReviewResponseDto>> getAll() throws CustomNotFoundException {
         List<ReviewResponseDto> dtos = reviewService.getAll();
 
         log.info("{}: Reviews have been retrieved", LogEnum.CONTROLLER);
@@ -86,42 +87,41 @@ public class ReviewController {
                 .body(dtos);
     }
 
-    @PutMapping("/{reviewId}")
+    @PutMapping(URI_WITH_ID)
+    @SecurityRequirement(name = SEC_REC)
     @Operation(summary = "Update figure")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Figure updated"),
             @ApiResponse(responseCode = "404", description = "Figure not found",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    @SecurityRequirement(name = secReq)
-    public ResponseEntity<ReviewResponseDto> updateReview(@PathVariable("reviewId") String reviewId,
+    public ResponseEntity<ReviewResponseDto> update(@PathVariable String id,
                                                           @NotNull @RequestBody ReviewRequestDto requestDto,
                                                           Principal principal) throws CustomNotFoundException, UnauthorizedAccessException{
-        validateIsOwnerOrAdmin(reviewId, principal);
+        validateIsOwnerOrAdmin(id, principal);
 
-        ReviewResponseDto updated = reviewService.update(reviewId, requestDto);
-        log.info("{}: Figure (id: {}) has been updated", LogEnum.CONTROLLER, reviewId);
+        ReviewResponseDto updated = reviewService.update(id, requestDto);
+        log.info("{}: Figure (id: {}) has been updated", LogEnum.CONTROLLER, id);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(updated);
     }
 
-    @DeleteMapping("{reviewId}")
+    @DeleteMapping(URI_WITH_ID)
+    @SecurityRequirement(name = SEC_REC)
     @Operation(summary = "Delete review")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Review deleted"),
             @ApiResponse(responseCode = "404", description = "Review not found",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    @ResponseStatus(HttpStatus.OK)
-    @SecurityRequirement(name = "BearerAuth")
-    public void deleteReview(@PathVariable("reviewId") String reviewId, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
-        validateIsOwnerOrAdmin(reviewId, principal);
+    public void delete(@PathVariable String id, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
+        validateIsOwnerOrAdmin(id, principal);
 
-        reviewService.delete(reviewId);
-        log.info("{}: Figure (id: {}) has been deleted", LogEnum.CONTROLLER, reviewId);
+        reviewService.delete(id);
+        log.info("{}: Figure (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }
 
 

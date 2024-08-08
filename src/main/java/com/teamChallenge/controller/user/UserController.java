@@ -43,23 +43,24 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UserController {
 
-    private static final String URI_USERS_WITH_ID = "/{id}";
+    private static final String URI_WITH_ID = "/{id}";
+    private static final String SEC_REC = "BearerAuth";
 
     private final UserServiceImpl userService;
     private final AuthUtil authUtil;
 
-    @PostMapping("/add")
+    @PostMapping()
+    @SecurityRequirement(name = SEC_REC)
     @Operation(summary = "Add new User")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Added new User",
-                    content = { @Content(mediaType = "application/json",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UserResponseDto.class))}),
             @ApiResponse(responseCode = "400", description = "Validation errors",
-                    content = { @Content(mediaType = "application/json",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<UserResponseDto> addUser(@Valid @NotNull @RequestBody SignupRequestDto request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
+    public ResponseEntity<UserResponseDto> create(@Valid @NotNull @RequestBody SignupRequestDto request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
         authUtil.validateAdminRole(principal);
 
         UserResponseDto user = userService.create(request);
@@ -70,16 +71,16 @@ public class UserController {
                 .body(user);
     }
 
-    @GetMapping("/all")
+    @GetMapping()
+    @SecurityRequirement(name = SEC_REC)
     @Operation(summary = "Get all users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List users",
-                    content = { @Content(mediaType = "application/json",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = UserResponseDto.class)))}
             )
     })
-    @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<List<UserResponseDto>> userList(Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
+    public ResponseEntity<List<UserResponseDto>> getAll(Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
         authUtil.validateAdminRole(principal);
 
         List<UserResponseDto> users = userService.getAll();
@@ -90,16 +91,16 @@ public class UserController {
                 .body(users);
     }
 
-    @GetMapping(URI_USERS_WITH_ID)
+    @GetMapping(URI_WITH_ID)
+    @SecurityRequirement(name = SEC_REC)
     @Operation(description = "get an user by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found the user",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UserResponseDto.class))}),
             @ApiResponse(responseCode = "404", description = "User not found",
-                    content = { @Content(mediaType = "application/json",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    @SecurityRequirement(name = "BearerAuth")
     public UserResponseDto getById(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
         authUtil.validateAdminRole(principal);
 
@@ -108,20 +109,20 @@ public class UserController {
         return user;
     }
 
-    @PutMapping(URI_USERS_WITH_ID)
+    @PutMapping(URI_WITH_ID)
+    @SecurityRequirement(name = SEC_REC)
     @Operation(description = "update an user by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated the user",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UserResponseDto.class))}),
             @ApiResponse(responseCode = "400", description = "Validation error",
-                    content = { @Content(mediaType = "application/json",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
             @ApiResponse(responseCode = "404", description = "User not found",
-                    content = { @Content(mediaType = "application/json",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    @SecurityRequirement(name = "BearerAuth")
     public UserResponseDto update(@PathVariable String id, @RequestBody UserRequestDto userRequestDto, Principal principal) throws UnauthorizedAccessException {
         authUtil.validateAdminRole(principal);
 
@@ -131,19 +132,19 @@ public class UserController {
     }
 
     @PutMapping("/address")
+    @SecurityRequirement(name = SEC_REC)
     @Operation(description = "update user address info")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated user address info",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UserResponseDto.class))}),
             @ApiResponse(responseCode = "400", description = "Validation error",
-                    content = { @Content(mediaType = "application/json",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
             @ApiResponse(responseCode = "404", description = "User not found",
-                    content = { @Content(mediaType = "application/json",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    @SecurityRequirement(name = "BearerAuth")
     public UserResponseDto update(@RequestBody AddressInfo addressInfo, Principal principal) throws UnauthorizedAccessException {
         //authUtil.validateAdminRole(principal);
         UserEntity userEntity = userService.findByEmail(principal.getName());
@@ -154,15 +155,15 @@ public class UserController {
         return user;
     }
 
-    @DeleteMapping(URI_USERS_WITH_ID)
+    @DeleteMapping(URI_WITH_ID)
+    @SecurityRequirement(name = SEC_REC)
     @Operation(summary = "Delete user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User deleted"),
             @ApiResponse(responseCode = "404", description = "User not found",
-                    content = { @Content(mediaType = "application/json",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
     @ResponseStatus(HttpStatus.OK)
-    @SecurityRequirement(name = "BearerAuth")
     public void delete(@PathVariable String id, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
         authUtil.validateAdminRole(principal);
         userService.delete(id);

@@ -3,7 +3,6 @@ package com.teamChallenge.controller;
 import com.teamChallenge.dto.request.figure.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
-import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
@@ -24,6 +23,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,25 +37,24 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/figures")
 public class FigureController {
+    private static final String URI_WITH_ID = "/{id}";
+    private static final String SEC_REC = "BearerAuth";
 
     private final FigureServiceImpl figureService;
     private final UserServiceImpl userService;
     private final AuthUtil authUtil;
 
-    private final String mediaType = "application/json";
-    private final String secReq = "BearerAuth";
-
-    @PostMapping("/add")
+    @PostMapping()
+    @SecurityRequirement(name = SEC_REC)
     @Operation(summary = "Add new Figure")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Added new Figure",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = FigureResponseDto.class))}),
             @ApiResponse(responseCode = "400", description = "Validation errors",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    @SecurityRequirement(name = secReq)
     public ResponseEntity<FigureResponseDto> addFigure(@Valid @NotNull @RequestBody FigureRequestDto request, Principal principal) throws CustomAlreadyExistException, UnauthorizedAccessException {
         authUtil.validateAdminRole(principal);
 
@@ -71,7 +70,7 @@ public class FigureController {
     @Operation(summary = "Get all figures. Now available those filters: \"features\", \"bestsellers\", \"in stock\", \"hot deals\"")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List figures",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
@@ -92,7 +91,7 @@ public class FigureController {
     @Operation(summary = "Get all figures by category")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List figures by category",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
@@ -109,7 +108,7 @@ public class FigureController {
     @Operation(summary = "Get all figures by sub category")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List figures by subCategory",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
@@ -122,79 +121,78 @@ public class FigureController {
                 .body(figureResponseDtos);
     }
 
-    @GetMapping("/{figureId}")
+    @GetMapping(URI_WITH_ID)
+    @SecurityRequirement(name = SEC_REC)
     @Operation(summary = "Get figure by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Getting figure",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = FigureResponseDto.class)) }),
             @ApiResponse(responseCode = "404", description = "Figure not found",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) })
 
     })
-    @SecurityRequirement(name = secReq)
-    public ResponseEntity<FigureResponseDto> getFigureById(@NotBlank @NotNull @PathVariable("figureId") String figureId) throws CustomNotFoundException{
-        FigureResponseDto figure = figureService.getById(figureId);
+    public ResponseEntity<FigureResponseDto> getFigureById(@NotBlank @NotNull @PathVariable String id) throws CustomNotFoundException{
+        FigureResponseDto figure = figureService.getById(id);
         log.info("{}: Figure (id: {}) has been retrieved", LogEnum.SERVICE, figure.id());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(figure);
     }
 
-    @PutMapping("/{figureId}")
+    @PutMapping(URI_WITH_ID)
+    @SecurityRequirement(name = SEC_REC)
     @Operation(summary = "Update figure")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Figure updated"),
             @ApiResponse(responseCode = "404", description = "Figure not found",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    @SecurityRequirement(name = secReq)
-    public ResponseEntity<FigureResponseDto> updateFigure(@PathVariable("figureId") String figureId,
+    public ResponseEntity<FigureResponseDto> updateFigure(@PathVariable String id,
                                                           @NotNull @RequestBody FigureRequestDto figureDto,
                                                           Principal principal) throws CustomNotFoundException, UnauthorizedAccessException{
         authUtil.validateAdminRole(principal);
 
-        FigureResponseDto figureResponseDto = figureService.update(figureId, figureDto);
-        log.info("{}: Figure (id: {}) has been updated", LogEnum.CONTROLLER, figureId);
+        FigureResponseDto figureResponseDto = figureService.update(id, figureDto);
+        log.info("{}: Figure (id: {}) has been updated", LogEnum.CONTROLLER, id);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(figureResponseDto);
     }
 
-    @DeleteMapping("/{figureId}")
+    @DeleteMapping(URI_WITH_ID)
+    @SecurityRequirement(name = SEC_REC)
+    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Delete figure")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Figure deleted"),
             @ApiResponse(responseCode = "404", description = "Figure not found",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    @ResponseStatus(HttpStatus.OK)
-    @SecurityRequirement(name = "BearerAuth")
-    public void deleteUrlByShortId(@PathVariable("figureId") String figureId, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
+    public void deleteUrlByShortId(@PathVariable String id, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
         authUtil.validateAdminRole(principal);
-        figureService.delete(figureId);
+        figureService.delete(id);
 
-        log.info("{}: Figure (id: {}) has been deleted", LogEnum.CONTROLLER, figureId);
+        log.info("{}: Figure (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }
 
-    @PostMapping("{id}")
+    @PostMapping(URI_WITH_ID)
+    @SecurityRequirement(name = SEC_REC)
     @Operation(summary = "Add figure to wish list")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Figure added"),
             @ApiResponse(responseCode = "400", description = "Validation errors",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<?> addFigureToWishList(@PathVariable ("id")String figureId, Principal principal) throws UnauthorizedAccessException {
+    public void addFigureToWishList(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
         authUtil.validateAdminRole(principal);
 
-        figureService.addFigureToUserWishList(principal.getName(), figureId);
+        figureService.addFigureToUserWishList(principal.getName(), id);
 
-        log.info("{}: Figure (id: {}) has been added to User (email: {}) wish list", LogEnum.SERVICE, figureId, principal.getName());
-        return ResponseEntity.ok().build();
+        log.info("{}: Figure (id: {}) has been added to User (email: {}) wish list", LogEnum.SERVICE, id, principal.getName());
     }
 }
