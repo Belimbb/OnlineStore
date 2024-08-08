@@ -2,13 +2,9 @@ package com.teamChallenge.controller;
 
 import com.teamChallenge.dto.request.AdsRequestDto;
 import com.teamChallenge.dto.response.AdsResponseDto;
-import com.teamChallenge.entity.advertisement.AdvertisementServiceImpl;
-import com.teamChallenge.entity.user.Roles;
-import com.teamChallenge.entity.user.UserServiceImpl;
+import com.teamChallenge.entity.advertisement.AdvertisementService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
-import com.teamChallenge.security.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,28 +13,23 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @Slf4j
-@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/ads")
 public class AdsController {
-    private final AdvertisementServiceImpl adsService;
-    private final AuthUtil authUtil;
 
-    @PostMapping("/add")
+    private final AdvertisementService adsService;
+
+    public static final String URI_ADS_WITH_ID = "/{id}";
+
+    @PostMapping
     @Operation(summary = "Add new Ads")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Added new Ads",
@@ -49,17 +40,13 @@ public class AdsController {
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
     @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<AdsResponseDto> addAds(@Valid @NotNull @RequestBody AdsRequestDto request, Principal principal) throws UnauthorizedAccessException {
-        authUtil.validateAdminRole(principal);
-
+    public AdsResponseDto addAds(@Valid @RequestBody AdsRequestDto request) {
         AdsResponseDto ads = adsService.create(request);
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, ads.id());
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ads);
+        return ads;
     }
 
-    @GetMapping("/all")
+    @GetMapping
     @Operation(summary = "Get all ads")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of ads",
@@ -67,16 +54,13 @@ public class AdsController {
                             array = @ArraySchema(schema = @Schema(implementation = AdsResponseDto.class)))}
             )
     })
-    public ResponseEntity<List<AdsResponseDto>> adsList() {
+    public List<AdsResponseDto> adsList() {
         List<AdsResponseDto> adsDtoList = adsService.getAll();
-
         log.info("{}: Ads list have been retrieved", LogEnum.CONTROLLER);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(adsDtoList);
+        return adsDtoList;
     }
 
-    @GetMapping("/{adsId}")
+    @GetMapping(URI_ADS_WITH_ID)
     @Operation(summary = "Get ads by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Got ads",
@@ -87,27 +71,22 @@ public class AdsController {
                             schema = @Schema(implementation = CustomErrorResponse.class)) })
 
     })
-    public ResponseEntity<AdsResponseDto> getAdsById(@NotBlank @NotNull @PathVariable("adsId") String adsId) {
-        AdsResponseDto ads = adsService.getById(adsId);
+    public AdsResponseDto getAdsById(@PathVariable String id) {
+        AdsResponseDto ads = adsService.getById(id);
         log.info("{}: Ads (id: {}) has been retrieved", LogEnum.SERVICE, ads.id());
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ads);
+        return ads;
     }
 
-    @DeleteMapping("/{adsId}")
+    @DeleteMapping(URI_ADS_WITH_ID)
     @Operation(summary = "Delete ads")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ads deleted"),
             @ApiResponse(responseCode = "404", description = "Ads not found",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
-    public void deleteAdsById(@PathVariable("adsId") String adsId, Principal principal) throws UnauthorizedAccessException {
-        authUtil.validateAdminRole(principal);
-
-        adsService.delete(adsId);
-        log.info("{}: Ads (id: {}) has been deleted", LogEnum.CONTROLLER, adsId);
+    public void deleteAdsById(@PathVariable String id) {
+        adsService.delete(id);
+        log.info("{}: Ads (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }
 }

@@ -8,7 +8,7 @@ import com.teamChallenge.entity.figure.sections.category.CategoryServiceImpl;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceImpl;
 import com.teamChallenge.entity.user.UserServiceImpl;
-import com.teamChallenge.entity.user.review.ReviewEntity;
+import com.teamChallenge.entity.review.ReviewEntity;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomBadRequestException;
@@ -71,23 +71,31 @@ public class FigureServiceImpl implements FigureService{
         return figureMapper.toResponseDto(figure);
     }
 
-    public void addFigureToUserWishList(String email, String figureId) {
+    @Override
+    public void addFigureToWishList(String figureId) {
         FigureEntity figure = findById(figureId);
-        userService.addFigureToWishList(email, figure);
+        userService.addFigureToWishList(figure);
     }
 
     @Override
-    public List<FigureResponseDto> getAll(String filter, String labelName, String startPrice, String endPrice, String pageStr, String sizeStr) {
+    public List<FigureResponseDto> getAll(String categoryName, String subcategoryName, String filter, String labelName,
+                                          String startPrice, String endPrice, String pageStr, String sizeStr) {
         Pageable pageable = getPageable(getIntegerFromString(pageStr), getIntegerFromString(sizeStr));
         List<FigureEntity> figureList;
 
-        if (labelName != null) {
+        if (categoryName != null) {
+            figureList = getFigureListByCategory(categoryName);
+
+        }   else if (!subcategoryName.isBlank()) {
+            figureList = getFigureListBySubCategory(subcategoryName);
+
+        }   else if (labelName != null) {
             figureList = getFigureListByLabelDESC(labelName);
 
-        } else if (filter != null) {
+        }   else if (filter != null) {
             figureList = getFigureListByFilter(filter);
 
-        }  else {
+        }   else {
             figureList = figureRepository.findAll();
             log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
         }
@@ -100,24 +108,18 @@ public class FigureServiceImpl implements FigureService{
         return figureMapper.toResponseDtoList(figurePage);
     }
 
-    public List<FigureResponseDto> getAllFiguresByCategory(String categoryName){
+    public List<FigureEntity> getFigureListByCategory(String categoryName){
         CategoryEntity category = categoryService.getByName(categoryName);
-        Optional<List<FigureEntity>> figureEntities = figureRepository.findByCategory(category);
-        if (figureEntities.isPresent()){
-            log.info("{}: All " + OBJECT_NAME + " by category {} retrieved from db", LogEnum.SERVICE, categoryName);
-            return figureMapper.toResponseDtoList(figureEntities.get());
-        }
-        throw new CustomNotFoundException(OBJECT_NAME + "s");
+        List<FigureEntity> figureEntities = figureRepository.findByCategory(category);
+        log.info("{}: All " + OBJECT_NAME + " by category {} retrieved from db", LogEnum.SERVICE, categoryName);
+        return figureEntities;
     }
 
-    public List<FigureResponseDto> getAllFiguresBySubCategory (String subCategoryName){
+    public List<FigureEntity> getFigureListBySubCategory (String subCategoryName){
         SubCategoryEntity subCategory = subCategoryService.getByName(subCategoryName);
-        Optional<List<FigureEntity>> figureEntities = figureRepository.findBySubCategory(subCategory);
-        if (figureEntities.isPresent()){
-            log.info("{}: All " + OBJECT_NAME + "s by sub category {} retrieved from db", LogEnum.SERVICE, subCategory);
-            return figureMapper.toResponseDtoList(figureEntities.get());
-        }
-        throw new CustomNotFoundException(OBJECT_NAME);
+        List<FigureEntity> figureEntities = figureRepository.findBySubCategory(subCategory);
+        log.info("{}: All " + OBJECT_NAME + "s by sub category {} retrieved from db", LogEnum.SERVICE, subCategory);
+        return figureEntities;
     }
 
     @Override

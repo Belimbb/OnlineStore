@@ -3,27 +3,21 @@ package com.teamChallenge.controller;
 import com.teamChallenge.dto.request.OrderRequestDto;
 import com.teamChallenge.dto.response.OrderResponseDto;
 import com.teamChallenge.entity.order.OrderService;
-import com.teamChallenge.entity.order.OrderServiceImpl;
-import com.teamChallenge.entity.user.Roles;
-import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
-import com.teamChallenge.security.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -32,12 +26,9 @@ import java.util.List;
 @Slf4j
 public class OrderController {
 
-    private static final String URI_ORDER_WITH_ID = "/{id}";
+    private final OrderService orderService;
 
-    private final OrderServiceImpl orderService;
-    private final UserServiceImpl userService;
-    private final AuthUtil authUtil;
-
+    private static final String URI_ORDERS_WITH_ID = "/{id}";
     private final String secReq = "BearerAuth";
 
     @GetMapping
@@ -49,7 +40,7 @@ public class OrderController {
         return orderList;
     }
 
-    @GetMapping(URI_ORDER_WITH_ID)
+    @GetMapping(URI_ORDERS_WITH_ID)
     @Operation(description = "get an order by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found the order",
@@ -81,15 +72,13 @@ public class OrderController {
             ),
     })
     @SecurityRequirement(name = secReq)
-    public OrderResponseDto create(@RequestBody OrderRequestDto orderDto, Principal principal) throws UnauthorizedAccessException {
-        authUtil.validateAdminRole(principal);
-
+    public OrderResponseDto create(@Valid @RequestBody OrderRequestDto orderDto) {
         OrderResponseDto order = orderService.create(orderDto);
         log.info("{}: Order (id: {}) has been added", LogEnum.CONTROLLER, order.id());
         return order;
     }
 
-    @PutMapping(URI_ORDER_WITH_ID)
+    @PutMapping(URI_ORDERS_WITH_ID)
     @Operation(description = "update an order by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated the order",
@@ -106,15 +95,13 @@ public class OrderController {
             )
     })
     @SecurityRequirement(name = secReq)
-    public OrderResponseDto update(@PathVariable String id, @RequestBody OrderRequestDto orderDto, Principal principal) throws UnauthorizedAccessException {
-        authUtil.validateAdminRole(principal);
-
+    public OrderResponseDto update(@PathVariable String id, @Valid @RequestBody OrderRequestDto orderDto) {
         OrderResponseDto order = orderService.update(id, orderDto);
         log.info("{}: Order (id: {}) has been updated", LogEnum.CONTROLLER, order.id());
         return order;
     }
 
-    @DeleteMapping(URI_ORDER_WITH_ID)
+    @DeleteMapping(URI_ORDERS_WITH_ID)
     @Operation(description = "delete an order by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Deleted the order",
@@ -127,11 +114,8 @@ public class OrderController {
                     })
     })
     @SecurityRequirement(name = secReq)
-    public ResponseEntity<?> delete(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
-        authUtil.validateAdminRole(principal);
-
+    public void delete(@PathVariable String id) {
         orderService.delete(id);
         log.info("{}: Order (id: {}) has been deleted", LogEnum.CONTROLLER, id);
-        return ResponseEntity.ok().build();
     }
 }

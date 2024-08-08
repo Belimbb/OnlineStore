@@ -3,12 +3,8 @@ package com.teamChallenge.controller;
 import com.teamChallenge.dto.request.CartRequestDto;
 import com.teamChallenge.dto.response.CartResponseDto;
 import com.teamChallenge.entity.shoppingCart.CartService;
-import com.teamChallenge.entity.shoppingCart.CartServiceImpl;
-import com.teamChallenge.entity.user.Roles;
-import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,14 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
-
-/**
- * Need update. Security and Service use
- */
-
-
 
 @RestController
 @RequestMapping("/api/carts")
@@ -37,13 +26,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CartController {
 
-    private static final String URI_CART_WITH_ID = "/{id}";
-
-    private final UserServiceImpl userService;
-
     private final CartService cartService;
 
-    @GetMapping("/all")
+    private static final String URI_CARTS_WITH_ID = "/{id}";
+
+    @GetMapping
     @Operation(summary = "Get all carts")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of carts",
@@ -57,7 +44,7 @@ public class CartController {
         return cartList;
     }
 
-    @GetMapping(URI_CART_WITH_ID)
+    @GetMapping(URI_CARTS_WITH_ID)
     @Operation(description = "get a cart by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Cart found",
@@ -89,13 +76,13 @@ public class CartController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
     })
-    public CartResponseDto create(@RequestBody CartRequestDto cartDto, Principal principal) throws UnauthorizedAccessException {
+    public CartResponseDto create(@RequestBody CartRequestDto cartDto) {
         CartResponseDto cart = cartService.create(cartDto);
         log.info("{}: Cart (id: {}) has been added", LogEnum.CONTROLLER, cart.id());
         return cart;
     }
 
-    @PutMapping(URI_CART_WITH_ID)
+    @PutMapping(URI_CARTS_WITH_ID)
     @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "update a cart by id")
     @ApiResponses(value = {
@@ -112,13 +99,13 @@ public class CartController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public CartResponseDto update(@PathVariable String id, @RequestBody CartRequestDto cartDto, Principal principal) throws UnauthorizedAccessException {
+    public CartResponseDto update(@PathVariable String id, @RequestBody CartRequestDto cartDto) {
         CartResponseDto cart = cartService.update(id, cartDto);
         log.info("{}: Cart (id: {}) has been updated", LogEnum.CONTROLLER, cart.id());
         return cart;
     }
 
-    @DeleteMapping(URI_CART_WITH_ID)
+    @DeleteMapping(URI_CARTS_WITH_ID)
     @SecurityRequirement(name = "BearerAuth")
     @Operation(description = "delete a cart by id")
     @ApiResponses(value = {
@@ -131,7 +118,7 @@ public class CartController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public void delete(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
+    public void delete(@PathVariable String id) {
         cartService.delete(id);
         log.info("{}: Cart (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }

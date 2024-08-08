@@ -6,7 +6,7 @@ import com.teamChallenge.entity.figure.sections.Labels;
 
 import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
-import com.teamChallenge.entity.user.review.ReviewEntity;
+import com.teamChallenge.entity.review.ReviewEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
