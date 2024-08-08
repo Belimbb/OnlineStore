@@ -14,4 +14,5 @@ public interface UserService {
     UserResponseDto create(SignupRequestDto signupRequestDto) throws CustomAlreadyExistException;
     UserResponseDto update(String id, UserRequestDto userRequestDto);
     boolean delete(String id);
+    void removeFigureFromWishList(String figureId);
 }

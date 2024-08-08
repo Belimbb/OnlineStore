@@ -2,7 +2,7 @@ package com.teamChallenge.entity.user;
 
 import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.entity.figure.FigureMapper;
-import com.teamChallenge.entity.user.review.ReviewMapper;
+import com.teamChallenge.entity.review.ReviewMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

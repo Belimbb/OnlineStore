@@ -1,4 +1,4 @@
-package com.teamChallenge.entity.user.review;
+package com.teamChallenge.entity.review;
 
 import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.user.UserEntity;

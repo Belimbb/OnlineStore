@@ -4,7 +4,7 @@ import com.teamChallenge.dto.request.UserRequestDto;
 import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.entity.figure.FigureEntity;
-import com.teamChallenge.entity.user.review.ReviewEntity;
+import com.teamChallenge.entity.review.ReviewEntity;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -33,7 +34,6 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     private String adminEmail;
 
     private final UserRepository userRepository;
-
     private final UserMapper userMapper;
 
     private static final String OBJECT_NAME = "user";
@@ -54,10 +54,6 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     public UserResponseDto getById(String id) {
         log.info("{}: request on retrieving " + OBJECT_NAME + " by id {} was sent", LogEnum.SERVICE, id);
         return userMapper.toResponseDto(findById(id));
-    }
-
-    public UserResponseDto getByEmail(String email){
-        return userMapper.toResponseDto(findByEmail(email));
     }
 
     @Override
@@ -90,20 +86,10 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         UserEntity user = findById(id);
         user.setUsername(userRequestDto.username());
         user.setPassword(userRequestDto.password());
+        user.setAddressInfo(userRequestDto.addressInfo());
 
         userRepository.save(user);
         log.info("{}: " + OBJECT_NAME + " (id: {}) was updated", LogEnum.SERVICE, id);
-        return userMapper.toResponseDto(user);
-    }
-
-    public UserResponseDto update(UserEntity user) {
-        String id = user.getId();
-        if (!userRepository.existsById(id)){
-            throw new CustomNotFoundException(OBJECT_NAME, id);
-        }
-        userRepository.save(user);
-
-        log.info("{}: " + OBJECT_NAME + " (id: {}) was updated (from entity)", LogEnum.SERVICE, id);
         return userMapper.toResponseDto(user);
     }
 
@@ -115,15 +101,16 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return true;
     }
 
-    public UserResponseDto addFigureToWishList(String email, FigureEntity figure) {
+    public void addFigureToWishList(FigureEntity figure) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = findByEmail(email);
         List<FigureEntity> whishList = user.getWhishList();
-        if (whishList==null){
+        if (whishList == null){
             whishList = new ArrayList<>();
         }
         whishList.add(figure);
         user.setWhishList(whishList);
-        return userMapper.toResponseDto(userRepository.save(user));
+        userRepository.save(user);
     }
 
     public FigureEntity getFigureFromWishList(UserEntity user, String figureId){
@@ -135,7 +122,9 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         throw new CustomNotFoundException(figureId);
     }
 
-    public void removeFigureFromWishList(String email, String figureId) {
+    @Override
+    public void removeFigureFromWishList(String figureId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = findByEmail(email);
         user.getWhishList().remove(getFigureFromWishList(user, figureId));
         userRepository.save(user);

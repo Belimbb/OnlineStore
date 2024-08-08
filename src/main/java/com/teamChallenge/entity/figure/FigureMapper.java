@@ -4,7 +4,7 @@ import com.teamChallenge.dto.request.figure.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryMapper;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceImpl;
-import com.teamChallenge.entity.user.review.ReviewMapper;
+import com.teamChallenge.entity.review.ReviewMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
