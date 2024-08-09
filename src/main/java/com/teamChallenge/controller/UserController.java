@@ -1,18 +1,13 @@
-package com.teamChallenge.controller.user;
+package com.teamChallenge.controller;
 
 import com.teamChallenge.dto.request.UserRequestDto;
 import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.dto.response.UserResponseDto;
-import com.teamChallenge.entity.user.UserEntity;
-import com.teamChallenge.entity.user.UserServiceImpl;
+import com.teamChallenge.entity.user.UserService;
 import com.teamChallenge.entity.user.address.AddressInfo;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
-import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
-import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
 
-import com.teamChallenge.security.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,18 +17,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -59,7 +51,6 @@ public class UserController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    @SecurityRequirement(name = "BearerAuth")
     public UserResponseDto create(@Valid @RequestBody SignupRequestDto request) {
         UserResponseDto user = userService.create(request);
         log.info("{}: User (id: {}) has been added", LogEnum.SERVICE, user.id());
@@ -114,30 +105,6 @@ public class UserController {
     public UserResponseDto update(@PathVariable String id, @Valid @RequestBody UserRequestDto userRequestDto) {
         UserResponseDto user = userService.update(id, userRequestDto);
         log.info("{}: User (id: {}) has been updated", LogEnum.CONTROLLER, user.id());
-        return user;
-    }
-
-    @PutMapping("/address")
-    @SecurityRequirement(name = SEC_REC)
-    @Operation(description = "update user address info")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Updated user address info",
-                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UserResponseDto.class))}),
-            @ApiResponse(responseCode = "400", description = "Validation error",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CustomErrorResponse.class))}
-            ),
-            @ApiResponse(responseCode = "404", description = "User not found",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public UserResponseDto updateAddress(@RequestBody AddressInfo addressInfo, Principal principal) throws UnauthorizedAccessException {
-        //authUtil.validateAdminRole(principal);
-        UserEntity userEntity = userService.findByEmail(principal.getName());
-        userEntity.setAddressInfo(addressInfo);
-
-        UserResponseDto user = userService.update(userEntity);
-        log.info("{}: User (id: {}) address info has been updated", LogEnum.CONTROLLER, user.id());
         return user;
     }
 

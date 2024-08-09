@@ -2,15 +2,10 @@ package com.teamChallenge.controller;
 
 import com.teamChallenge.dto.request.figure.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
-import com.teamChallenge.entity.figure.FigureServiceImpl;
-import com.teamChallenge.entity.user.Roles;
-import com.teamChallenge.entity.user.UserServiceImpl;
+import com.teamChallenge.entity.figure.FigureService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
-import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
-import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
-import com.teamChallenge.security.AuthUtil;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,17 +13,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
+
+import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -52,7 +45,7 @@ public class FigureController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    public FigureResponseDto addFigure(@Valid @RequestBody FigureRequestDto request) {
+    public FigureResponseDto create(@Valid @RequestBody FigureRequestDto request) {
         FigureResponseDto figure = figureService.create(request);
 
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, figure.id());
@@ -67,7 +60,7 @@ public class FigureController {
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public List<FigureResponseDto> figureList(@RequestParam(required = false) String filter, @RequestParam(required = false) String label,
+    public List<FigureResponseDto> getAll(@RequestParam(required = false) String filter, @RequestParam(required = false) String label,
                                                               @RequestParam(required = false) String category, @RequestParam(required = false) String subcategory,
                                                               @RequestParam(required = false) String start_price, @RequestParam(required = false) String end_price,
                                                               @RequestParam(defaultValue = "0") String page, @RequestParam(defaultValue = "10") String size) {
@@ -82,14 +75,14 @@ public class FigureController {
     @Operation(summary = "Get figure by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Getting figure",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = FigureResponseDto.class)) }),
             @ApiResponse(responseCode = "404", description = "Figure not found",
-                    content = { @Content(mediaType = mediaType,
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) })
 
     })
-    public FigureResponseDto getFigureById(@PathVariable String id) {
+    public FigureResponseDto getById(@PathVariable String id) {
         FigureResponseDto figure = figureService.getById(id);
         log.info("{}: Figure (id: {}) has been retrieved", LogEnum.SERVICE, figure.id());
         return figure;
@@ -104,7 +97,7 @@ public class FigureController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    public FigureResponseDto updateFigure(@PathVariable String id, @Valid @RequestBody FigureRequestDto figureDto) {
+    public FigureResponseDto update(@PathVariable String id, @Valid @RequestBody FigureRequestDto figureDto) {
         FigureResponseDto figureResponseDto = figureService.update(id, figureDto);
         log.info("{}: Figure (id: {}) has been updated", LogEnum.CONTROLLER, id);
         return figureResponseDto;
@@ -118,7 +111,7 @@ public class FigureController {
             @ApiResponse(responseCode = "404", description = "Figure not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public void deleteUrlByShortId(@PathVariable String id) {
+    public void delete(@PathVariable String id) {
         figureService.delete(id);
         log.info("{}: Figure (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }

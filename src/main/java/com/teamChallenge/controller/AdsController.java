@@ -1,15 +1,11 @@
 package com.teamChallenge.controller;
 
 import com.teamChallenge.dto.request.AdsRequestDto;
-import com.teamChallenge.dto.request.figure.FigureRequestDto;
 import com.teamChallenge.dto.response.AdsResponseDto;
-import com.teamChallenge.dto.response.FigureResponseDto;
-import com.teamChallenge.entity.advertisement.AdvertisementServiceImpl;
+import com.teamChallenge.entity.advertisement.AdvertisementService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
-import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
-import com.teamChallenge.security.AuthUtil;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,18 +13,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -53,9 +50,7 @@ public class AdsController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    public AdsResponseDto create(@Valid @NotNull @RequestBody AdsRequestDto request, Principal principal) throws UnauthorizedAccessException {
-        authUtil.validateAdminRole(principal);
-
+    public AdsResponseDto create(@Valid @RequestBody AdsRequestDto request) {
         AdsResponseDto ads = adsService.create(request);
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, ads.id());
         return ads;
@@ -69,7 +64,7 @@ public class AdsController {
                             array = @ArraySchema(schema = @Schema(implementation = AdsResponseDto.class)))}
             )
     })
-    public List<AdsResponseDto> adsList() {
+    public List<AdsResponseDto> getAll() {
         List<AdsResponseDto> adsDtoList = adsService.getAll();
 
         log.info("{}: Ads list have been retrieved", LogEnum.CONTROLLER);
@@ -102,9 +97,7 @@ public class AdsController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    public AdsResponseDto update(@PathVariable String id, @NotNull @RequestBody AdsRequestDto adsDto, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException{
-        authUtil.validateAdminRole(principal);
-
+    public AdsResponseDto update(@PathVariable String id, @NotNull @RequestBody AdsRequestDto adsDto){
         AdsResponseDto updated = adsService.update(id, adsDto);
         log.info("{}: Ads (id: {}) has been updated", LogEnum.CONTROLLER, id);
 
@@ -120,9 +113,7 @@ public class AdsController {
             @ApiResponse(responseCode = "404", description = "Ads not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public void delete(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
-        authUtil.validateAdminRole(principal);
-
+    public void delete(@PathVariable String id) {
         adsService.delete(id);
         log.info("{}: Ads (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }

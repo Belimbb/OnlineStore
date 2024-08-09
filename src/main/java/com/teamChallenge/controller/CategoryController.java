@@ -5,22 +5,23 @@ import com.teamChallenge.dto.response.CategoryResponseDto;
 import com.teamChallenge.entity.figure.sections.category.CategoryService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
-import com.teamChallenge.security.AuthUtil;
+
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -48,9 +49,7 @@ public class CategoryController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
     })
-    public CategoryResponseDto create(@RequestBody CategoryRequestDto categoryRequestDto, Principal principal) throws UnauthorizedAccessException {
-        authUtil.validateAdminRole(principal);
-
+    public CategoryResponseDto create(@Valid @RequestBody CategoryRequestDto categoryRequestDto) {
         CategoryResponseDto categoryResponseDto = categoryService.createCategory(categoryRequestDto);
         log.info("{}: Category (id: {}) has been added", LogEnum.CONTROLLER, categoryResponseDto.id());
         return categoryResponseDto;

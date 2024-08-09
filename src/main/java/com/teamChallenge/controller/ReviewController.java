@@ -3,17 +3,10 @@ package com.teamChallenge.controller;
 import com.teamChallenge.dto.request.ReviewRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.dto.response.ReviewResponseDto;
-import com.teamChallenge.entity.figure.FigureServiceImpl;
-import com.teamChallenge.entity.user.UserEntity;
-import com.teamChallenge.entity.user.UserServiceImpl;
-import com.teamChallenge.entity.user.review.ReviewServiceImpl;
+import com.teamChallenge.entity.review.ReviewService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
-import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
-import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
 
-import com.teamChallenge.security.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,17 +15,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -77,12 +66,12 @@ public class ReviewController {
         return dtos;
     }
 
-    @PutMapping(URI_WITH_ID)
+    @GetMapping(URI_WITH_ID)
     @SecurityRequirement(name = SEC_REC)
     @Operation(summary = "Get review by ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Figure updated"),
-            @ApiResponse(responseCode = "404", description = "Figure not found",
+            @ApiResponse(responseCode = "200", description = "Review received"),
+            @ApiResponse(responseCode = "404", description = "Review not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
@@ -101,7 +90,6 @@ public class ReviewController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    @SecurityRequirement(name = secReq)
     public ReviewResponseDto update(@PathVariable String id, @Valid @RequestBody ReviewRequestDto requestDto) {
         ReviewResponseDto updated = reviewService.update(id, requestDto);
         log.info("{}: Figure (id: {}) has been updated", LogEnum.CONTROLLER, id);

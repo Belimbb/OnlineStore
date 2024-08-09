@@ -3,11 +3,9 @@ package com.teamChallenge.controller;
 import com.teamChallenge.dto.request.BannerRequestDto;
 import com.teamChallenge.dto.response.BannerResponseDto;
 import com.teamChallenge.entity.banner.BannerService;
-import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
-import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
-import com.teamChallenge.security.AuthUtil;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,12 +13,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -36,6 +37,7 @@ public class BannerController {
 
     @PostMapping
     @SecurityRequirement(name = SEC_REC)
+    @ResponseStatus(HttpStatus.CREATED)
     @Operation(description = "create a banner")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created the banner",
@@ -47,13 +49,12 @@ public class BannerController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
     })
-    public BannerResponseDto create(@RequestBody BannerRequestDto bannerRequestDto, Principal principal) throws UnauthorizedAccessException {
-        authUtil.validateAdminRole(principal);
-
+    public BannerResponseDto create(@Valid @RequestBody BannerRequestDto bannerRequestDto) {
         BannerResponseDto bannerResponseDto = bannerService.create(bannerRequestDto);
         log.info("{}: Banner (id: {}) has been added", LogEnum.CONTROLLER, bannerResponseDto.id());
         return bannerResponseDto;
     }
+
     @GetMapping
     @Operation(summary = "Get all banners")
     @ApiResponses(value = {

@@ -86,7 +86,7 @@ public class FigureServiceImpl implements FigureService{
         if (categoryName != null) {
             figureList = getFigureListByCategory(categoryName);
 
-        }   else if (!subcategoryName.isBlank()) {
+        }   else if (subcategoryName!=null && !subcategoryName.isBlank()) {
             figureList = getFigureListBySubCategory(subcategoryName);
 
         }   else if (labelName != null) {
