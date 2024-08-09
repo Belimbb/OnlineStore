@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +34,7 @@ public class FigureController {
     private final String secReq = "BearerAuth";
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add new Figure")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Added new Figure",
@@ -57,12 +59,15 @@ public class FigureController {
                             array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
             )
     })
-    public List<FigureResponseDto> figureList(@RequestParam(required = false) String filter, @RequestParam(required = false) String label,
-                                                              @RequestParam(required = false) String category, @RequestParam(required = false) String subcategory,
-                                                              @RequestParam(required = false) String start_price, @RequestParam(required = false) String end_price,
-                                                              @RequestParam(defaultValue = "0") String page, @RequestParam(defaultValue = "10") String size) {
-        List<FigureResponseDto> figureResponseDtos = figureService.getAll(category, subcategory, filter, label, start_price, end_price, page, size);
+    public List<FigureResponseDto> figureList(@RequestParam(required = false) String category, @RequestParam(required = false) String subcategory,
+                                              @RequestParam(required = false) String filter, @RequestParam(required = false) String label,
+                                              @RequestParam(required = false) String type, @RequestParam(required = false) String genre,
+                                              @RequestParam(required = false) String brand, @RequestParam(required = false) String material,
+                                              @RequestParam(required = false) String start_price, @RequestParam(required = false) String end_price,
+                                              @RequestParam(defaultValue = "0") String page, @RequestParam(defaultValue = "10") String size) {
 
+        List<FigureResponseDto> figureResponseDtos = figureService.getAll(category, subcategory, filter, label, type, genre,
+                brand, material, start_price, end_price, page, size);
         log.info("{}: Figures have been retrieved", LogEnum.CONTROLLER);
         return figureResponseDtos;
     }
