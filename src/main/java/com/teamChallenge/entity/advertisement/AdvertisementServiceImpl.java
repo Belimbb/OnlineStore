@@ -43,10 +43,14 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     }
 
     @Override
-    public AdsResponseDto update(AdsRequestDto adsDto) {
-        AdvertisementEntity advertisement = advertisementRepository.save(advertisementMapper.toEntity(adsDto));
-        log.info("{}: " + OBJECT_NAME +" (id: {}) updated)", LogEnum.SERVICE, advertisement.getId());
-        return advertisementMapper.toResponseDto(advertisement);
+    public AdsResponseDto update(String id, AdsRequestDto adsDto) {
+        AdvertisementEntity entity = findById(id);
+        entity.setText(adsDto.text());
+        entity.setUrl(adsDto.url());
+
+        advertisementRepository.save(entity);
+        log.info("{}: " + OBJECT_NAME +" (id: {}) updated)", LogEnum.SERVICE, entity.getId());
+        return advertisementMapper.toResponseDto(entity);
     }
 
     @Override
