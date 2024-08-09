@@ -3,8 +3,11 @@ package com.teamChallenge.controller;
 import com.teamChallenge.dto.request.BannerRequestDto;
 import com.teamChallenge.dto.response.BannerResponseDto;
 import com.teamChallenge.entity.banner.BannerService;
+import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,13 +15,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -27,16 +29,36 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BannerController {
 
+    public static final String URI_WITH_ID = "/{id}";
+    private static final String SEC_REC = "BearerAuth";
+
     private final BannerService bannerService;
 
-    public static final String URI_BANNERS_WITH_ID = "/{id}";
-    private final String secReq = "BearerAuth";
+    @PostMapping
+    @SecurityRequirement(name = SEC_REC)
+    @Operation(description = "create a banner")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created the banner",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = BannerResponseDto.class))}
+            ),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CustomErrorResponse.class))}
+            ),
+    })
+    public BannerResponseDto create(@RequestBody BannerRequestDto bannerRequestDto, Principal principal) throws UnauthorizedAccessException {
+        authUtil.validateAdminRole(principal);
 
+        BannerResponseDto bannerResponseDto = bannerService.create(bannerRequestDto);
+        log.info("{}: Banner (id: {}) has been added", LogEnum.CONTROLLER, bannerResponseDto.id());
+        return bannerResponseDto;
+    }
     @GetMapping
     @Operation(summary = "Get all banners")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of banners",
-                    content = { @Content(mediaType = "application/json",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = BannerResponseDto.class)))}
             )
     })
@@ -46,7 +68,7 @@ public class BannerController {
         return bannerResponseDtoList;
     }
 
-    @GetMapping(URI_BANNERS_WITH_ID)
+    @GetMapping(URI_WITH_ID)
     @Operation(description = "get a banner by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Banner found",
@@ -64,28 +86,8 @@ public class BannerController {
         return bannerResponseDto;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    @SecurityRequirement(name = secReq)
-    @Operation(description = "create a banner")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created the banner",
-                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = BannerResponseDto.class))}
-            ),
-            @ApiResponse(responseCode = "400", description = "Validation error",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CustomErrorResponse.class))}
-            ),
-    })
-    public BannerResponseDto create(@Valid @RequestBody BannerRequestDto bannerRequestDto) {
-        BannerResponseDto bannerResponseDto = bannerService.create(bannerRequestDto);
-        log.info("{}: Banner (id: {}) has been added", LogEnum.CONTROLLER, bannerResponseDto.id());
-        return bannerResponseDto;
-    }
-
-    @PutMapping(URI_BANNERS_WITH_ID)
-    @SecurityRequirement(name = secReq)
+    @PutMapping(URI_WITH_ID)
+    @SecurityRequirement(name = SEC_REC)
     @Operation(description = "update a banner by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated the banner",
@@ -93,7 +95,7 @@ public class BannerController {
                             schema = @Schema(implementation = BannerResponseDto.class))}
             ),
             @ApiResponse(responseCode = "400", description = "Validation error",
-                    content = { @Content(mediaType = "application/json",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
             @ApiResponse(responseCode = "404", description = "Banner not found",
@@ -107,8 +109,8 @@ public class BannerController {
         return bannerResponseDto;
     }
 
-    @DeleteMapping(URI_BANNERS_WITH_ID)
-    @SecurityRequirement(name = "BearerAuth")
+    @DeleteMapping(URI_WITH_ID)
+    @SecurityRequirement(name = SEC_REC)
     @Operation(description = "delete a banner by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Deleted the banner",

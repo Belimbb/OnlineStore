@@ -3,8 +3,12 @@ package com.teamChallenge.controller;
 import com.teamChallenge.dto.request.CartRequestDto;
 import com.teamChallenge.dto.response.CartResponseDto;
 import com.teamChallenge.entity.shoppingCart.CartService;
+import com.teamChallenge.entity.shoppingCart.CartServiceImpl;
+import com.teamChallenge.entity.user.Roles;
+import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,7 +22,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/carts")
@@ -26,25 +32,46 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CartController {
 
+    private static final String URI_WITH_ID = "/{id}";
+    private static final String SEC_REC = "BearerAuth";
+
     private final CartService cartService;
 
-    private static final String URI_CARTS_WITH_ID = "/{id}";
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @SecurityRequirement(name = SEC_REC)
+    @Operation(description = "create a cart")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created the cart",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CartResponseDto.class))}
+            ),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CustomErrorResponse.class))}
+            ),
+    })
+    public CartResponseDto create(@RequestBody CartRequestDto cartDto) throws UnauthorizedAccessException {
+        CartResponseDto cart = cartService.create(cartDto);
+        log.info("{}: Cart (id: {}) has been added", LogEnum.CONTROLLER, cart.id());
+        return cart;
+    }
 
-    @GetMapping
+    @GetMapping()
     @Operation(summary = "Get all carts")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of carts",
-                    content = { @Content(mediaType = "application/json",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = CartResponseDto.class)))}
             )
     })
-    public List<CartResponseDto> cartList() {
+    public List<CartResponseDto> getAll() {
         List<CartResponseDto> cartList = cartService.getAll();
         log.info("{}: Cart list has been retrieved", LogEnum.CONTROLLER);
         return cartList;
     }
 
-    @GetMapping(URI_CARTS_WITH_ID)
+    @GetMapping(URI_WITH_ID)
     @Operation(description = "get a cart by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Cart found",
@@ -62,28 +89,8 @@ public class CartController {
         return cart;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    @SecurityRequirement(name = "BearerAuth")
-    @Operation(description = "create a cart")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created the cart",
-                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CartResponseDto.class))}
-            ),
-            @ApiResponse(responseCode = "400", description = "Validation error",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CustomErrorResponse.class))}
-            ),
-    })
-    public CartResponseDto create(@RequestBody CartRequestDto cartDto) {
-        CartResponseDto cart = cartService.create(cartDto);
-        log.info("{}: Cart (id: {}) has been added", LogEnum.CONTROLLER, cart.id());
-        return cart;
-    }
-
-    @PutMapping(URI_CARTS_WITH_ID)
-    @SecurityRequirement(name = "BearerAuth")
+    @PutMapping(URI_WITH_ID)
+    @SecurityRequirement(name = SEC_REC)
     @Operation(description = "update a cart by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated the cart",
@@ -91,7 +98,7 @@ public class CartController {
                             schema = @Schema(implementation = CartResponseDto.class))}
             ),
             @ApiResponse(responseCode = "400", description = "Validation error",
-                    content = { @Content(mediaType = "application/json",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
             @ApiResponse(responseCode = "404", description = "Cart not found",
@@ -105,8 +112,8 @@ public class CartController {
         return cart;
     }
 
-    @DeleteMapping(URI_CARTS_WITH_ID)
-    @SecurityRequirement(name = "BearerAuth")
+    @DeleteMapping(URI_WITH_ID)
+    @SecurityRequirement(name = SEC_REC)
     @Operation(description = "delete a cart by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Deleted the cart",
