@@ -16,8 +16,8 @@ public class CartMapper {
     public CartResponseDto toResponseDto(CartEntity entity){
         return new CartResponseDto(
                 entity.getId(),
-                entity.getFigureIdAndAmountMap(),
-                entity.getPrice()
+                entity.getFigures(),
+                entity.getTotalPrice()
         );
     }
 

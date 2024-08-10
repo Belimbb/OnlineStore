@@ -1,5 +1,7 @@
-package com.teamChallenge.dto.response;
+package com.teamChallenge.dto.response.figure;
 
+import com.teamChallenge.dto.response.ReviewResponseDto;
+import com.teamChallenge.dto.response.SubCategoryResponseDto;
 import com.teamChallenge.entity.figure.additionalInfo.AdditionalInfo;
 import com.teamChallenge.entity.figure.sections.Labels;
 

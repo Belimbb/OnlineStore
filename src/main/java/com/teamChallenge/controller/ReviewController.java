@@ -1,7 +1,7 @@
 package com.teamChallenge.controller;
 
 import com.teamChallenge.dto.request.ReviewRequestDto;
-import com.teamChallenge.dto.response.FigureResponseDto;
+import com.teamChallenge.dto.response.figure.FigureResponseDto;
 import com.teamChallenge.dto.response.ReviewResponseDto;
 import com.teamChallenge.entity.review.ReviewService;
 import com.teamChallenge.exception.CustomErrorResponse;
