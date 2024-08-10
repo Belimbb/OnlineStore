@@ -21,7 +21,7 @@ public class OrderMapper {
     public OrderResponseDto toResponseDto(OrderEntity entity) {
         return new OrderResponseDto(
                 entity.getId(),
-                entity.getAddress(),
+                entity.getAddressInfo(),
                 entity.getPrice(),
                 entity.getStatus(),
                 figureMapper.toResponseDtoList(entity.getFigureList()),

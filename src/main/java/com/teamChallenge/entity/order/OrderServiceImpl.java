@@ -34,7 +34,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderResponseDto> getAll() {
         log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
-        return orderMapper.toResponseDtoList(orderRepository.findAll());
+        List<OrderEntity> all = orderRepository.findAll();
+        return orderMapper.toResponseDtoList(all);
     }
 
     @Override
@@ -64,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponseDto update(String id, OrderRequestDto orderRequestDto) {
         OrderEntity order = findById(id);
-        order.setAddress(orderRequestDto.address());
+        order.setAddressInfo(orderRequestDto.address());
 
         List<FigureEntity> figureList = getFigureList(orderRequestDto);
         order.setFigureList(figureList);

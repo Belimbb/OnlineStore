@@ -23,8 +23,7 @@ public class OrderEntity {
     @Id
     private String id;
 
-    @Column(nullable = false)
-    private AddressInfo address;
+    private AddressInfo addressInfo;
 
     @Column(nullable = false)
     private int price;
@@ -38,8 +37,8 @@ public class OrderEntity {
     @DBRef
     private UserEntity user;
 
-    public OrderEntity(AddressInfo address, int price, List<FigureEntity> figureList, UserEntity user) {
-        this.address = address;
+    public OrderEntity(AddressInfo addressInfo, int price, List<FigureEntity> figureList, UserEntity user) {
+        this.addressInfo = addressInfo;
         this.price = price;
         status = Statuses.NEW;
         this.figureList = figureList;
