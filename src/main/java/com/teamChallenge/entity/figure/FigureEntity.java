@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.teamChallenge.entity.figure.additionalInfo.AdditionalInfo;
 import com.teamChallenge.entity.figure.sections.Labels;
 
+import com.teamChallenge.entity.figure.sections.Types;
 import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
 import com.teamChallenge.entity.review.ReviewEntity;
@@ -54,6 +55,9 @@ public class FigureEntity {
 
     @Column
     private Labels label;
+
+    @Column
+    private Types type;
 
     @Column (nullable = false)
     private int currentPrice;
@@ -121,16 +125,16 @@ public class FigureEntity {
     }
 
     public FigureEntity(String name, String shortDescription, String longDescription, SubCategoryEntity subCategory,
-                        Labels label, int currentPrice, int oldPrice, int amount, List<String> images, AdditionalInfo additionalInfo) {
-        setup(name, shortDescription, longDescription, subCategory, label, currentPrice, oldPrice,
+                        Labels label, Types type, int currentPrice, int oldPrice, int amount, List<String> images, AdditionalInfo additionalInfo) {
+        setup(name, shortDescription, longDescription, subCategory, label, type, currentPrice, oldPrice,
                 amount, images, additionalInfo);
     }
 
     public FigureEntity(String id, String name, String shortDescription, String longDescription,
-                        SubCategoryEntity subCategory, Labels label, int currentPrice, int oldPrice,
+                        SubCategoryEntity subCategory, Labels label, Types type, int currentPrice, int oldPrice,
                         int amount, List<String> images, AdditionalInfo additionalInfo,
                         List<ReviewEntity> reviews, Date createdAt) {
-        setup(name, shortDescription, longDescription, subCategory, label, currentPrice, oldPrice,
+        setup(name, shortDescription, longDescription, subCategory, label, type, currentPrice, oldPrice,
                 amount, images, additionalInfo);
         this.setId(id);
         this.setReviews(reviews);
@@ -140,13 +144,14 @@ public class FigureEntity {
     }
 
     private void setup(String name, String shortDescription, String longDescription, SubCategoryEntity subCategory,
-                       Labels label, int currentPrice, int oldPrice, int amount, List<String> images, AdditionalInfo additionalInfo){
+                       Labels label, Types type, int currentPrice, int oldPrice, int amount, List<String> images, AdditionalInfo additionalInfo){
         this.setName(name);
         this.setShortDescription(shortDescription);
         this.setLongDescription(longDescription);
         this.setCategory(subCategory.getCategory());
         this.setSubCategory(subCategory);
         this.setLabel(label);
+        this.setType(type);
         this.setCurrentPrice(currentPrice);
         this.setOldPrice(oldPrice);
         this.setAmount(amount);

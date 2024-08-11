@@ -3,6 +3,7 @@ package com.teamChallenge.entity.figure;
 import com.teamChallenge.dto.request.figure.FigureRequestDto;
 import com.teamChallenge.dto.response.FigureResponseDto;
 import com.teamChallenge.entity.figure.sections.Labels;
+import com.teamChallenge.entity.figure.sections.Types;
 import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
 import com.teamChallenge.entity.figure.sections.category.CategoryServiceImpl;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
@@ -78,15 +79,14 @@ public class FigureServiceImpl implements FigureService{
     }
 
     @Override
-    public List<FigureResponseDto> getAll(String categoryName, String subcategoryName, String filter, String labelName,
-                                          String startPrice, String endPrice, String pageStr, String sizeStr) {
-        Pageable pageable = getPageable(getIntegerFromString(pageStr), getIntegerFromString(sizeStr));
+    public List<FigureResponseDto> getAll(String categoryName, String subcategoryName, String filter, String labelName, String type, String genre,
+                                          String brand, String material, String startPrice, String endPrice, String pageStr, String sizeStr) {
         List<FigureEntity> figureList;
 
         if (categoryName != null) {
             figureList = getFigureListByCategory(categoryName);
 
-        }   else if (subcategoryName!=null && !subcategoryName.isBlank()) {
+        }   else if (subcategoryName != null) {
             figureList = getFigureListBySubCategory(subcategoryName);
 
         }   else if (labelName != null) {
@@ -100,11 +100,9 @@ public class FigureServiceImpl implements FigureService{
             log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
         }
 
-        if (startPrice != null || endPrice != null) {
-            figureList = sortByPriceRange(figureList, startPrice, endPrice);
-        }
-
-        Page<FigureEntity> figurePage = paginateFigureList(figureList, pageable);
+        List<FigureEntity> sortedFigureList = sortByFields(figureList, type, genre, brand, material, startPrice, endPrice);
+        Pageable pageable = getPageable(getIntegerFromString(pageStr), getIntegerFromString(sizeStr));
+        Page<FigureEntity> figurePage = paginateFigureList(sortedFigureList, pageable);
         return figureMapper.toResponseDtoList(figurePage);
     }
 
@@ -177,11 +175,19 @@ public class FigureServiceImpl implements FigureService{
         return figurePage;
     }
 
-    public Labels getLabelFromString(String label) {
+    public Labels getLabelFromString(String labelName) {
         try {
-            return Labels.valueOf(label);
+            return Labels.valueOf(labelName);
         }   catch (IllegalArgumentException ex) {
-            throw new CustomNotFoundException("Label with 'name' " + label);
+            throw new CustomNotFoundException("Label with name '" + labelName + "' ");
+        }
+    }
+
+    public Types getTypeFromString(String typeName) {
+        try {
+            return Types.valueOf(typeName);
+        }   catch (IllegalArgumentException ex) {
+            throw new CustomNotFoundException("Type with name '" + typeName + "' ");
         }
     }
 
@@ -191,6 +197,65 @@ public class FigureServiceImpl implements FigureService{
         }   catch (NullPointerException | NumberFormatException ex) {
             throw new CustomNullPointerException(strNumber);
         }
+    }
+
+    public List<FigureEntity> sortByFields(List<FigureEntity> figureList, String type, String genre, String brand, String material, String startPrice, String endPrice) {
+
+        if (type != null) {
+            figureList = sortByType(figureList, type);
+        }
+
+        if (genre != null) {
+            figureList = sortByGenre(figureList, genre);
+        }
+
+        if (brand != null) {
+            figureList = sortByBrand(figureList, brand);
+        }
+
+        if (material != null) {
+            figureList = sortByMaterial(figureList, material);
+        }
+
+        if (startPrice != null || endPrice != null) {
+            figureList = sortByPriceRange(figureList, startPrice, endPrice);
+        }
+
+        return figureList;
+    }
+
+    public List<FigureEntity> sortByType(List<FigureEntity> figureList, String typeName) {
+        Types type = getTypeFromString(typeName);
+        return figureList
+                .stream()
+                .filter(figure -> figure.getType() != null)
+                .filter(figure -> figure.getType().equals(type))
+                .toList();
+    }
+
+    public List<FigureEntity> sortByGenre(List<FigureEntity> figureList, String genre) {
+        return figureList
+                .stream()
+                .filter(figure -> figure.getAdditionalInfo() != null)
+                .filter(figure -> figure.getAdditionalInfo().getGenre() != null)
+                .filter(figure -> figure.getAdditionalInfo().getGenre().equals(genre))
+                .toList();
+    }
+
+    public List<FigureEntity> sortByBrand(List<FigureEntity> figureList, String brand) {
+        return figureList
+                .stream()
+                .filter(figure -> figure.getAdditionalInfo() != null)
+                .filter(figure -> figure.getAdditionalInfo().getBrand().equals(brand))
+                .toList();
+    }
+
+    public List<FigureEntity> sortByMaterial(List<FigureEntity> figureList, String material) {
+        return figureList
+                .stream()
+                .filter(figure -> figure.getAdditionalInfo() != null)
+                .filter(figure -> figure.getAdditionalInfo().getMaterial().equals(material))
+                .toList();
     }
 
     public List<FigureEntity> sortByPriceRange(List<FigureEntity> figureList, String startPriceStr, String endPriceStr) {
