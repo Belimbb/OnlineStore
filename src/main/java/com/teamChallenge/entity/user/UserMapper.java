@@ -23,6 +23,7 @@ public class UserMapper {
         return new UserResponseDto(
                 entity.getId(),
                 entity.getEmail(),
+                entity.getPhoneNumber(),
                 entity.getUsername(),
                 entity.getPassword(),
                 entity.getRole(),
@@ -40,6 +41,7 @@ public class UserMapper {
                 dto.id(),
                 dto.username(),
                 dto.email(),
+                dto.phoneNumber(),
                 null,
                 dto.role(),
                 dto.addressInfo(),

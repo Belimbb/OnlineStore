@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 public class AdditionalInfo {
 
     @NotBlank
-    private String theme, material, characterName, productType, typeOfFigure, country, packageSize, toySize;
+    private String theme, genre, brand, material, characterName, productType, typeOfFigure, country, packageSize, toySize;
 }

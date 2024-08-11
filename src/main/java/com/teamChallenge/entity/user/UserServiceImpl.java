@@ -5,7 +5,7 @@ import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.review.ReviewEntity;
-import com.teamChallenge.entity.user.address.AddressInfo;
+import com.teamChallenge.entity.address.AddressInfo;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
@@ -87,11 +87,25 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         UserEntity user = findById(id);
         user.setUsername(userRequestDto.username());
         user.setPassword(userRequestDto.password());
-        user.setAddressInfo(userRequestDto.addressInfo());
+
+        String phoneNumber = userRequestDto.phoneNumber();
+        if (phoneNumber != null && !phoneNumber.isBlank()) {
+            user.setPhoneNumber(phoneNumber);
+        }
 
         userRepository.save(user);
         log.info("{}: " + OBJECT_NAME + " (id: {}) was updated", LogEnum.SERVICE, id);
         return userMapper.toResponseDto(user);
+    }
+
+    @Override
+    public UserResponseDto updateAddressInfo(String id, AddressInfo addressInfo) {
+        UserEntity user = findById(id);
+        user.setAddressInfo(addressInfo);
+
+        UserEntity updatedUser = userRepository.save(user);
+        log.info("{}: " + OBJECT_NAME + "'s (id: {}) address info field was updated", LogEnum.SERVICE, id);
+        return userMapper.toResponseDto(updatedUser);
     }
 
     @Override

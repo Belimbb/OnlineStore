@@ -2,7 +2,7 @@ package com.teamChallenge.dto.request;
 
 import com.teamChallenge.dto.request.figure.FigureInCartOrderRequestDto;
 import com.teamChallenge.entity.order.Statuses;
-import com.teamChallenge.entity.user.address.AddressInfo;
+import com.teamChallenge.entity.address.AddressInfo;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;

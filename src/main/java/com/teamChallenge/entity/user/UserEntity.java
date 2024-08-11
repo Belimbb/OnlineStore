@@ -3,7 +3,7 @@ package com.teamChallenge.entity.user;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.order.OrderEntity;
-import com.teamChallenge.entity.user.address.AddressInfo;
+import com.teamChallenge.entity.address.AddressInfo;
 import com.teamChallenge.entity.review.ReviewEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
@@ -39,6 +39,9 @@ public class UserEntity {
     @Email
     @Column(nullable = false)
     private String email;
+
+    @Column
+    private String phoneNumber;
 
     @NotNull
     @Size(min = 8, max = 100)

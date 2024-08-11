@@ -100,6 +100,14 @@ public class OpenAPIConfig {
     }
 
     @Bean
+    public GroupedOpenApi apiPromoCodesV1() {
+        return GroupedOpenApi.builder()
+                .group("Promo Codes API V1")
+                .pathsToMatch("/api/promo_codes/**")
+                .build();
+    }
+
+    @Bean
     @Primary
     public OpenAPI customOpenAPIv1() {
         return new OpenAPI()

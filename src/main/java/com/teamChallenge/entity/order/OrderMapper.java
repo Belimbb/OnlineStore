@@ -1,7 +1,6 @@
 package com.teamChallenge.entity.order;
 
 import com.teamChallenge.dto.response.OrderResponseDto;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +8,6 @@ import java.util.List;
 
 @Slf4j
 @Component
-@AllArgsConstructor
 public class OrderMapper {
 
     public OrderResponseDto toResponseDto(OrderEntity entity) {
