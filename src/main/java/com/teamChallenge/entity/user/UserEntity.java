@@ -2,6 +2,7 @@ package com.teamChallenge.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.teamChallenge.entity.figure.FigureEntity;
+import com.teamChallenge.entity.order.OrderEntity;
 import com.teamChallenge.entity.user.address.AddressInfo;
 import com.teamChallenge.entity.review.ReviewEntity;
 import jakarta.persistence.Column;
@@ -65,6 +66,9 @@ public class UserEntity {
 
     @DBRef
     private List<FigureEntity> recentlyViewed;
+
+    @DBRef
+    private List<OrderEntity> orderHistory;
 
     public UserEntity(String username, String email, String password) {
         this.username = username;

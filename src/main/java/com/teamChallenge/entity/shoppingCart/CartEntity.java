@@ -1,5 +1,6 @@
 package com.teamChallenge.entity.shoppingCart;
 
+import com.teamChallenge.dto.response.figure.FigureInCartOrderResponseDto;
 import com.teamChallenge.entity.user.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
@@ -10,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
-import java.util.Map;
+import java.util.List;
 
 @Document(collection = "cart")
 @Data
@@ -21,18 +22,26 @@ public class CartEntity implements Serializable {
     @Id
     private String id;
 
-    @Column(nullable = false)
-    private Map<String, Integer> figureIdAndAmountMap;
+    private List<FigureInCartOrderResponseDto> figures;
 
     @DBRef
     private UserEntity user;
 
     @Column(nullable = false)
-    private int price;
+    private int totalPrice;
 
-    public CartEntity(UserEntity user, int price, Map<String, Integer> figureIdAndAmountMap) {
+    public void setTotalPrice() {
+        int totalPrice = 0;
+        for (FigureInCartOrderResponseDto figure : figures) {
+            totalPrice += figure.price()*figure.amount();
+        }
+        this.totalPrice = totalPrice;
+    }
+
+    public CartEntity(UserEntity user, List<FigureInCartOrderResponseDto> figures) {
         this.user = user;
-        this.price = price;
-        this.figureIdAndAmountMap = figureIdAndAmountMap;
+        this.figures = figures;
+
+        setTotalPrice();
     }
 }

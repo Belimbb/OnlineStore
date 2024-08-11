@@ -1,7 +1,7 @@
 package com.teamChallenge.controller;
 
 import com.teamChallenge.dto.request.figure.FigureRequestDto;
-import com.teamChallenge.dto.response.FigureResponseDto;
+import com.teamChallenge.dto.response.figure.FigureResponseDto;
 import com.teamChallenge.entity.figure.FigureService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;

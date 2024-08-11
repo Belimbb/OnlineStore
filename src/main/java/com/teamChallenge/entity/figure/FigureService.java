@@ -1,7 +1,7 @@
 package com.teamChallenge.entity.figure;
 
 import com.teamChallenge.dto.request.figure.FigureRequestDto;
-import com.teamChallenge.dto.response.FigureResponseDto;
+import com.teamChallenge.dto.response.figure.FigureResponseDto;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 

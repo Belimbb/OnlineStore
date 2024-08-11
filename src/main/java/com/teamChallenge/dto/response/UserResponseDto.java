@@ -1,5 +1,6 @@
 package com.teamChallenge.dto.response;
 
+import com.teamChallenge.dto.response.figure.FigureResponseDto;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.address.AddressInfo;
 
@@ -16,5 +17,6 @@ public record UserResponseDto(String id,
                               Date createdAt,
                               List<FigureResponseDto> wishList,
                               List<FigureResponseDto> recentlyViewed,
-                              List<ReviewResponseDto> reviewResponseDtoList) {
+                              List<ReviewResponseDto> reviewResponseDtoList,
+                              List<OrderResponseDto> orderResponseHistory) {
 }

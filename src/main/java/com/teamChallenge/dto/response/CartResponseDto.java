@@ -1,6 +1,8 @@
 package com.teamChallenge.dto.response;
 
-import java.util.Map;
+import com.teamChallenge.dto.response.figure.FigureInCartOrderResponseDto;
 
-public record CartResponseDto(String id, Map<String, Integer> figureIdAndAmountMap, int price) {
+import java.util.List;
+
+public record CartResponseDto(String id, List<FigureInCartOrderResponseDto> figures, int totalPrice) {
 }
