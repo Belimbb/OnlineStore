@@ -1,10 +1,12 @@
 package com.teamChallenge.entity.order;
 
+import com.teamChallenge.dto.request.CartRequestDto;
 import com.teamChallenge.dto.request.OrderRequestDto;
+import com.teamChallenge.dto.response.CartResponseDto;
 import com.teamChallenge.dto.response.OrderResponseDto;
 import com.teamChallenge.dto.response.figure.FigureInCartOrderResponseDto;
-import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
+import com.teamChallenge.entity.shoppingCart.CartServiceImpl;
 import com.teamChallenge.entity.user.UserEntity;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.LogEnum;
@@ -14,8 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -27,8 +27,8 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderMapper orderMapper;
 
+    private final CartServiceImpl cartService;
     private final FigureServiceImpl figureService;
-
     private final UserServiceImpl userService;
 
     private static final String OBJECT_NAME = "Order";
@@ -50,11 +50,15 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponseDto create(OrderRequestDto orderRequestDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity currentUser = userService.findByEmail(email);
+        CartResponseDto cart = cartService.getById(orderRequestDto.cartId());
 
-        List<FigureInCartOrderResponseDto> figureList = figureService.getCartOrderResponseFigures(orderRequestDto.figures());
+        List<FigureInCartOrderResponseDto> figureList = cart.figures();
+        figureService.updatePurchaseCounter(figureList);
 
         OrderEntity newOrder = new OrderEntity(orderRequestDto.address(), figureList, currentUser.getId());
         orderRepository.save(newOrder);
+
+        cartService.update(cart.id(), new CartRequestDto(null, null));
         log.info("{}: " + OBJECT_NAME + " was created", LogEnum.SERVICE);
         return orderMapper.toResponseDto(newOrder);
     }
@@ -64,7 +68,9 @@ public class OrderServiceImpl implements OrderService {
         OrderEntity order = findById(id);
         order.setAddressInfo(orderRequestDto.address());
 
-        List<FigureInCartOrderResponseDto> figureList = figureService.getCartOrderResponseFigures(orderRequestDto.figures());
+        List<FigureInCartOrderResponseDto> figureList = cartService.getById(orderRequestDto.cartId()).figures();
+        figureService.updatePurchaseCounter(figureList);
+
         order.setStatus(orderRequestDto.status());
         order.setFigures(figureList);
         order.setTotalPrice();

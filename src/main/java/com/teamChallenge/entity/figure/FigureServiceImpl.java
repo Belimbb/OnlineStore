@@ -1,6 +1,6 @@
 package com.teamChallenge.entity.figure;
 
-import com.teamChallenge.dto.request.figure.FigureInCartOrderRequestDto;
+import com.teamChallenge.dto.request.figure.FigureInCartRequestDto;
 import com.teamChallenge.dto.request.figure.FigureRequestDto;
 import com.teamChallenge.dto.response.figure.FigureInCartOrderResponseDto;
 import com.teamChallenge.dto.response.figure.FigureResponseDto;
@@ -343,14 +343,11 @@ public class FigureServiceImpl implements FigureService{
         throw new CustomNotFoundException("Review in the figure's review list", review.getId());
     }
 
-    public List<FigureInCartOrderResponseDto> getCartOrderResponseFigures(List<FigureInCartOrderRequestDto> figures){
-        List<FigureEntity> entities = new ArrayList<>();
-        List<FigureInCartOrderResponseDto> dtos = figures
+    public List<FigureInCartOrderResponseDto> getCartOrderResponseFigures(List<FigureInCartRequestDto> figures) {
+        return figures
                 .stream()
                 .map(figureDto -> {
                     FigureEntity figureEntity = findById(figureDto.id());
-                    entities.add(figureEntity);
-
                     return new FigureInCartOrderResponseDto(
                             figureEntity.getId(),
                             figureEntity.getName(),
@@ -360,12 +357,18 @@ public class FigureServiceImpl implements FigureService{
                     );
                 })
                 .toList();
-
-        for (int i = 0; i<dtos.size(); i++){
-            FigureEntity entity = entities.get(i);
-
-            entity.setPurchaseCount(entity.getPurchaseCount()+dtos.get(i).amount());
-        }
-        return dtos;
     }
+
+    public void updatePurchaseCounter(List<FigureInCartOrderResponseDto> figures) {
+        List<FigureEntity> entities = figures
+                .stream()
+                .map(figureDto -> findById(figureDto.figureId()))
+                .toList();
+
+        for (int i = 0; i < figures.size(); i++) {
+            FigureEntity entity = entities.get(i);
+            entity.setPurchaseCount(entity.getPurchaseCount() + figures.get(i).amount());
+        }
+    }
+
 }
