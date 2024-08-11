@@ -19,7 +19,6 @@ public class AddressInfo {
     @NotBlank
     private String phoneNumber;
 
-
     @NotBlank
     private String country;
 

@@ -39,6 +39,9 @@ public class UserEntity {
     @Column(nullable = false)
     private String email;
 
+    @Column
+    private String phoneNumber;
+
     @NotNull
     @Size(min = 8, max = 100)
     @Column(nullable = false)

@@ -8,6 +8,7 @@ import java.util.List;
 
 public record UserResponseDto(String id,
                               String email,
+                              String phoneNumber,
                               String username,
                               String password,
                               Roles role,

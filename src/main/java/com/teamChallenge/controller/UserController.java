@@ -108,6 +108,26 @@ public class UserController {
         return user;
     }
 
+    @PatchMapping(URI_WITH_ID + "/addressInfo")
+    @SecurityRequirement(name = SEC_REC)
+    @Operation(description = "update an user's address info by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Updated the user's address info",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserResponseDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CustomErrorResponse.class))}
+            ),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CustomErrorResponse.class)) }) })
+    public UserResponseDto updateAddressInfo(@PathVariable String id, @RequestBody AddressInfo addressInfo) {
+        UserResponseDto user = userService.updateAddressInfo(id, addressInfo);
+        log.info("{}: User's (id: {}) address info has been updated", LogEnum.CONTROLLER, user.id());
+        return user;
+    }
+
     @DeleteMapping(URI_WITH_ID)
     @SecurityRequirement(name = SEC_REC)
     @Operation(summary = "Delete user")
