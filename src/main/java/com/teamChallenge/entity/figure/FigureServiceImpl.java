@@ -1,14 +1,17 @@
 package com.teamChallenge.entity.figure;
 
+import com.teamChallenge.dto.request.figure.FigureInCartOrderRequestDto;
 import com.teamChallenge.dto.request.figure.FigureRequestDto;
-import com.teamChallenge.dto.response.FigureResponseDto;
+import com.teamChallenge.dto.response.figure.FigureInCartOrderResponseDto;
+import com.teamChallenge.dto.response.figure.FigureResponseDto;
 import com.teamChallenge.entity.figure.sections.Labels;
+import com.teamChallenge.entity.figure.sections.Types;
 import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
 import com.teamChallenge.entity.figure.sections.category.CategoryServiceImpl;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceImpl;
 import com.teamChallenge.entity.user.UserServiceImpl;
-import com.teamChallenge.entity.user.review.ReviewEntity;
+import com.teamChallenge.entity.review.ReviewEntity;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomBadRequestException;
@@ -29,22 +32,19 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class FigureServiceImpl implements FigureService{
+    private static final String OBJECT_NAME = "Figure";
 
     private final FigureRepository figureRepository;
 
     private final FigureMapper figureMapper;
 
     private final SubCategoryServiceImpl subCategoryService;
-
     private final CategoryServiceImpl categoryService;
-
     private final UserServiceImpl userService;
 
-    private static final String OBJECT_NAME = "Figure";
 
     @Override
     public FigureResponseDto create(FigureRequestDto figureRequestDto) throws CustomAlreadyExistException {
-        SubCategoryEntity subCategory = subCategoryService.getByName(figureRequestDto.subCategoryName());
         String name = figureRequestDto.name();
         FigureEntity figureEntity = figureMapper.toEntity(figureRequestDto);
 
@@ -71,53 +71,52 @@ public class FigureServiceImpl implements FigureService{
         return figureMapper.toResponseDto(figure);
     }
 
-    public void addFigureToUserWishList(String email, String figureId) {
+    @Override
+    public void addFigureToWishList(String figureId) {
         FigureEntity figure = findById(figureId);
-        userService.addFigureToWishList(email, figure);
+        userService.addFigureToWishList(figure);
     }
 
     @Override
-    public List<FigureResponseDto> getAll(String filter, String labelName, String startPrice, String endPrice, String pageStr, String sizeStr) {
-        Pageable pageable = getPageable(getIntegerFromString(pageStr), getIntegerFromString(sizeStr));
+    public List<FigureResponseDto> getAll(String categoryName, String subcategoryName, String filter, String labelName, String type, String genre,
+                                          String brand, String material, String startPrice, String endPrice, String pageStr, String sizeStr) {
         List<FigureEntity> figureList;
 
-        if (labelName != null) {
+        if (categoryName != null) {
+            figureList = getFigureListByCategory(categoryName);
+
+        }   else if (subcategoryName != null) {
+            figureList = getFigureListBySubCategory(subcategoryName);
+
+        }   else if (labelName != null) {
             figureList = getFigureListByLabelDESC(labelName);
 
-        } else if (filter != null) {
+        }   else if (filter != null) {
             figureList = getFigureListByFilter(filter);
 
-        }  else {
+        }   else {
             figureList = figureRepository.findAll();
             log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
         }
 
-        if (startPrice != null || endPrice != null) {
-            figureList = sortByPriceRange(figureList, startPrice, endPrice);
-        }
-
-        Page<FigureEntity> figurePage = paginateFigureList(figureList, pageable);
+        List<FigureEntity> sortedFigureList = sortByFields(figureList, type, genre, brand, material, startPrice, endPrice);
+        Pageable pageable = getPageable(getIntegerFromString(pageStr), getIntegerFromString(sizeStr));
+        Page<FigureEntity> figurePage = paginateFigureList(sortedFigureList, pageable);
         return figureMapper.toResponseDtoList(figurePage);
     }
 
-    public List<FigureResponseDto> getAllFiguresByCategory(String categoryName){
+    private List<FigureEntity> getFigureListByCategory(String categoryName){
         CategoryEntity category = categoryService.getByName(categoryName);
-        Optional<List<FigureEntity>> figureEntities = figureRepository.findByCategory(category);
-        if (figureEntities.isPresent()){
-            log.info("{}: All " + OBJECT_NAME + " by category {} retrieved from db", LogEnum.SERVICE, categoryName);
-            return figureMapper.toResponseDtoList(figureEntities.get());
-        }
-        throw new CustomNotFoundException(OBJECT_NAME + "s");
+        List<FigureEntity> figureEntities = figureRepository.findByCategory(category);
+        log.info("{}: All " + OBJECT_NAME + " by category {} retrieved from db", LogEnum.SERVICE, categoryName);
+        return figureEntities;
     }
 
-    public List<FigureResponseDto> getAllFiguresBySubCategory (String subCategoryName){
+    private List<FigureEntity> getFigureListBySubCategory (String subCategoryName){
         SubCategoryEntity subCategory = subCategoryService.getByName(subCategoryName);
-        Optional<List<FigureEntity>> figureEntities = figureRepository.findBySubCategory(subCategory);
-        if (figureEntities.isPresent()){
-            log.info("{}: All " + OBJECT_NAME + "s by sub category {} retrieved from db", LogEnum.SERVICE, subCategory);
-            return figureMapper.toResponseDtoList(figureEntities.get());
-        }
-        throw new CustomNotFoundException(OBJECT_NAME);
+        List<FigureEntity> figureEntities = figureRepository.findBySubCategory(subCategory);
+        log.info("{}: All " + OBJECT_NAME + "s by sub category {} retrieved from db", LogEnum.SERVICE, subCategory);
+        return figureEntities;
     }
 
     @Override
@@ -144,7 +143,7 @@ public class FigureServiceImpl implements FigureService{
         return figureRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
     }
 
-    public List<FigureEntity> getFigureListByFilter(String filter) {
+    private List<FigureEntity> getFigureListByFilter(String filter) {
         List<FigureEntity> figureList = switch (filter) {
             case "features" -> getFigureListByLabelsDESC(new Labels[]{Labels.EXCLUSIVE, Labels.LIMITED});
             case "bestsellers" -> getFiveBestSellers();
@@ -157,7 +156,7 @@ public class FigureServiceImpl implements FigureService{
         return figureList;
     }
 
-    public List<FigureEntity> getFigureListByLabelsDESC(Labels[] labels) {
+    private List<FigureEntity> getFigureListByLabelsDESC(Labels[] labels) {
         List<FigureEntity> figureList = new ArrayList<>();
 
         for (Labels label : labels) {
@@ -168,27 +167,94 @@ public class FigureServiceImpl implements FigureService{
         return figureList;
     }
 
-    public List<FigureEntity> getFigureListByLabelDESC(String labelName) {
+    private List<FigureEntity> getFigureListByLabelDESC(String labelName) {
         Labels label = getLabelFromString(labelName);
         List<FigureEntity> figurePage = figureRepository.findByLabel(label, Sort.Direction.DESC);
         log.info("{}: All " + OBJECT_NAME + "s (with label '{}') retrieved from db", LogEnum.SERVICE, labelName);
         return figurePage;
     }
 
-    public Labels getLabelFromString(String label) {
+    private Labels getLabelFromString(String labelName) {
         try {
-            return Labels.valueOf(label);
+            return Labels.valueOf(labelName);
         }   catch (IllegalArgumentException ex) {
-            throw new CustomNotFoundException("Label with 'name' " + label);
+            throw new CustomNotFoundException("Label with name '" + labelName + "' ");
         }
     }
 
-    public Integer getIntegerFromString(String strNumber) {
+    public Types getTypeFromString(String typeName) {
+        try {
+            return Types.valueOf(typeName);
+        }   catch (IllegalArgumentException ex) {
+            throw new CustomNotFoundException("Type with name '" + typeName + "' ");
+        }
+    }
+
+    private Integer getIntegerFromString(String strNumber) {
         try {
             return Integer.parseInt(strNumber);
         }   catch (NullPointerException | NumberFormatException ex) {
             throw new CustomNullPointerException(strNumber);
         }
+    }
+
+    public List<FigureEntity> sortByFields(List<FigureEntity> figureList, String type, String genre, String brand, String material, String startPrice, String endPrice) {
+
+        if (type != null) {
+            figureList = sortByType(figureList, type);
+        }
+
+        if (genre != null) {
+            figureList = sortByGenre(figureList, genre);
+        }
+
+        if (brand != null) {
+            figureList = sortByBrand(figureList, brand);
+        }
+
+        if (material != null) {
+            figureList = sortByMaterial(figureList, material);
+        }
+
+        if (startPrice != null || endPrice != null) {
+            figureList = sortByPriceRange(figureList, startPrice, endPrice);
+        }
+
+        return figureList;
+    }
+
+    public List<FigureEntity> sortByType(List<FigureEntity> figureList, String typeName) {
+        Types type = getTypeFromString(typeName);
+        return figureList
+                .stream()
+                .filter(figure -> figure.getType() != null)
+                .filter(figure -> figure.getType().equals(type))
+                .toList();
+    }
+
+    public List<FigureEntity> sortByGenre(List<FigureEntity> figureList, String genre) {
+        return figureList
+                .stream()
+                .filter(figure -> figure.getAdditionalInfo() != null)
+                .filter(figure -> figure.getAdditionalInfo().getGenre() != null)
+                .filter(figure -> figure.getAdditionalInfo().getGenre().equals(genre))
+                .toList();
+    }
+
+    public List<FigureEntity> sortByBrand(List<FigureEntity> figureList, String brand) {
+        return figureList
+                .stream()
+                .filter(figure -> figure.getAdditionalInfo() != null)
+                .filter(figure -> figure.getAdditionalInfo().getBrand().equals(brand))
+                .toList();
+    }
+
+    public List<FigureEntity> sortByMaterial(List<FigureEntity> figureList, String material) {
+        return figureList
+                .stream()
+                .filter(figure -> figure.getAdditionalInfo() != null)
+                .filter(figure -> figure.getAdditionalInfo().getMaterial().equals(material))
+                .toList();
     }
 
     public List<FigureEntity> sortByPriceRange(List<FigureEntity> figureList, String startPriceStr, String endPriceStr) {
@@ -235,14 +301,14 @@ public class FigureServiceImpl implements FigureService{
         throw new CustomNotFoundException(OBJECT_NAME);
     }
 
-    public Page<FigureEntity> paginateFigureList(List<FigureEntity> figureList, Pageable pageable) {
+    private Page<FigureEntity> paginateFigureList(List<FigureEntity> figureList, Pageable pageable) {
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), figureList.size());
         List<FigureEntity> paginatedFigureList = start > end ? new ArrayList<>() : figureList.subList(start, end);
         return new PageImpl<>(paginatedFigureList, pageable, figureList.size());
     }
 
-    public Pageable getPageable(int page, int size) {
+    private Pageable getPageable(int page, int size) {
         if (page >= 0 && size > 0 && size <= 18) {
             return PageRequest.of(page, size);
         }
@@ -275,5 +341,31 @@ public class FigureServiceImpl implements FigureService{
         }
 
         throw new CustomNotFoundException("Review in the figure's review list", review.getId());
+    }
+
+    public List<FigureInCartOrderResponseDto> getCartOrderResponseFigures(List<FigureInCartOrderRequestDto> figures){
+        List<FigureEntity> entities = new ArrayList<>();
+        List<FigureInCartOrderResponseDto> dtos = figures
+                .stream()
+                .map(figureDto -> {
+                    FigureEntity figureEntity = findById(figureDto.id());
+                    entities.add(figureEntity);
+
+                    return new FigureInCartOrderResponseDto(
+                            figureEntity.getId(),
+                            figureEntity.getName(),
+                            figureEntity.getImages().getFirst(),
+                            figureDto.amount(),
+                            figureEntity.getCurrentPrice()
+                    );
+                })
+                .toList();
+
+        for (int i = 0; i<dtos.size(); i++){
+            FigureEntity entity = entities.get(i);
+
+            entity.setPurchaseCount(entity.getPurchaseCount()+dtos.get(i).amount());
+        }
+        return dtos;
     }
 }

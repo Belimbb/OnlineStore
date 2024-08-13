@@ -13,8 +13,8 @@ import java.util.Optional;
 
 @Repository
 public interface FigureRepository extends MongoRepository<FigureEntity, String> {
-    Optional<List<FigureEntity>> findByCategory(CategoryEntity category);
-    Optional<List<FigureEntity>> findBySubCategory(SubCategoryEntity subCategory);
+    List<FigureEntity> findByCategory(CategoryEntity category);
+    List<FigureEntity> findBySubCategory(SubCategoryEntity subCategory);
     Optional<List<FigureEntity>> findByAmountGreaterThan(int amount);
 
     List<FigureEntity> findByLabel(Labels label, Sort.Direction direction);

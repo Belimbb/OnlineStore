@@ -1,4 +1,4 @@
-package com.teamChallenge.entity.user.review;
+package com.teamChallenge.entity.review;
 
 import com.teamChallenge.dto.response.ReviewResponseDto;
 import lombok.extern.slf4j.Slf4j;

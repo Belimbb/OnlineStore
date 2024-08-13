@@ -2,8 +2,9 @@ package com.teamChallenge.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.teamChallenge.entity.figure.FigureEntity;
+import com.teamChallenge.entity.order.OrderEntity;
 import com.teamChallenge.entity.user.address.AddressInfo;
-import com.teamChallenge.entity.user.review.ReviewEntity;
+import com.teamChallenge.entity.review.ReviewEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
@@ -39,6 +40,9 @@ public class UserEntity {
     @Column(nullable = false)
     private String email;
 
+    @Column
+    private String phoneNumber;
+
     @NotNull
     @Size(min = 8, max = 100)
     @Column(nullable = false)
@@ -62,6 +66,9 @@ public class UserEntity {
 
     @DBRef
     private List<FigureEntity> recentlyViewed;
+
+    @DBRef
+    private List<OrderEntity> orderHistory;
 
     public UserEntity(String username, String email, String password) {
         this.username = username;
