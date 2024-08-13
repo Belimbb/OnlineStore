@@ -1,7 +1,7 @@
 package com.teamChallenge.entity.order;
 
 import com.teamChallenge.dto.response.figure.FigureInCartOrderResponseDto;
-import com.teamChallenge.entity.user.address.AddressInfo;
+import com.teamChallenge.entity.address.AddressInfo;
 import jakarta.persistence.Column;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;

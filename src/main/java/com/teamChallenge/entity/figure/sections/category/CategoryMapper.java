@@ -41,13 +41,13 @@ public class CategoryMapper {
     }
 
     public List<CategoryEntity> toEntityListFromRequest (List<CategoryRequestDto> dtos){
-        return dtos.stream()
+        return dtos == null ? null : dtos.stream()
                 .map(this::toEntityFromRequest)
                 .collect(Collectors.toList());
     }
 
     public List<CategoryEntity> toEntityListFromResponse (List<CategoryResponseDto> dtos){
-        return dtos.stream()
+        return dtos == null ? null : dtos.stream()
                 .map(this::toEntityFromResponse)
                 .collect(Collectors.toList());
     }

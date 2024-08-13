@@ -21,13 +21,13 @@ public class AdvertisementMapper {
 
 
     public List<AdsResponseDto> toResponseDtoList(List<AdvertisementEntity> entities){
-        return entities.stream()
+        return entities == null ? null : entities.stream()
                 .map(this::toResponseDto)
                 .collect(Collectors.toList());
     }
 
     public List<AdvertisementEntity> toEntityList(List<AdsRequestDto> dtos){
-        return dtos.stream()
+        return dtos == null ? null : dtos.stream()
                 .map(this::toEntity)
                 .collect(Collectors.toList());
     }

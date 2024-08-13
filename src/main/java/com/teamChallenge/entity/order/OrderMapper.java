@@ -1,15 +1,14 @@
 package com.teamChallenge.entity.order;
 
 import com.teamChallenge.dto.response.OrderResponseDto;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-@AllArgsConstructor
 public class OrderMapper {
 
     public OrderResponseDto toResponseDto(OrderEntity entity) {
@@ -37,15 +36,15 @@ public class OrderMapper {
     }
 
     public List<OrderResponseDto> toResponseDtoList(List<OrderEntity> entities) {
-        return entities
+        return entities == null ? null : entities
                 .stream()
                 .map(this::toResponseDto)
                 .toList();
     }
 
     public List<OrderEntity> toEntityListFromResponse(List<OrderResponseDto> dtos) {
-        return dtos.stream()
+        return dtos == null ? null : dtos.stream()
                 .map(this::toEntity)
-                .toList();
+                .collect(Collectors.toList());
     }
 }

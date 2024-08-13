@@ -56,13 +56,13 @@ public class BannerMapper {
     }
 
     public List<BannerEntity> toEntityListFromRequest (List<BannerRequestDto> dtos){
-        return dtos.stream()
+        return dtos == null ? null : dtos.stream()
                 .map(this::toEntity)
                 .collect(Collectors.toList());
     }
 
     public List<BannerEntity> toEntityListFromResponse (List<BannerResponseDto> dtos){
-        return dtos.stream()
+        return dtos == null ? null : dtos.stream()
                 .map(this::toEntity)
                 .collect(Collectors.toList());
     }

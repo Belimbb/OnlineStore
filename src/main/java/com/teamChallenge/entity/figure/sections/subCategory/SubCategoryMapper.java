@@ -49,13 +49,13 @@ public class SubCategoryMapper {
     }
 
     public List<SubCategoryEntity> toEntityListFromRequest (List<SubCategoryRequestDto> dtos){
-        return dtos.stream()
+        return dtos == null ? null : dtos.stream()
                 .map(this::toEntityFromRequest)
                 .collect(Collectors.toList());
     }
 
     public List<SubCategoryEntity> toEntityListFromResponse (List<SubCategoryResponseDto> dtos){
-        return dtos.stream()
+        return dtos == null ? null : dtos.stream()
                 .map(this::toEntityFromResponse)
                 .collect(Collectors.toList());
     }
