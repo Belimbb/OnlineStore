@@ -340,9 +340,9 @@ public class FigureServiceImpl implements FigureService {
             reviewList.remove(review);
             figure.setReviews(reviewList);
             figureRepository.save(figure);
+        }else {
+            throw new CustomNotFoundException("Review in the figure's review list", review.getId());
         }
-
-        throw new CustomNotFoundException("Review in the figure's review list", review.getId());
     }
 
     public List<FigureInCartOrderResponseDto> getCartOrderResponseFigures(List<FigureInCartRequestDto> figures) {

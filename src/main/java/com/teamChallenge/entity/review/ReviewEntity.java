@@ -58,6 +58,19 @@ public class ReviewEntity {
     }
 
     @Override
+    public String toString() {
+        return "ReviewEntity{" +
+                "id='" + id + '\'' +
+                ", score=" + score +
+                ", userId=" + user.getId() +
+                ", creationDate=" + creationDate +
+                ", advantages='" + advantages + '\'' +
+                ", disadvantages='" + disadvantages + '\'' +
+                ", figureId=" + figure.getId() +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

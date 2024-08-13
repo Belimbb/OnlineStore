@@ -220,8 +220,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
             reviewList.remove(review);
             user.setReviews(reviewList);
             userRepository.save(user);
+        }else {
+            throw new CustomNotFoundException("Review in the user's review list", review.getId());
         }
-
-        throw new CustomNotFoundException("Review in the user's review list", review.getId());
     }
 }
