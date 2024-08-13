@@ -19,10 +19,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Document(collection = "users")
 @Data
@@ -40,7 +37,7 @@ public class UserEntity {
     @Column(nullable = false)
     private String email;
 
-    @Column
+    @Column(unique = true)
     private String phoneNumber;
 
     @NotNull
@@ -70,12 +67,20 @@ public class UserEntity {
     @DBRef
     private List<OrderEntity> orderHistory;
 
+    @Column(nullable = false)
+    private boolean isAccountVerified;
+
+    @Column
+    private UUID verificationCode;
+
     public UserEntity(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
         role = Roles.USER;
         recentlyViewed = new ArrayList<>();
+        isAccountVerified = false;
+        verificationCode = UUID.randomUUID();
     }
 
     @Override

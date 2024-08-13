@@ -1,6 +1,7 @@
 package com.teamChallenge.exception;
 
 import com.teamChallenge.exception.exceptions.generalExceptions.*;
+import com.teamChallenge.exception.exceptions.userExceptions.UnverifiedAccountException;
 import com.teamChallenge.exception.exceptions.userExceptions.UserIncorrectPasswordException;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mail.MailSendException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -75,6 +77,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserIncorrectPasswordException.class)
     public ResponseEntity<Map<String, List<String>>> userIncorrectPasswordException(UserIncorrectPasswordException e) {
         return getErrorsMap(e, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(UnverifiedAccountException.class)
+    public ResponseEntity<Map<String, List<String>>> unverifiedAccountException(UnverifiedAccountException ex) {
+        return getErrorsMap(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    /* Mail exceptions */
+
+    @ExceptionHandler(MailSendException.class)
+    public ResponseEntity<Map<String, List<String>>> mailSendException(MailSendException ex) {
+        return getErrorsMap(ex, HttpStatus.BAD_REQUEST);
     }
 
     /* Helpers */

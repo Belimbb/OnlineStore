@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -32,7 +33,8 @@ public class UserMapper {
                 figureMapper.toResponseDtoList(entity.getWhishList()),
                 figureMapper.toResponseDtoList(entity.getRecentlyViewed()),
                 reviewMapper.toResponseDtoList(entity.getReviews()),
-                orderMapper.toResponseDtoList(entity.getOrderHistory())
+                entity.getOrderHistory() == null ? new ArrayList<>() : orderMapper.toResponseDtoList(entity.getOrderHistory()),
+                entity.isAccountVerified()
         );
     }
 
@@ -49,7 +51,9 @@ public class UserMapper {
                 reviewMapper.toEntityListFromResponse(dto.reviewResponseDtoList()),
                 figureMapper.toEntityListFromResponse(dto.wishList()),
                 figureMapper.toEntityListFromResponse(dto.recentlyViewed()),
-                orderMapper.toEntityListFromResponse(dto.orderResponseHistory())
+                orderMapper.toEntityListFromResponse(dto.orderResponseHistory()),
+                dto.isAccountVerified(),
+                null
         );
     }
 
