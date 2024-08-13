@@ -9,6 +9,7 @@ import com.teamChallenge.entity.address.AddressInfo;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
+import com.teamChallenge.mail.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -36,6 +34,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final EmailService emailService;
 
     private static final String OBJECT_NAME = "user";
 
@@ -58,7 +57,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Override
-    public UserResponseDto create (SignupRequestDto signupRequestDto) throws CustomAlreadyExistException{
+    public UserResponseDto create (SignupRequestDto signupRequestDto) throws CustomAlreadyExistException {
         String username = signupRequestDto.getUsername();
         String email = signupRequestDto.getEmail();
 
@@ -78,6 +77,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         }
 
         UserEntity saved = userRepository.save(user);
+        emailService.sendVerificationLetter(email, user.getVerificationCode());
         log.info("{}: " + OBJECT_NAME + " (Username: {}) was created", LogEnum.SERVICE, username);
         return userMapper.toResponseDto(saved);
     }
@@ -86,14 +86,26 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     public UserResponseDto update(String id, UserRequestDto userRequestDto) {
         UserEntity user = findById(id);
         user.setUsername(userRequestDto.username());
-        user.setPassword(userRequestDto.password());
+
+        String email = userRequestDto.email();
+        boolean isEmailChanged = false;
+        if (!existByEmail(email) && !email.equals(user.getEmail())) {
+            user.setEmail(email);
+            user.setAccountVerified(false);
+            user.setVerificationCode(UUID.randomUUID());
+            isEmailChanged = true;
+        }
 
         String phoneNumber = userRequestDto.phoneNumber();
-        if (phoneNumber != null && !phoneNumber.isBlank()) {
+        if (phoneNumber != null && !phoneNumber.isBlank() && !existsByPhoneNumber(phoneNumber)) {
             user.setPhoneNumber(phoneNumber);
         }
 
-        userRepository.save(user);
+        UserEntity updatedUser = userRepository.save(user);
+        if (isEmailChanged) {
+            emailService.sendVerificationLetter(updatedUser.getEmail(), updatedUser.getVerificationCode());
+        }
+
         log.info("{}: " + OBJECT_NAME + " (id: {}) was updated", LogEnum.SERVICE, id);
         return userMapper.toResponseDto(user);
     }
@@ -145,12 +157,25 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         userRepository.save(user);
     }
 
+    public UserResponseDto confirmEmail(UUID verificationCode) {
+        UserEntity user = findByVerificationCode(verificationCode);
+        user.setAccountVerified(true);
+        user.setVerificationCode(null);
+        log.info("{}: " + OBJECT_NAME + "'s (id: {}) email has been confirmed", LogEnum.SERVICE, user.getId());
+        UserEntity savedUser = userRepository.save(user);
+        return userMapper.toResponseDto(savedUser);
+    }
+
     public boolean existByEmail (String email){
         return userRepository.existsByEmail(email);
     }
 
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
+    }
+
+    public boolean existsByPhoneNumber(String phoneNumber) {
+        return userRepository.existsByPhoneNumber(phoneNumber);
     }
 
     @Override
@@ -175,6 +200,11 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     public UserEntity findByEmail (String email) {
         log.info("{}: request on retrieving " + OBJECT_NAME + " by email {} was sent", LogEnum.SERVICE, email);
         return userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, email));
+    }
+
+    public UserEntity findByVerificationCode(UUID verificationCode) {
+        log.info("{}: request on retrieving " + OBJECT_NAME + " by verification code {} was sent", LogEnum.SERVICE, verificationCode);
+        return userRepository.findByVerificationCode(verificationCode).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME));
     }
 
     public UserEntity getByUsername(String username) {

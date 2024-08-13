@@ -64,4 +64,16 @@ public class AuthController {
         log.info("{}: User (id: {}) has accomplished registration process", LogEnum.CONTROLLER, userDto.id());
         return userDto;
     }
+
+    @GetMapping("/verification/{verifCode}")
+    @Operation(summary = "User account verification")
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "Verification successful"),
+            @ApiResponse(responseCode = "404", description = "User with this verification code not found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CustomErrorResponse.class)) })
+    })
+    public void verification(@PathVariable String verifCode) {
+        UserResponseDto userResponseDto = authService.verification(verifCode);
+        log.info("{}: User (id: {}) has completed verification", LogEnum.CONTROLLER, userResponseDto.id());
+    }
 }

@@ -18,5 +18,6 @@ public record UserResponseDto(String id,
                               List<FigureResponseDto> wishList,
                               List<FigureResponseDto> recentlyViewed,
                               List<ReviewResponseDto> reviewResponseDtoList,
-                              List<OrderResponseDto> orderResponseHistory) {
+                              List<OrderResponseDto> orderResponseHistory,
+                              boolean isAccountVerified) {
 }
