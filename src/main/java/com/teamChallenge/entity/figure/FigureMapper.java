@@ -93,13 +93,13 @@ public class FigureMapper {
     }
 
     public List<FigureEntity> toEntityListFromRequest (List<FigureRequestDto> dtos){
-        return dtos.stream()
+        return dtos == null ? null : dtos.stream()
                 .map(this::toEntity)
                 .collect(Collectors.toList());
     }
 
     public List<FigureEntity> toEntityListFromResponse (List<FigureResponseDto> dtos){
-        return dtos.stream()
+        return dtos == null ? null : dtos.stream()
                 .map(this::toEntity)
                 .collect(Collectors.toList());
     }

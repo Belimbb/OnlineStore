@@ -22,7 +22,7 @@ public class CartMapper {
     }
 
     public List<CartResponseDto> toDtoList (List<CartEntity> entities){
-        return entities.stream()
+        return entities == null ? null : entities.stream()
                 .map(this::toResponseDto)
                 .collect(Collectors.toList());
     }

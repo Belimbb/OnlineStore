@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -54,15 +55,15 @@ public class UserMapper {
     }
 
     public List<UserResponseDto> toResponseDtoList(List<UserEntity> entities) {
-        return entities
+        return entities == null ? null : entities
                 .stream()
                 .map(this::toResponseDto)
                 .toList();
     }
 
     public List<UserEntity> toEntityListFromResponse(List<UserResponseDto> dtos) {
-        return dtos.stream()
+        return dtos == null ? null : dtos.stream()
                 .map(this::toEntity)
-                .toList();
+                .collect(Collectors.toList());
     }
 }
