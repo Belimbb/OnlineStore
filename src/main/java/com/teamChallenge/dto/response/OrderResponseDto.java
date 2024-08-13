@@ -2,7 +2,7 @@ package com.teamChallenge.dto.response;
 
 import com.teamChallenge.dto.response.figure.FigureInCartOrderResponseDto;
 import com.teamChallenge.entity.order.Statuses;
-import com.teamChallenge.entity.user.address.AddressInfo;
+import com.teamChallenge.entity.address.AddressInfo;
 
 import java.util.Date;
 import java.util.List;

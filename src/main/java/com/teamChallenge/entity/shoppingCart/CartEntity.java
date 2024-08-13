@@ -1,6 +1,8 @@
 package com.teamChallenge.entity.shoppingCart;
 
+import com.teamChallenge.dto.response.PromoCodeResponseDto;
 import com.teamChallenge.dto.response.figure.FigureInCartOrderResponseDto;
+import com.teamChallenge.entity.promoCode.PromoCodeEntity;
 import com.teamChallenge.entity.user.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
@@ -30,18 +32,23 @@ public class CartEntity implements Serializable {
     @Column(nullable = false)
     private int totalPrice;
 
-    public void setTotalPrice() {
-        int totalPrice = 0;
+    public void setTotalPrice(int discount) {
+        int totalPrice = -discount;
         for (FigureInCartOrderResponseDto figure : figures) {
             totalPrice += figure.price()*figure.amount();
+
+            if (totalPrice<0){
+                totalPrice = 0;
+                break;
+            }
         }
         this.totalPrice = totalPrice;
     }
 
-    public CartEntity(UserEntity user, List<FigureInCartOrderResponseDto> figures) {
+    public CartEntity(UserEntity user, List<FigureInCartOrderResponseDto> figures, int discount) {
         this.user = user;
         this.figures = figures;
 
-        setTotalPrice();
+        setTotalPrice(discount);
     }
 }

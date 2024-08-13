@@ -4,6 +4,7 @@ import com.teamChallenge.dto.request.CartRequestDto;
 import com.teamChallenge.dto.response.CartResponseDto;
 import com.teamChallenge.dto.response.figure.FigureInCartOrderResponseDto;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
+import com.teamChallenge.entity.promoCode.PromoCodeServiceImpl;
 import com.teamChallenge.entity.user.UserEntity;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.LogEnum;
@@ -30,8 +31,8 @@ public class CartServiceImpl implements CartService {
     private final CartMapper cartMapper;
 
     private final UserServiceImpl userService;
-
     private final FigureServiceImpl figureService;
+    private final PromoCodeServiceImpl promoCodeService;
 
     private static final String OBJECT_NAME = "Cart";
 
@@ -66,7 +67,7 @@ public class CartServiceImpl implements CartService {
             return cartMapper.toResponseDto(addFigures(cart.getId(), figures));
         }
 
-        CartEntity newCart = new CartEntity(currentUser, figures);
+        CartEntity newCart = new CartEntity(currentUser, figures, getDiscount(cartDto.promoCode()));
         CartEntity savedCart = cartRepository.save(newCart);
 
         log.info("{}: " + OBJECT_NAME + " (Id: {}) was created", LogEnum.SERVICE, savedCart.getId());
@@ -106,7 +107,7 @@ public class CartServiceImpl implements CartService {
         }
 
         cart.setFigures(figures);
-        cart.setTotalPrice();
+        cart.setTotalPrice(getDiscount(cartDto.promoCode()));
 
         CartEntity updatedCart = cartRepository.save(cart);
         log.info("{}: " + OBJECT_NAME + " (Id: {}) updated figure list and total price throughout update method", LogEnum.SERVICE, id);
@@ -122,5 +123,14 @@ public class CartServiceImpl implements CartService {
 
     private CartEntity findById(String id) {
         return cartRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
+    }
+
+    private int getDiscount(String promoCode){
+        int discount = 0;
+        if (promoCode==null||promoCode.isBlank()){
+            discount = promoCodeService.getByCode(promoCode).discount();
+        }
+
+        return discount;
     }
 }
