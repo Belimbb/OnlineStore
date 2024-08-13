@@ -8,6 +8,7 @@ import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -35,7 +36,7 @@ import java.util.List;
 @RequestMapping("/api/ads")
 public class AdsController {
     private final AdvertisementServiceImpl adsService;
-    private final UserServiceImpl userService;
+    private final AuthUtil authUtil;
 
     @PostMapping("/add")
     @Operation(summary = "Add new Ads")
@@ -49,9 +50,9 @@ public class AdsController {
     })
     @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<AdsResponseDto> addAds(@Valid @NotNull @RequestBody AdsRequestDto request, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
 
-        AdsResponseDto ads = adsService.createAds(request);
+        AdsResponseDto ads = adsService.create(request);
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, ads.id());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -104,15 +105,9 @@ public class AdsController {
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
     public void deleteAdsById(@PathVariable("adsId") String adsId, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
 
-        adsService.deleteAds(adsId);
+        adsService.delete(adsId);
         log.info("{}: Ads (id: {}) has been deleted", LogEnum.CONTROLLER, adsId);
-    }
-
-    private void validation(Principal principal) throws UnauthorizedAccessException {
-        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
-            throw new UnauthorizedAccessException();
-        }
     }
 }

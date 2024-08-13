@@ -3,8 +3,8 @@ package com.teamChallenge.entity.figure;
 import com.teamChallenge.entity.figure.sections.Labels;
 import com.teamChallenge.entity.figure.sections.category.CategoryEntity;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryEntity;
-import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,7 +15,8 @@ import java.util.Optional;
 public interface FigureRepository extends MongoRepository<FigureEntity, String> {
     Optional<List<FigureEntity>> findByCategory(CategoryEntity category);
     Optional<List<FigureEntity>> findBySubCategory(SubCategoryEntity subCategory);
-    Optional<List<FigureEntity>> findByColor(String color);
+    Optional<List<FigureEntity>> findByAmountGreaterThan(int amount);
+
     List<FigureEntity> findByLabel(Labels label, Sort.Direction direction);
 
     void deleteByCategory (CategoryEntity category);

@@ -1,9 +1,6 @@
 package com.teamChallenge.exception;
 
-import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
-import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
-import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
-import com.teamChallenge.exception.exceptions.generalExceptions.SomethingWentWrongException;
+import com.teamChallenge.exception.exceptions.generalExceptions.*;
 import com.teamChallenge.exception.exceptions.userExceptions.UserIncorrectPasswordException;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -61,6 +58,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SomethingWentWrongException.class)
     public ResponseEntity<Map<String, List<String>>> somethingWentWrongException(SomethingWentWrongException ex) {
         return getErrorsMap(ex, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(CustomNullPointerException.class)
+    public ResponseEntity<Map<String, List<String>>> nullPointerException(CustomNullPointerException ex) {
+        return getErrorsMap(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CustomBadRequestException.class)
+    public ResponseEntity<Map<String, List<String>>> badRequestException(CustomBadRequestException ex) {
+        return getErrorsMap(ex, HttpStatus.BAD_REQUEST);
     }
 
     /* User exceptions */

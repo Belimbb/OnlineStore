@@ -1,17 +1,15 @@
 package com.teamChallenge.controller.user;
 
 import com.teamChallenge.dto.response.FigureResponseDto;
-import com.teamChallenge.dto.response.UserResponseDto;
-import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.figure.FigureMapper;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserEntity;
-import com.teamChallenge.entity.user.UserRepository;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -41,30 +39,9 @@ public class WishListController {
     private static final String URI_FIGURES_WITH_ID = "/{figureId}";
 
     private final UserServiceImpl userService;
+    private final AuthUtil authUtil;
+
     private final FigureMapper figureMapper;
-    private final UserRepository userRepository;
-
-    @PostMapping(URI_FIGURES_WITH_ID)
-    @Operation(summary = "Add figure to wish list")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Figure added",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserResponseDto.class))}),
-            @ApiResponse(responseCode = "400", description = "Validation errors",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CustomErrorResponse.class))})
-    })
-    @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<UserResponseDto> addFigureToWishList(@PathVariable String figureId, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
-
-        UserResponseDto user = userService.addFigureToWishList(principal.getName(), figureId);
-
-        log.info("{}: Figure (id: {}) has been added to User (id: {}) wish list", LogEnum.SERVICE, figureId, user.id());
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(user);
-    }
 
     @GetMapping(URI_FIGURES_WITH_ID)
     @Operation(summary = "Get figure from wish list by ID")
@@ -87,25 +64,6 @@ public class WishListController {
                 .body(figure);
     }
 
-    @GetMapping("")
-    @Operation(summary = "Get all figures from wish list")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List figures from wish list",
-                    content = { @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
-            )
-    })
-    @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<List<FigureResponseDto>> figureListFromWishList(Principal principal) throws CustomNotFoundException {
-        UserEntity user = userService.findByEmail(principal.getName());
-        List<FigureResponseDto> figureResponseDtos = figureMapper.toResponseDtoList(user.getWhishList());
-
-        log.info("{}: Figures from User (id: {}) wish list have been retrieved", LogEnum.CONTROLLER, user.getId());
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(figureResponseDtos);
-    }
-
     @DeleteMapping(URI_FIGURES_WITH_ID)
     @Operation(summary = "Remove figure from wish list")
     @ApiResponses(value = {
@@ -116,17 +74,12 @@ public class WishListController {
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "BearerAuth")
     public void removeFigureFromWishList(@PathVariable String figureId, Principal principal) throws CustomNotFoundException, UnauthorizedAccessException {
-        validation(principal);
+        authUtil.validateAdminRole(principal);
+
         String email = principal.getName();
 
         userService.removeFigureFromWishList(email, figureId);
 
         log.info("{}: Figure (id: {}) has been removed from User (email: {}) wish list", LogEnum.CONTROLLER, figureId, email);
-    }
-
-    private void validation(Principal principal) throws UnauthorizedAccessException {
-        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
-            throw new UnauthorizedAccessException();
-        }
     }
 }

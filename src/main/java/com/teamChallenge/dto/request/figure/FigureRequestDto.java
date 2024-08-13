@@ -1,5 +1,6 @@
 package com.teamChallenge.dto.request.figure;
 
+import com.teamChallenge.entity.figure.additionalInfo.AdditionalInfo;
 import com.teamChallenge.entity.figure.sections.Labels;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +16,6 @@ public record FigureRequestDto(@NotBlank @Size(max = 50) String name,
                                @NotNull int currentPrice,
                                @NotNull int oldPrice,
                                @NotNull int amount,
-                               @NotBlank @Size(min = 7, max = 7) String color,
+                               @NotNull AdditionalInfo additionalInfo,
                                List<String> images) {
 }

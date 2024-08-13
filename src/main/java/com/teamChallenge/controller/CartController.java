@@ -3,6 +3,7 @@ package com.teamChallenge.controller;
 import com.teamChallenge.dto.request.CartRequestDto;
 import com.teamChallenge.dto.response.CartResponseDto;
 import com.teamChallenge.entity.shoppingCart.CartService;
+import com.teamChallenge.entity.shoppingCart.CartServiceImpl;
 import com.teamChallenge.entity.user.Roles;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.CustomErrorResponse;
@@ -24,6 +25,12 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 
+/**
+ * Need update. Security and Service use
+ */
+
+
+
 @RestController
 @RequestMapping("/api/carts")
 @Slf4j
@@ -37,7 +44,7 @@ public class CartController {
     private final CartService cartService;
 
     @GetMapping("/all")
-    @Operation(summary = "Get all ads")
+    @Operation(summary = "Get all carts")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of carts",
                     content = { @Content(mediaType = "application/json",
@@ -83,8 +90,6 @@ public class CartController {
             ),
     })
     public CartResponseDto create(@RequestBody CartRequestDto cartDto, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
-
         CartResponseDto cart = cartService.create(cartDto);
         log.info("{}: Cart (id: {}) has been added", LogEnum.CONTROLLER, cart.id());
         return cart;
@@ -108,7 +113,6 @@ public class CartController {
                     })
     })
     public CartResponseDto update(@PathVariable String id, @RequestBody CartRequestDto cartDto, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
         CartResponseDto cart = cartService.update(id, cartDto);
         log.info("{}: Cart (id: {}) has been updated", LogEnum.CONTROLLER, cart.id());
         return cart;
@@ -128,14 +132,7 @@ public class CartController {
                     })
     })
     public void delete(@PathVariable String id, Principal principal) throws UnauthorizedAccessException {
-        validation(principal);
         cartService.delete(id);
         log.info("{}: Cart (id: {}) has been deleted", LogEnum.CONTROLLER, id);
-    }
-
-    private void validation(Principal principal) throws UnauthorizedAccessException {
-        if (!userService.findByEmail(principal.getName()).getRole().equals(Roles.ADMIN)){
-            throw new UnauthorizedAccessException();
-        }
     }
 }

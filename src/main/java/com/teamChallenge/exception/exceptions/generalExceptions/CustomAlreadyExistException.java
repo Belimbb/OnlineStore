@@ -16,4 +16,8 @@ public class CustomAlreadyExistException extends RuntimeException {
     public CustomAlreadyExistException(String objectName, String propertyName, String value) {
         super(String.format(ALREADY_EXIST_EXCEPTION_PROPERTY_NAME_AND_VALUE, objectName, propertyName, value));
     }
+
+    public CustomAlreadyExistException(String message) {
+        super(message);
+    }
 }
