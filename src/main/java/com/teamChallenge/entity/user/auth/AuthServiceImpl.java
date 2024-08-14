@@ -5,6 +5,7 @@ import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.entity.user.UserEntity;
 import com.teamChallenge.entity.user.UserServiceImpl;
+import com.teamChallenge.exception.exceptions.userExceptions.UnverifiedAccountException;
 import com.teamChallenge.security.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,6 +34,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String login(LoginRequestDto loginRequestDto) throws Exception {
+        UserEntity user = userService.findByEmail(loginRequestDto.getEmail());
+
+        if (!user.isAccountVerified()) {
+            throw new UnverifiedAccountException(loginRequestDto.getEmail());
+        }
+
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
@@ -41,7 +50,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserEntity user = userService.findByEmail(loginRequestDto.getEmail());
         return jwtUtils.generateToken(user);
+    }
+
+    @Override
+    public UserResponseDto verification(String verificationCode) {
+        return userService.confirmEmail(UUID.fromString(verificationCode));
     }
 }
