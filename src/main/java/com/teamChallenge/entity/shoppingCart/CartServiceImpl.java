@@ -56,7 +56,12 @@ public class CartServiceImpl implements CartService {
         UserEntity currentUser = userService.findByEmail(email);
 
         List<FigureInCartOrderResponseDto> figures = figureService.getCartOrderResponseFigures(cartDto.figures());
-        figures.removeIf(elem -> !figureService.existById(elem.figureId()));
+        //figures.removeIf(elem -> !figureService.existById(elem.figureId())); - This variant isn't working (IDK why...)
+        for (FigureInCartOrderResponseDto elem : figures){
+            if (!figureService.existById(elem.figureId())){
+                figures.remove(elem);
+            }
+        }
 
         if (figures.isEmpty()) {
             throw new CustomBadRequestException("This request is not valid");

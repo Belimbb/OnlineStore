@@ -52,7 +52,7 @@ public class PromoCodeController {
         return promoCode;
     }
 
-    @GetMapping()
+    @GetMapping
     @SecurityRequirement(name = SEC_REC)
     @Operation(summary = "Get all promo codes")
     @ApiResponses(value = {
@@ -84,6 +84,7 @@ public class PromoCodeController {
     }
 
     @PutMapping(URI_WITH_ID)
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @SecurityRequirement(name = SEC_REC)
     @Operation(description = "update aa promo code by id")
     @ApiResponses(value = {
