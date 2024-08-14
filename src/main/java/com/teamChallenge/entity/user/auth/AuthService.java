@@ -10,5 +10,7 @@ public interface AuthService {
 
     String login(LoginRequestDto loginRequestDto) throws Exception;
 
-    UserResponseDto verification(String verificationCode);
+    UserResponseDto emailVerification(String emailVerificationCode);
+
+    UserResponseDto passwordVerification(String passwordVerificationCode);
 }

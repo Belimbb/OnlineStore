@@ -32,6 +32,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController {
 
+    private static final String VERIF_URI = "/verification";
+    private static final String VERIF_URI_CODE = "/{verifCode}";
+
     private final AuthService authService;
 
     @PostMapping("/login")
@@ -49,7 +52,6 @@ public class AuthController {
         return new JwtResponseDto(jwtToken);
     }
 
-
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Register user")
@@ -65,15 +67,27 @@ public class AuthController {
         return userDto;
     }
 
-    @GetMapping("/verification/{verifCode}")
+    @GetMapping(VERIF_URI+"/email"+VERIF_URI_CODE)
     @Operation(summary = "User account verification")
     @ApiResponses( value = {
-            @ApiResponse(responseCode = "200", description = "Verification successful"),
-            @ApiResponse(responseCode = "404", description = "User with this verification code not found",
+            @ApiResponse(responseCode = "200", description = "Email verification successful"),
+            @ApiResponse(responseCode = "404", description = "User with this email verification code not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CustomErrorResponse.class)) })
     })
-    public void verification(@PathVariable String verifCode) {
-        UserResponseDto userResponseDto = authService.verification(verifCode);
-        log.info("{}: User (id: {}) has completed verification", LogEnum.CONTROLLER, userResponseDto.id());
+    public void emailVerification(@PathVariable String verifCode) {
+        UserResponseDto userResponseDto = authService.emailVerification(verifCode);
+        log.info("{}: User (id: {}) has completed email verification", LogEnum.CONTROLLER, userResponseDto.id());
+    }
+
+    @GetMapping(VERIF_URI+"/password"+VERIF_URI_CODE)
+    @Operation(summary = "User account verification")
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "Password verification successful"),
+            @ApiResponse(responseCode = "404", description = "User with this password verification code not found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CustomErrorResponse.class)) })
+    })
+    public void passwordVerification(@PathVariable String verifCode) {
+        UserResponseDto userResponseDto = authService.passwordVerification(verifCode);
+        log.info("{}: User (id: {}) has completed password verification", LogEnum.CONTROLLER, userResponseDto.id());
     }
 }

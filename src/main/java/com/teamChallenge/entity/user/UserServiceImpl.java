@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         }
 
         UserEntity saved = userRepository.save(user);
-        emailService.sendVerificationLetter(email, user.getVerificationCode());
+        emailService.sendVerificationEmailLetter(email, user.getEmailVerificationCode());
         log.info("{}: " + OBJECT_NAME + " (Username: {}) was created", LogEnum.SERVICE, username);
         return userMapper.toResponseDto(saved);
     }
@@ -88,12 +88,17 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         user.setUsername(userRequestDto.username());
 
         String email = userRequestDto.email();
-        boolean isEmailChanged = false;
+        String password = userRequestDto.password();
+
         if (!existByEmail(email) && !email.equals(user.getEmail())) {
             user.setEmail(email);
-            user.setAccountVerified(false);
-            user.setVerificationCode(UUID.randomUUID());
-            isEmailChanged = true;
+            user.setEmailVerified(false);
+            user.setEmailVerificationCode(UUID.randomUUID());
+        }
+        if (user.getPassword().equals(password)){
+            user.setPassword(passwordEncoder.encode(password));
+            user.setPasswordVerified(false);
+            user.setPasswordVerificationCode(UUID.randomUUID());
         }
 
         String phoneNumber = userRequestDto.phoneNumber();
@@ -102,9 +107,13 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         }
 
         UserEntity updatedUser = userRepository.save(user);
-        if (isEmailChanged) {
-            emailService.sendVerificationLetter(updatedUser.getEmail(), updatedUser.getVerificationCode());
+        if (!user.isEmailVerified()) {
+            emailService.sendVerificationEmailLetter(email, updatedUser.getEmailVerificationCode());
         }
+        if (!user.isPasswordVerified()){
+            emailService.sendVerificationPasswordLetter(email, updatedUser.getPasswordVerificationCode());
+        }
+
 
         log.info("{}: " + OBJECT_NAME + " (id: {}) was updated", LogEnum.SERVICE, id);
         return userMapper.toResponseDto(user);
@@ -157,11 +166,20 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         userRepository.save(user);
     }
 
-    public UserResponseDto confirmEmail(UUID verificationCode) {
-        UserEntity user = findByVerificationCode(verificationCode);
-        user.setAccountVerified(true);
-        user.setVerificationCode(null);
+    public UserResponseDto confirmEmail(UUID emailVerificationCode) {
+        UserEntity user = findByEmailVerificationCode(emailVerificationCode);
+        user.setEmailVerified(true);
+        user.setEmailVerificationCode(null);
         log.info("{}: " + OBJECT_NAME + "'s (id: {}) email has been confirmed", LogEnum.SERVICE, user.getId());
+        UserEntity savedUser = userRepository.save(user);
+        return userMapper.toResponseDto(savedUser);
+    }
+
+    public UserResponseDto confirmPassword(UUID passwordVerificationCode) {
+        UserEntity user = findByPasswordVerificationCode(passwordVerificationCode);
+        user.setPasswordVerified(true);
+        user.setPasswordVerificationCode(null);
+        log.info("{}: " + OBJECT_NAME + "'s (id: {}) password has been confirmed", LogEnum.SERVICE, user.getId());
         UserEntity savedUser = userRepository.save(user);
         return userMapper.toResponseDto(savedUser);
     }
@@ -202,14 +220,14 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, email));
     }
 
-    public UserEntity findByVerificationCode(UUID verificationCode) {
-        log.info("{}: request on retrieving " + OBJECT_NAME + " by verification code {} was sent", LogEnum.SERVICE, verificationCode);
-        return userRepository.findByVerificationCode(verificationCode).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME));
+    public UserEntity findByEmailVerificationCode(UUID verificationCode) {
+        log.info("{}: request on retrieving " + OBJECT_NAME + " by email verification code {} was sent", LogEnum.SERVICE, verificationCode);
+        return userRepository.findByEmailVerificationCode(verificationCode).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME));
     }
 
-    public UserEntity getByUsername(String username) {
-        log.info("{}: request on retrieving " + OBJECT_NAME + " by username {} was sent", LogEnum.SERVICE, username);
-        return userRepository.findByUsername(username).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, username));
+    public UserEntity findByPasswordVerificationCode(UUID verificationCode) {
+        log.info("{}: request on retrieving " + OBJECT_NAME + " by password verification code {} was sent", LogEnum.SERVICE, verificationCode);
+        return userRepository.findByPasswordVerificationCode(verificationCode).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME));
     }
 
     public void addFigureToRecentlyViewedList(String userEmail, FigureEntity figure) {

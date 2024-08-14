@@ -36,7 +36,7 @@ public class AuthServiceImpl implements AuthService {
     public String login(LoginRequestDto loginRequestDto) throws Exception {
         UserEntity user = userService.findByEmail(loginRequestDto.getEmail());
 
-        if (!user.isAccountVerified()) {
+        if (!user.isEmailVerified()) {
             throw new UnverifiedAccountException(loginRequestDto.getEmail());
         }
 
@@ -54,7 +54,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public UserResponseDto verification(String verificationCode) {
-        return userService.confirmEmail(UUID.fromString(verificationCode));
+    public UserResponseDto emailVerification(String emailVerificationCode) {
+        return userService.confirmEmail(UUID.fromString(emailVerificationCode));
+    }
+
+    @Override
+    public UserResponseDto passwordVerification(String passwordVerificationCode) {
+        return userService.confirmPassword(UUID.fromString(passwordVerificationCode));
     }
 }

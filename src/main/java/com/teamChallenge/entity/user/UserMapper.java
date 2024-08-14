@@ -35,7 +35,8 @@ public class UserMapper {
                 figureMapper.toResponseDtoList(entity.getRecentlyViewed()),
                 reviewMapper.toResponseDtoList(entity.getReviews()),
                 entity.getOrderHistory() == null ? new ArrayList<>() : orderMapper.toResponseDtoList(entity.getOrderHistory()),
-                entity.isAccountVerified()
+                entity.isEmailVerified(),
+                entity.isPasswordVerified()
         );
     }
 
@@ -53,7 +54,9 @@ public class UserMapper {
                 figureMapper.toEntityListFromResponse(dto.wishList()),
                 figureMapper.toEntityListFromResponse(dto.recentlyViewed()),
                 orderMapper.toEntityListFromResponse(dto.orderResponseHistory()),
-                dto.isAccountVerified(),
+                dto.isEmailVerified(),
+                dto.isPasswordVerified(),
+                null,
                 null
         );
     }

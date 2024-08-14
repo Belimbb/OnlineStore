@@ -68,10 +68,13 @@ public class UserEntity {
     private List<OrderEntity> orderHistory;
 
     @Column(nullable = false)
-    private boolean isAccountVerified;
+    private boolean isEmailVerified;
+
+    @Column(nullable = false)
+    private boolean isPasswordVerified;
 
     @Column
-    private UUID verificationCode;
+    private UUID emailVerificationCode, passwordVerificationCode;
 
     public UserEntity(String username, String email, String password) {
         this.username = username;
@@ -79,8 +82,10 @@ public class UserEntity {
         this.password = password;
         role = Roles.USER;
         recentlyViewed = new ArrayList<>();
-        isAccountVerified = false;
-        verificationCode = UUID.randomUUID();
+        isEmailVerified = false;
+        isPasswordVerified = false;
+        emailVerificationCode = UUID.randomUUID();
+        passwordVerificationCode = UUID.randomUUID();
     }
 
     @Override
