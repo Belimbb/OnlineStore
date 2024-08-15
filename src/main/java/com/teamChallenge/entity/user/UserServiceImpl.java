@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
             user.setEmailVerified(false);
             user.setEmailVerificationCode(UUID.randomUUID());
         }
-        if (user.getPassword().equals(password)){
+        if (!user.getPassword().equals(password)){
             user.setPassword(passwordEncoder.encode(password));
             user.setPasswordVerified(false);
             user.setPasswordVerificationCode(UUID.randomUUID());
