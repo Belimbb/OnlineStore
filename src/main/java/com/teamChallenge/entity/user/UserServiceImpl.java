@@ -90,10 +90,10 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         String email = userRequestDto.email();
         String password = userRequestDto.password();
 
-        if (existByEmail(email)){
-            throw new CustomAlreadyExistException(OBJECT_NAME, "Email", email);
-        }
         if (!email.equals(user.getEmail())) {
+            if (existByEmail(email)){
+                throw new CustomAlreadyExistException(OBJECT_NAME, "Email", email);
+            }
             user.setEmail(email);
             user.setEmailVerified(false);
             user.setEmailVerificationCode(UUID.randomUUID());
