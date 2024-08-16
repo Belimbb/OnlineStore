@@ -108,6 +108,14 @@ public class OpenAPIConfig {
     }
 
     @Bean
+    public GroupedOpenApi apiImageUploadingV1() {
+        return GroupedOpenApi.builder()
+                .group("Image Uploading API V1")
+                .pathsToMatch("/api/images/**")
+                .build();
+    }
+
+    @Bean
     @Primary
     public OpenAPI customOpenAPIv1() {
         return new OpenAPI()
