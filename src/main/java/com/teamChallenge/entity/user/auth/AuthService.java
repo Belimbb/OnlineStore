@@ -13,4 +13,10 @@ public interface AuthService {
     UserResponseDto emailVerification(String emailVerificationCode);
 
     UserResponseDto passwordVerification(String passwordVerificationCode);
+
+    UserResponseDto sentEmailVerifMes(String email);
+
+    UserResponseDto sentPasswordVerifMes(String email);
+
+    UserResponseDto resetPassword(LoginRequestDto loginRequestDto);
 }

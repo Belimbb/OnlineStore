@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -67,16 +68,42 @@ public class AuthController {
         return userDto;
     }
 
+    @PostMapping(VERIF_URI+"/email")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Send email verif message")
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "Email verification message sent successfully"),
+            @ApiResponse(responseCode = "404", description = "User with this email verification code not found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CustomErrorResponse.class)) })
+    })
+    public void sendEmailVerifMes(@Valid @RequestBody LoginRequestDto loginRequestDto) throws CustomAlreadyExistException {
+        UserResponseDto userDto = authService.sentEmailVerifMes(loginRequestDto.getEmail());
+        log.info("{}: Email verification email was sent to User (id: {})", LogEnum.CONTROLLER, userDto.id());
+    }
+
     @GetMapping(VERIF_URI+"/email"+VERIF_URI_CODE)
     @Operation(summary = "User account verification")
     @ApiResponses( value = {
             @ApiResponse(responseCode = "200", description = "Email verification successful"),
-            @ApiResponse(responseCode = "404", description = "User with this email verification code not found",
+            @ApiResponse(responseCode = "404", description = "User with this email not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CustomErrorResponse.class)) })
     })
     public void emailVerification(@PathVariable String verifCode) {
         UserResponseDto userResponseDto = authService.emailVerification(verifCode);
         log.info("{}: User (id: {}) has completed email verification", LogEnum.CONTROLLER, userResponseDto.id());
+    }
+
+    @PostMapping(VERIF_URI+"/password")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Send password verif message")
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "Password verification message sent successfully"),
+            @ApiResponse(responseCode = "404", description = "User with this email not found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CustomErrorResponse.class)) })
+    })
+    public void sendPasswordVerifMes(@Valid @RequestBody LoginRequestDto loginRequestDto) throws CustomAlreadyExistException {
+        UserResponseDto userDto = authService.sentPasswordVerifMes(loginRequestDto.getEmail());
+        log.info("{}: Password verification email was sent to User (id: {})", LogEnum.CONTROLLER, userDto.id());
     }
 
     @GetMapping(VERIF_URI+"/password"+VERIF_URI_CODE)
@@ -89,5 +116,18 @@ public class AuthController {
     public void passwordVerification(@PathVariable String verifCode) {
         UserResponseDto userResponseDto = authService.passwordVerification(verifCode);
         log.info("{}: User (id: {}) has completed password verification", LogEnum.CONTROLLER, userResponseDto.id());
+    }
+
+    @PostMapping(VERIF_URI+"/password/reset")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Reset password (update)")
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "Password reset"),
+            @ApiResponse(responseCode = "404", description = "User with this email not found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CustomErrorResponse.class)) })
+    })
+    public void resetPassword(@Valid @RequestBody LoginRequestDto loginRequestDto) throws CustomAlreadyExistException {
+        UserResponseDto userDto = authService.resetPassword(loginRequestDto);
+        log.info("{}: User (id: {}) password was reset", LogEnum.CONTROLLER, userDto.id());
     }
 }

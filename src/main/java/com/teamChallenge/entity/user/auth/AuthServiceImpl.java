@@ -1,5 +1,6 @@
 package com.teamChallenge.entity.user.auth;
 
+import com.teamChallenge.dto.request.UserRequestDto;
 import com.teamChallenge.dto.request.auth.LoginRequestDto;
 import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.dto.response.UserResponseDto;
@@ -61,5 +62,22 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public UserResponseDto passwordVerification(String passwordVerificationCode) {
         return userService.confirmPassword(UUID.fromString(passwordVerificationCode));
+    }
+
+    @Override
+    public UserResponseDto sentEmailVerifMes(String email) {
+        return userService.sendEmilVerifMessage(email);
+    }
+
+    @Override
+    public UserResponseDto sentPasswordVerifMes(String email) {
+        return userService.sendPasswordVerifMessage(email);
+    }
+
+    @Override
+    public UserResponseDto resetPassword(LoginRequestDto loginRequestDto) {
+        UserEntity user = userService.findByEmail(loginRequestDto.getEmail());
+        UserRequestDto userRequestDto = new UserRequestDto(user.getUsername(), user.getEmail(), loginRequestDto.getPassword(), user.getPhoneNumber());
+        return userService.update(user.getId(), userRequestDto);
     }
 }

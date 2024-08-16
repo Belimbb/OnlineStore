@@ -90,12 +90,15 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         String email = userRequestDto.email();
         String password = userRequestDto.password();
 
-        if (!existByEmail(email) && !email.equals(user.getEmail())) {
+        if (existByEmail(email)){
+            throw new CustomAlreadyExistException(OBJECT_NAME, "Email", email);
+        }
+        if (!email.equals(user.getEmail())) {
             user.setEmail(email);
             user.setEmailVerified(false);
             user.setEmailVerificationCode(UUID.randomUUID());
         }
-        if (user.getPassword().equals(password)){
+        if (!passwordEncoder.matches(password, user.getPassword())){
             user.setPassword(passwordEncoder.encode(password));
             user.setPasswordVerified(false);
             user.setPasswordVerificationCode(UUID.randomUUID());
@@ -164,6 +167,28 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         UserEntity user = findByEmail(email);
         user.getWhishList().remove(getFigureFromWishList(user, figureId));
         userRepository.save(user);
+    }
+
+    public UserResponseDto sendEmilVerifMessage(String email){
+        UserEntity user = findByEmail(email);
+
+        if (user.getEmailVerificationCode()==null){
+            user.setEmailVerificationCode(UUID.randomUUID());
+        }
+
+        emailService.sendVerificationEmailLetter(email, user.getEmailVerificationCode());
+        return userMapper.toResponseDto(user);
+    }
+
+    public UserResponseDto sendPasswordVerifMessage(String email){
+        UserEntity user = findByEmail(email);
+
+        if (user.getPasswordVerificationCode()==null){
+            user.setPasswordVerificationCode(UUID.randomUUID());
+        }
+
+        emailService.sendVerificationPasswordLetter(email, user.getPasswordVerificationCode());
+        return userMapper.toResponseDto(user);
     }
 
     public UserResponseDto confirmEmail(UUID emailVerificationCode) {
