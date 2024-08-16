@@ -1,6 +1,7 @@
 package com.teamChallenge.exception;
 
 import com.teamChallenge.exception.exceptions.generalExceptions.*;
+import com.teamChallenge.exception.exceptions.imageExceptions.IncorrectFileExtension;
 import com.teamChallenge.exception.exceptions.userExceptions.UnverifiedAccountException;
 import com.teamChallenge.exception.exceptions.userExceptions.UserIncorrectPasswordException;
 
@@ -88,6 +89,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MailSendException.class)
     public ResponseEntity<Map<String, List<String>>> mailSendException(MailSendException ex) {
+        return getErrorsMap(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    /* Image exceptions */
+
+    @ExceptionHandler(IncorrectFileExtension.class)
+    public ResponseEntity<Map<String, List<String>>> incorrectFileExtension(IncorrectFileExtension ex) {
         return getErrorsMap(ex, HttpStatus.BAD_REQUEST);
     }
 

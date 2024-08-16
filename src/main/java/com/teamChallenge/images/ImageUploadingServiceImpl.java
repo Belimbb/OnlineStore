@@ -6,15 +6,14 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+import com.teamChallenge.exception.exceptions.generalExceptions.CustomBadRequestException;
 import com.teamChallenge.exception.exceptions.generalExceptions.SomethingWentWrongException;
+import com.teamChallenge.exception.exceptions.imageExceptions.IncorrectFileExtension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.UUID;
 
@@ -37,7 +36,7 @@ public class ImageUploadingServiceImpl implements ImageUploadingService {
             uploadFile(file, filename);
             file.delete();
             return filename;
-        }   catch (Exception ex) {
+        }   catch (IOException ex) {
             ex.printStackTrace();
             throw new SomethingWentWrongException();
         }
@@ -54,13 +53,19 @@ public class ImageUploadingServiceImpl implements ImageUploadingService {
     private void uploadFile(File file, String filename) throws IOException {
         BlobId blobId = BlobId.of(bucketName, filename);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("media").build();
-        InputStream inputStream = ImageUploadingServiceImpl.class.getClassLoader().getResourceAsStream(privateKeyFilename);
+
+        InputStream inputStream = new FileInputStream("/etc/secrets/" + privateKeyFilename);
         Credentials credentials = GoogleCredentials.fromStream(inputStream);
         Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
         storage.create(blobInfo, Files.readAllBytes(file.toPath()));
     }
 
     private String getExtension(String filename) {
-        return filename.substring(filename.lastIndexOf("."));
+        String extension = filename.substring(filename.lastIndexOf("."));
+
+        if (extension.equals(".jpg") || extension.equals(".jpeg") || extension.equals(".png")) {
+            return extension;
+        }
+        throw new IncorrectFileExtension(extension);
     }
 }
