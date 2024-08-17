@@ -10,8 +10,10 @@ import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.mail.EmailService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -70,6 +72,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         }
 
         UserEntity user = new UserEntity(username, email, passwordEncoder.encode(signupRequestDto.getPassword()));
+        user.setPasswordVerified(true);
         user.setCreatedAt(new Date());
 
         if (email.trim().equalsIgnoreCase(adminEmail)){
@@ -93,12 +96,12 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         if (!existByEmail(email) && !email.equals(user.getEmail())) {
             user.setEmail(email);
             user.setEmailVerified(false);
-            user.setEmailVerificationCode(UUID.randomUUID());
+            user.setEmailVerificationCode(UUID.randomUUID().toString().substring(0, 6));
         }
         if (!user.getPassword().equals(password)){
             user.setPassword(passwordEncoder.encode(password));
             user.setPasswordVerified(false);
-            user.setPasswordVerificationCode(UUID.randomUUID());
+            user.setPasswordVerificationCode(UUID.randomUUID().toString().substring(0, 6));
         }
 
         String phoneNumber = userRequestDto.phoneNumber();
@@ -166,7 +169,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         userRepository.save(user);
     }
 
-    public UserResponseDto confirmEmail(UUID emailVerificationCode) {
+    public UserResponseDto confirmEmail(String emailVerificationCode) {
         UserEntity user = findByEmailVerificationCode(emailVerificationCode);
         user.setEmailVerified(true);
         user.setEmailVerificationCode(null);
@@ -175,7 +178,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userMapper.toResponseDto(savedUser);
     }
 
-    public UserResponseDto confirmPassword(UUID passwordVerificationCode) {
+    public UserResponseDto confirmPassword(String passwordVerificationCode) {
         UserEntity user = findByPasswordVerificationCode(passwordVerificationCode);
         user.setPasswordVerified(true);
         user.setPasswordVerificationCode(null);
@@ -220,12 +223,12 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, email));
     }
 
-    public UserEntity findByEmailVerificationCode(UUID verificationCode) {
+    public UserEntity findByEmailVerificationCode(String verificationCode) {
         log.info("{}: request on retrieving " + OBJECT_NAME + " by email verification code {} was sent", LogEnum.SERVICE, verificationCode);
         return userRepository.findByEmailVerificationCode(verificationCode).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME));
     }
 
-    public UserEntity findByPasswordVerificationCode(UUID verificationCode) {
+    public UserEntity findByPasswordVerificationCode(String verificationCode) {
         log.info("{}: request on retrieving " + OBJECT_NAME + " by password verification code {} was sent", LogEnum.SERVICE, verificationCode);
         return userRepository.findByPasswordVerificationCode(verificationCode).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME));
     }

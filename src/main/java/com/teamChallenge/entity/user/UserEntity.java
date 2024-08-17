@@ -74,7 +74,7 @@ public class UserEntity {
     private boolean isPasswordVerified;
 
     @Column
-    private UUID emailVerificationCode, passwordVerificationCode;
+    private String emailVerificationCode, passwordVerificationCode;
 
     public UserEntity(String username, String email, String password) {
         this.username = username;
@@ -84,8 +84,8 @@ public class UserEntity {
         recentlyViewed = new ArrayList<>();
         isEmailVerified = false;
         isPasswordVerified = false;
-        emailVerificationCode = UUID.randomUUID();
-        passwordVerificationCode = UUID.randomUUID();
+        emailVerificationCode = UUID.randomUUID().toString().substring(0, 6);;
+        passwordVerificationCode = UUID.randomUUID().toString().substring(0, 6);;
     }
 
     @Override

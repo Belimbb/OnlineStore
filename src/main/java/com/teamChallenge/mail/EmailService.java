@@ -6,7 +6,7 @@ public interface EmailService {
 
     void sendLetter(String to, String subject, String text);
 
-    void sendVerificationEmailLetter(String to, UUID emailVerificationCode);
+    void sendVerificationEmailLetter(String to, String emailVerificationCode);
 
-    void sendVerificationPasswordLetter(String to, UUID passwordVerificationCode);
+    void sendVerificationPasswordLetter(String to, String passwordVerificationCode);
 }

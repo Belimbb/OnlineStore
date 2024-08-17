@@ -8,8 +8,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Slf4j
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -21,9 +19,7 @@ public class EmailServiceImpl implements EmailService {
     private String mailUsername;
 
     public static final String OBJECT_NAME = "Letter";
-    @Value("${server.host}")
-    private String URI_HOST;
-    public static final String URI_VERIFICATION = "/auth/verification/";
+
     private String subject;
     private String text;
 
@@ -34,20 +30,20 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendVerificationEmailLetter(String to, UUID verificationCode) {
+    public void sendVerificationEmailLetter(String to, String verificationCode) {
         subject = "Email verification in the Online Store";
-        text = "You need to verify your account. Please go to the following link: %s";
+        text = "You need to verify your account. Your verification code: %s";
 
-        sendSimpleMessage(to, subject, String.format(text, URI_HOST + URI_VERIFICATION + "email/" + verificationCode));
+        sendSimpleMessage(to, subject, String.format(text, verificationCode));
         log.info("{}: Email verification " + OBJECT_NAME + " (to: {}) was send", LogEnum.SERVICE, to);
     }
 
     @Override
-    public void sendVerificationPasswordLetter(String to, UUID verificationCode) {
+    public void sendVerificationPasswordLetter(String to, String verificationCode) {
         subject = "Verify password update in the Online Store";
-        text = "You need to verify your account password update. Please go to the following link: %s";
+        text = "You need to verify your account password update. Your verification code: %s";
 
-        sendSimpleMessage(to, subject, String.format(text, URI_HOST + URI_VERIFICATION + "password/" + verificationCode));
+        sendSimpleMessage(to, subject, String.format(text, verificationCode));
         log.info("{}: Password verification " + OBJECT_NAME + " (to: {}) was send", LogEnum.SERVICE, to);
     }
 
