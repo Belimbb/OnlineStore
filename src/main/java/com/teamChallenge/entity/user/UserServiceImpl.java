@@ -174,7 +174,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         UserEntity user = findByEmail(email);
 
         if (user.getEmailVerificationCode()==null){
-            user.setEmailVerificationCode(UUID.randomUUID());
+            user.setEmailVerificationCode(UUID.randomUUID().toString().substring(0, 6));
         }
 
         emailService.sendVerificationEmailLetter(email, user.getEmailVerificationCode());
@@ -185,7 +185,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         UserEntity user = findByEmail(email);
 
         if (user.getPasswordVerificationCode()==null){
-            user.setPasswordVerificationCode(UUID.randomUUID());
+            user.setPasswordVerificationCode(UUID.randomUUID().toString().substring(0, 6));
         }
 
         emailService.sendVerificationPasswordLetter(email, user.getPasswordVerificationCode());
