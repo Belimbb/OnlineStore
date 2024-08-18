@@ -2,8 +2,9 @@ package com.teamChallenge.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.teamChallenge.entity.figure.FigureEntity;
-import com.teamChallenge.entity.user.address.AddressInfo;
-import com.teamChallenge.entity.user.review.ReviewEntity;
+import com.teamChallenge.entity.order.OrderEntity;
+import com.teamChallenge.entity.address.AddressInfo;
+import com.teamChallenge.entity.review.ReviewEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
@@ -18,10 +19,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Document(collection = "users")
 @Data
@@ -38,6 +36,9 @@ public class UserEntity {
     @Email
     @Column(nullable = false)
     private String email;
+
+    @Column(unique = true)
+    private String phoneNumber;
 
     @NotNull
     @Size(min = 8, max = 100)
@@ -63,12 +64,28 @@ public class UserEntity {
     @DBRef
     private List<FigureEntity> recentlyViewed;
 
+    @DBRef
+    private List<OrderEntity> orderHistory;
+
+    @Column(nullable = false)
+    private boolean isEmailVerified;
+
+    @Column(nullable = false)
+    private boolean isPasswordVerified;
+
+    @Column
+    private UUID emailVerificationCode, passwordVerificationCode;
+
     public UserEntity(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
         role = Roles.USER;
         recentlyViewed = new ArrayList<>();
+        isEmailVerified = false;
+        isPasswordVerified = false;
+        emailVerificationCode = UUID.randomUUID();
+        passwordVerificationCode = UUID.randomUUID();
     }
 
     @Override

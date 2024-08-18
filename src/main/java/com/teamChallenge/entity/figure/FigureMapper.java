@@ -1,10 +1,10 @@
 package com.teamChallenge.entity.figure;
 
 import com.teamChallenge.dto.request.figure.FigureRequestDto;
-import com.teamChallenge.dto.response.FigureResponseDto;
+import com.teamChallenge.dto.response.figure.FigureResponseDto;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryMapper;
 import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryServiceImpl;
-import com.teamChallenge.entity.user.review.ReviewMapper;
+import com.teamChallenge.entity.review.ReviewMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,6 +33,7 @@ public class FigureMapper {
                 entity.getLongDescription(),
                 subCategoryMapper.toResponseDto(entity.getSubCategory()),
                 entity.getLabel(),
+                entity.getType(),
                 entity.getCurrentPrice(),
                 entity.getOldPrice(),
                 entity.getAmount(),
@@ -51,6 +52,7 @@ public class FigureMapper {
                 dto.longDescription(),
                 subCategoryService.getByName(dto.subCategoryName()),
                 dto.label(),
+                dto.type(),
                 dto.currentPrice(),
                 dto.oldPrice(),
                 dto.amount(),
@@ -67,6 +69,7 @@ public class FigureMapper {
                 dto.longDescription(),
                 subCategoryMapper.toEntityFromResponse(dto.subCategory()),
                 dto.label(),
+                dto.type(),
                 dto.currentPrice(),
                 dto.oldPrice(),
                 dto.amount(),
@@ -90,13 +93,13 @@ public class FigureMapper {
     }
 
     public List<FigureEntity> toEntityListFromRequest (List<FigureRequestDto> dtos){
-        return dtos.stream()
+        return dtos == null ? null : dtos.stream()
                 .map(this::toEntity)
                 .collect(Collectors.toList());
     }
 
     public List<FigureEntity> toEntityListFromResponse (List<FigureResponseDto> dtos){
-        return dtos.stream()
+        return dtos == null ? null : dtos.stream()
                 .map(this::toEntity)
                 .collect(Collectors.toList());
     }

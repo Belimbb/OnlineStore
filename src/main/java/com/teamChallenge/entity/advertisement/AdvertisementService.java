@@ -9,6 +9,6 @@ public interface AdvertisementService {
     AdsResponseDto create(AdsRequestDto adsRequestDto);
     AdsResponseDto getById (String id);
     List<AdsResponseDto> getAll();
-    AdsResponseDto update(AdsRequestDto adsDto);
+    AdsResponseDto update(String id, AdsRequestDto adsDto);
     void delete(String id);
 }

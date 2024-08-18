@@ -1,4 +1,4 @@
-package com.teamChallenge.entity.user.review;
+package com.teamChallenge.entity.review;
 
 import com.teamChallenge.dto.request.ReviewRequestDto;
 import com.teamChallenge.dto.response.ReviewResponseDto;

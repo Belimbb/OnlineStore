@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CartRepository extends MongoRepository<CartEntity, String> {
-    Optional<List<CartEntity>> findByPrice(int price);
+    Optional<List<CartEntity>> findByTotalPrice(int totalPrice);
 
     boolean existsByUser(UserEntity user);
 

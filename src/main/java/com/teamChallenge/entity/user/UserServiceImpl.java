@@ -4,26 +4,26 @@ import com.teamChallenge.dto.request.UserRequestDto;
 import com.teamChallenge.dto.request.auth.SignupRequestDto;
 import com.teamChallenge.dto.response.UserResponseDto;
 import com.teamChallenge.entity.figure.FigureEntity;
-import com.teamChallenge.entity.user.review.ReviewEntity;
+import com.teamChallenge.entity.review.ReviewEntity;
+import com.teamChallenge.entity.address.AddressInfo;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
+import com.teamChallenge.mail.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -33,8 +33,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     private String adminEmail;
 
     private final UserRepository userRepository;
-
     private final UserMapper userMapper;
+    private final EmailService emailService;
 
     private static final String OBJECT_NAME = "user";
 
@@ -56,12 +56,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userMapper.toResponseDto(findById(id));
     }
 
-    public UserResponseDto getByEmail(String email){
-        return userMapper.toResponseDto(findByEmail(email));
-    }
-
     @Override
-    public UserResponseDto create (SignupRequestDto signupRequestDto) throws CustomAlreadyExistException{
+    public UserResponseDto create (SignupRequestDto signupRequestDto) throws CustomAlreadyExistException {
         String username = signupRequestDto.getUsername();
         String email = signupRequestDto.getEmail();
 
@@ -81,6 +77,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         }
 
         UserEntity saved = userRepository.save(user);
+        emailService.sendVerificationEmailLetter(email, user.getEmailVerificationCode());
         log.info("{}: " + OBJECT_NAME + " (Username: {}) was created", LogEnum.SERVICE, username);
         return userMapper.toResponseDto(saved);
     }
@@ -89,22 +86,50 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     public UserResponseDto update(String id, UserRequestDto userRequestDto) {
         UserEntity user = findById(id);
         user.setUsername(userRequestDto.username());
-        user.setPassword(userRequestDto.password());
 
-        userRepository.save(user);
+        String email = userRequestDto.email();
+        String password = userRequestDto.password();
+
+        if (!email.equals(user.getEmail())) {
+            if (existByEmail(email)){
+                throw new CustomAlreadyExistException(OBJECT_NAME, "Email", email);
+            }
+            user.setEmail(email);
+            user.setEmailVerified(false);
+            user.setEmailVerificationCode(UUID.randomUUID());
+        }
+        if (!passwordEncoder.matches(password, user.getPassword())){
+            user.setPassword(passwordEncoder.encode(password));
+            user.setPasswordVerified(false);
+            user.setPasswordVerificationCode(UUID.randomUUID());
+        }
+
+        String phoneNumber = userRequestDto.phoneNumber();
+        if (phoneNumber != null && !phoneNumber.isBlank() && !existsByPhoneNumber(phoneNumber)) {
+            user.setPhoneNumber(phoneNumber);
+        }
+
+        UserEntity updatedUser = userRepository.save(user);
+        if (!user.isEmailVerified()) {
+            emailService.sendVerificationEmailLetter(email, updatedUser.getEmailVerificationCode());
+        }
+        if (!user.isPasswordVerified()){
+            emailService.sendVerificationPasswordLetter(email, updatedUser.getPasswordVerificationCode());
+        }
+
+
         log.info("{}: " + OBJECT_NAME + " (id: {}) was updated", LogEnum.SERVICE, id);
         return userMapper.toResponseDto(user);
     }
 
-    public UserResponseDto update(UserEntity user) {
-        String id = user.getId();
-        if (!userRepository.existsById(id)){
-            throw new CustomNotFoundException(OBJECT_NAME, id);
-        }
-        userRepository.save(user);
+    @Override
+    public UserResponseDto updateAddressInfo(String id, AddressInfo addressInfo) {
+        UserEntity user = findById(id);
+        user.setAddressInfo(addressInfo);
 
-        log.info("{}: " + OBJECT_NAME + " (id: {}) was updated (from entity)", LogEnum.SERVICE, id);
-        return userMapper.toResponseDto(user);
+        UserEntity updatedUser = userRepository.save(user);
+        log.info("{}: " + OBJECT_NAME + "'s (id: {}) address info field was updated", LogEnum.SERVICE, id);
+        return userMapper.toResponseDto(updatedUser);
     }
 
     @Override
@@ -115,15 +140,16 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return true;
     }
 
-    public UserResponseDto addFigureToWishList(String email, FigureEntity figure) {
+    public void addFigureToWishList(FigureEntity figure) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = findByEmail(email);
         List<FigureEntity> whishList = user.getWhishList();
-        if (whishList==null){
+        if (whishList == null){
             whishList = new ArrayList<>();
         }
         whishList.add(figure);
         user.setWhishList(whishList);
-        return userMapper.toResponseDto(userRepository.save(user));
+        userRepository.save(user);
     }
 
     public FigureEntity getFigureFromWishList(UserEntity user, String figureId){
@@ -135,10 +161,52 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         throw new CustomNotFoundException(figureId);
     }
 
-    public void removeFigureFromWishList(String email, String figureId) {
+    @Override
+    public void removeFigureFromWishList(String figureId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = findByEmail(email);
         user.getWhishList().remove(getFigureFromWishList(user, figureId));
         userRepository.save(user);
+    }
+
+    public UserResponseDto sendEmilVerifMessage(String email){
+        UserEntity user = findByEmail(email);
+
+        if (user.getEmailVerificationCode()==null){
+            user.setEmailVerificationCode(UUID.randomUUID());
+        }
+
+        emailService.sendVerificationEmailLetter(email, user.getEmailVerificationCode());
+        return userMapper.toResponseDto(user);
+    }
+
+    public UserResponseDto sendPasswordVerifMessage(String email){
+        UserEntity user = findByEmail(email);
+
+        if (user.getPasswordVerificationCode()==null){
+            user.setPasswordVerificationCode(UUID.randomUUID());
+        }
+
+        emailService.sendVerificationPasswordLetter(email, user.getPasswordVerificationCode());
+        return userMapper.toResponseDto(user);
+    }
+
+    public UserResponseDto confirmEmail(UUID emailVerificationCode) {
+        UserEntity user = findByEmailVerificationCode(emailVerificationCode);
+        user.setEmailVerified(true);
+        user.setEmailVerificationCode(null);
+        log.info("{}: " + OBJECT_NAME + "'s (id: {}) email has been confirmed", LogEnum.SERVICE, user.getId());
+        UserEntity savedUser = userRepository.save(user);
+        return userMapper.toResponseDto(savedUser);
+    }
+
+    public UserResponseDto confirmPassword(UUID passwordVerificationCode) {
+        UserEntity user = findByPasswordVerificationCode(passwordVerificationCode);
+        user.setPasswordVerified(true);
+        user.setPasswordVerificationCode(null);
+        log.info("{}: " + OBJECT_NAME + "'s (id: {}) password has been confirmed", LogEnum.SERVICE, user.getId());
+        UserEntity savedUser = userRepository.save(user);
+        return userMapper.toResponseDto(savedUser);
     }
 
     public boolean existByEmail (String email){
@@ -147,6 +215,10 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
+    }
+
+    public boolean existsByPhoneNumber(String phoneNumber) {
+        return userRepository.existsByPhoneNumber(phoneNumber);
     }
 
     @Override
@@ -173,9 +245,14 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, email));
     }
 
-    public UserEntity getByUsername(String username) {
-        log.info("{}: request on retrieving " + OBJECT_NAME + " by username {} was sent", LogEnum.SERVICE, username);
-        return userRepository.findByUsername(username).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, username));
+    public UserEntity findByEmailVerificationCode(UUID verificationCode) {
+        log.info("{}: request on retrieving " + OBJECT_NAME + " by email verification code {} was sent", LogEnum.SERVICE, verificationCode);
+        return userRepository.findByEmailVerificationCode(verificationCode).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME));
+    }
+
+    public UserEntity findByPasswordVerificationCode(UUID verificationCode) {
+        log.info("{}: request on retrieving " + OBJECT_NAME + " by password verification code {} was sent", LogEnum.SERVICE, verificationCode);
+        return userRepository.findByPasswordVerificationCode(verificationCode).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME));
     }
 
     public void addFigureToRecentlyViewedList(String userEmail, FigureEntity figure) {
@@ -216,8 +293,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
             reviewList.remove(review);
             user.setReviews(reviewList);
             userRepository.save(user);
+        }else {
+            throw new CustomNotFoundException("Review in the user's review list", review.getId());
         }
-
-        throw new CustomNotFoundException("Review in the user's review list", review.getId());
     }
 }

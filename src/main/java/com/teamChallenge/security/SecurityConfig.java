@@ -27,6 +27,7 @@ import org.springframework.web.filter.CorsFilter;
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig {
+
     private final UserService userService;
     private final AuthEntryPointJwt unauthorizedHandler;
     private final JwtRequestFilter jwtRequestFilter;
@@ -48,6 +49,7 @@ public class SecurityConfig {
                                         "/api-docs/**")
                                 .permitAll()
                                 .requestMatchers("/api/users/**").authenticated()
+                                .requestMatchers("/api/images/**").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/**")
                                 .permitAll()
                                 .anyRequest().authenticated()

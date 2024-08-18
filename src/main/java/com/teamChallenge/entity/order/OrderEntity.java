@@ -1,8 +1,7 @@
 package com.teamChallenge.entity.order;
 
-import com.teamChallenge.entity.figure.FigureEntity;
-import com.teamChallenge.entity.user.UserEntity;
-import com.teamChallenge.entity.user.address.AddressInfo;
+import com.teamChallenge.dto.response.figure.FigureInCartOrderResponseDto;
+import com.teamChallenge.entity.address.AddressInfo;
 import jakarta.persistence.Column;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
@@ -12,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Date;
 import java.util.List;
 
 @Document(collection = "orders")
@@ -23,26 +23,43 @@ public class OrderEntity {
     @Id
     private String id;
 
-    @Column(nullable = false)
-    private AddressInfo address;
+    private AddressInfo addressInfo;
 
     @Column(nullable = false)
-    private int price;
+    private int totalPrice;
 
     @Enumerated
     private Statuses status;
 
-    @DBRef
-    private List<FigureEntity> figureList;
+    private List<FigureInCartOrderResponseDto> figures;
 
     @DBRef
-    private UserEntity user;
+    private String userId;
 
-    public OrderEntity(AddressInfo address, int price, List<FigureEntity> figureList, UserEntity user) {
-        this.address = address;
-        this.price = price;
+    private Date dateOfCompletion;
+
+    public void setTotalPrice() {
+        int totalPrice = 0;
+        for (FigureInCartOrderResponseDto figure : figures) {
+            totalPrice += figure.price()*figure.amount();
+        }
+        this.totalPrice = totalPrice;
+    }
+
+    public void setStatus(Statuses status) {
+        if (status.equals(Statuses.COMPLETED)){
+            this.dateOfCompletion = new Date();
+        }
+
+        this.status = status;
+    }
+
+    public OrderEntity(AddressInfo addressInfo, List<FigureInCartOrderResponseDto> figures, String userId) {
+        this.addressInfo = addressInfo;
         status = Statuses.NEW;
-        this.figureList = figureList;
-        this.user = user;
+        this.figures = figures;
+        this.userId = userId;
+
+        setTotalPrice();
     }
 }

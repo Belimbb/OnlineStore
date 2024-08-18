@@ -2,7 +2,9 @@ package com.teamChallenge.entity.shoppingCart;
 
 import com.teamChallenge.dto.request.CartRequestDto;
 import com.teamChallenge.dto.response.CartResponseDto;
+import com.teamChallenge.dto.response.figure.FigureInCartOrderResponseDto;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
+import com.teamChallenge.entity.promoCode.PromoCodeServiceImpl;
 import com.teamChallenge.entity.user.UserEntity;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.LogEnum;
@@ -13,8 +15,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +31,8 @@ public class CartServiceImpl implements CartService {
     private final CartMapper cartMapper;
 
     private final UserServiceImpl userService;
-
     private final FigureServiceImpl figureService;
+    private final PromoCodeServiceImpl promoCodeService;
 
     private static final String OBJECT_NAME = "Cart";
 
@@ -50,43 +55,44 @@ public class CartServiceImpl implements CartService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity currentUser = userService.findByEmail(email);
 
-        Map<String, Integer> figureIdAndAmountMap = cartDto.figureIdAndAmountMap();
-        figureIdAndAmountMap.entrySet().removeIf(entry -> !figureService.existById(entry.getKey()));
+        List<FigureInCartOrderResponseDto> figures = figureService.getCartOrderResponseFigures(cartDto.figures());
+        //figures.removeIf(elem -> !figureService.existById(elem.figureId())); - This variant isn't working (IDK why...)
+        for (FigureInCartOrderResponseDto elem : figures){
+            if (!figureService.existById(elem.figureId())){
+                figures.remove(elem);
+            }
+        }
 
-        if (figureIdAndAmountMap.isEmpty()) {
+        if (figures.isEmpty()) {
             throw new CustomBadRequestException("This request is not valid");
         }
 
         if (cartRepository.existsByUser(currentUser)) {
             CartEntity cart = cartRepository.findByUser(currentUser);
-            return cartMapper.toResponseDto(addFigures(cart.getId(), figureIdAndAmountMap));
+            return cartMapper.toResponseDto(addFigures(cart.getId(), figures));
         }
 
-        int totalPrice = figureIdAndAmountMap.keySet().stream().mapToInt(key -> figureService.findById(key).getCurrentPrice() * figureIdAndAmountMap.get(key)).sum();
-        CartEntity newCart = new CartEntity(currentUser, totalPrice, figureIdAndAmountMap);
+        CartEntity newCart = new CartEntity(currentUser, figures, getDiscount(cartDto.promoCode()));
         CartEntity savedCart = cartRepository.save(newCart);
 
         log.info("{}: " + OBJECT_NAME + " (Id: {}) was created", LogEnum.SERVICE, savedCart.getId());
         return cartMapper.toResponseDto(savedCart);
     }
 
-    private CartEntity addFigures(String cartId, Map<String, Integer> map) {
+    private CartEntity addFigures(String cartId, List<FigureInCartOrderResponseDto> figures) {
         if (cartRepository.existsById(cartId)) {
             CartEntity cart = findById(cartId);
-            Map<String, Integer> figureIdAndAmountMap = cart.getFigureIdAndAmountMap();
+            List<FigureInCartOrderResponseDto> figuresInCart = new ArrayList<>(cart.getFigures());
 
-            for (Map.Entry<String, Integer> entry : map.entrySet()) {
-                String key = entry.getKey();
-                if (figureIdAndAmountMap.containsKey(key)) {
-                    int existAmount = entry.getValue();
-                    figureIdAndAmountMap.replace(key, existAmount + figureIdAndAmountMap.get(key));
-                    map.remove(key);
-                }
-            }
+            Map<String, FigureInCartOrderResponseDto> figureMap = figuresInCart.stream()
+                    .collect(Collectors.toMap(FigureInCartOrderResponseDto::figureId, Function.identity()));
 
-            figureIdAndAmountMap.putAll(map);
-            int totalPrice = figureIdAndAmountMap.keySet().stream().mapToInt(key -> figureService.findById(key).getCurrentPrice() * figureIdAndAmountMap.get(key)).sum();
-            cart.setPrice(totalPrice);
+            figures.forEach(elem -> figureMap.put(elem.figureId(), elem));
+
+            figuresInCart.clear();
+            figuresInCart.addAll(figureMap.values());
+
+            cart.setFigures(figuresInCart);
 
             CartEntity savedCart = cartRepository.save(cart);
             log.info("{}: " + OBJECT_NAME + " (Id: {}) updated figure list and total price throughout create method", LogEnum.SERVICE, savedCart.getId());
@@ -99,16 +105,14 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartResponseDto update(String id, CartRequestDto cartDto) {
         CartEntity cart = findById(id);
-        Map<String, Integer> figureIdAndAmountMap = cartDto.figureIdAndAmountMap();
-        figureIdAndAmountMap.entrySet().removeIf(entry -> !figureService.existById(entry.getKey()));
+        List<FigureInCartOrderResponseDto> figures = figureService.getCartOrderResponseFigures(cartDto.figures());
 
-        if (figureIdAndAmountMap.isEmpty()) {
+        if (figures.isEmpty()) {
             throw new CustomBadRequestException("This request is not valid");
         }
 
-        cart.setFigureIdAndAmountMap(figureIdAndAmountMap);
-        int totalPrice = figureIdAndAmountMap.keySet().stream().mapToInt(key -> figureService.findById(key).getCurrentPrice() * figureIdAndAmountMap.get(key)).sum();
-        cart.setPrice(totalPrice);
+        cart.setFigures(figures);
+        cart.setTotalPrice(getDiscount(cartDto.promoCode()));
 
         CartEntity updatedCart = cartRepository.save(cart);
         log.info("{}: " + OBJECT_NAME + " (Id: {}) updated figure list and total price throughout update method", LogEnum.SERVICE, id);
@@ -124,5 +128,14 @@ public class CartServiceImpl implements CartService {
 
     private CartEntity findById(String id) {
         return cartRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
+    }
+
+    private int getDiscount(String promoCode){
+        int discount = 0;
+        if (promoCode==null||promoCode.isBlank()){
+            discount = promoCodeService.getByCode(promoCode).discount();
+        }
+
+        return discount;
     }
 }

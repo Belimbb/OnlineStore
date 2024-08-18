@@ -1,10 +1,12 @@
 package com.teamChallenge.entity.order;
 
+import com.teamChallenge.dto.request.CartRequestDto;
 import com.teamChallenge.dto.request.OrderRequestDto;
-import com.teamChallenge.dto.request.figure.FigureInOrderRequestDto;
+import com.teamChallenge.dto.response.CartResponseDto;
 import com.teamChallenge.dto.response.OrderResponseDto;
-import com.teamChallenge.entity.figure.FigureEntity;
+import com.teamChallenge.dto.response.figure.FigureInCartOrderResponseDto;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
+import com.teamChallenge.entity.shoppingCart.CartServiceImpl;
 import com.teamChallenge.entity.user.UserEntity;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.LogEnum;
@@ -25,8 +27,8 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderMapper orderMapper;
 
+    private final CartServiceImpl cartService;
     private final FigureServiceImpl figureService;
-
     private final UserServiceImpl userService;
 
     private static final String OBJECT_NAME = "Order";
@@ -34,7 +36,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderResponseDto> getAll() {
         log.info("{}: All " + OBJECT_NAME + "s retrieved from db", LogEnum.SERVICE);
-        return orderMapper.toResponseDtoList(orderRepository.findAll());
+        List<OrderEntity> all = orderRepository.findAll();
+        return orderMapper.toResponseDtoList(all);
     }
 
     @Override
@@ -47,16 +50,15 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponseDto create(OrderRequestDto orderRequestDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity currentUser = userService.findByEmail(email);
+        CartResponseDto cart = cartService.getById(orderRequestDto.cartId());
 
-        List<FigureEntity> figureList = getFigureList(orderRequestDto);
+        List<FigureInCartOrderResponseDto> figureList = cart.figures();
+        figureService.updatePurchaseCounter(figureList);
 
-        int totalPrice = figureList
-                .stream()
-                .mapToInt(FigureEntity::getCurrentPrice)
-                .sum();
-
-        OrderEntity newOrder = new OrderEntity(orderRequestDto.address(), totalPrice, figureList, currentUser);
+        OrderEntity newOrder = new OrderEntity(orderRequestDto.address(), figureList, currentUser.getId());
         orderRepository.save(newOrder);
+
+        cartService.update(cart.id(), new CartRequestDto(null, null));
         log.info("{}: " + OBJECT_NAME + " was created", LogEnum.SERVICE);
         return orderMapper.toResponseDto(newOrder);
     }
@@ -64,16 +66,14 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponseDto update(String id, OrderRequestDto orderRequestDto) {
         OrderEntity order = findById(id);
-        order.setAddress(orderRequestDto.address());
+        order.setAddressInfo(orderRequestDto.address());
 
-        List<FigureEntity> figureList = getFigureList(orderRequestDto);
-        order.setFigureList(figureList);
+        List<FigureInCartOrderResponseDto> figureList = cartService.getById(orderRequestDto.cartId()).figures();
+        figureService.updatePurchaseCounter(figureList);
 
-        int totalPrice = figureList
-                .stream()
-                .mapToInt(FigureEntity::getCurrentPrice)
-                .sum();
-        order.setPrice(totalPrice);
+        order.setStatus(orderRequestDto.status());
+        order.setFigures(figureList);
+        order.setTotalPrice();
 
         OrderEntity updatedOrder = orderRepository.save(order);
         log.info("{}: " + OBJECT_NAME + " (id: {}) updated)", LogEnum.SERVICE, order.getId());
@@ -89,21 +89,5 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderEntity findById(String id) {
         return orderRepository.findById(id).orElseThrow(()-> new CustomNotFoundException(OBJECT_NAME, id));
-    }
-
-    private List<FigureEntity> getFigureList(OrderRequestDto orderRequestDto){
-        List<FigureInOrderRequestDto> figureDtos = orderRequestDto.figures();
-        List<FigureEntity> figureList = orderRequestDto.figures()
-                .stream()
-                .map(FigureInOrderRequestDto::id)
-                .map(figureService::findById)
-                .toList();
-
-        for (int i = 0; i<figureDtos.size(); i++){
-            FigureEntity entity = figureList.get(i);
-
-            entity.setPurchaseCount(entity.getPurchaseCount()+figureDtos.get(i).amount());
-        }
-        return figureList;
     }
 }

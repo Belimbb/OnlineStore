@@ -1,4 +1,4 @@
-package com.teamChallenge.entity.user.review;
+package com.teamChallenge.entity.review;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.teamChallenge.entity.figure.FigureEntity;
@@ -55,6 +55,19 @@ public class ReviewEntity {
         this.advantages = advantages;
         this.disadvantages = disadvantages;
         this.figure = figure;
+    }
+
+    @Override
+    public String toString() {
+        return "ReviewEntity{" +
+                "id='" + id + '\'' +
+                ", score=" + score +
+                ", userId=" + user.getId() +
+                ", creationDate=" + creationDate +
+                ", advantages='" + advantages + '\'' +
+                ", disadvantages='" + disadvantages + '\'' +
+                ", figureId=" + figure.getId() +
+                '}';
     }
 
     @Override

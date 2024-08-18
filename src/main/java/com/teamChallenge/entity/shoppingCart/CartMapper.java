@@ -16,13 +16,13 @@ public class CartMapper {
     public CartResponseDto toResponseDto(CartEntity entity){
         return new CartResponseDto(
                 entity.getId(),
-                entity.getFigureIdAndAmountMap(),
-                entity.getPrice()
+                entity.getFigures(),
+                entity.getTotalPrice()
         );
     }
 
     public List<CartResponseDto> toDtoList (List<CartEntity> entities){
-        return entities.stream()
+        return entities == null ? null : entities.stream()
                 .map(this::toResponseDto)
                 .collect(Collectors.toList());
     }
