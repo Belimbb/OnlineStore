@@ -11,8 +11,8 @@ import java.util.UUID;
 public interface UserRepository extends MongoRepository<UserEntity, String> {
     Optional<UserEntity> findByEmail(String email);
     Optional<UserEntity> findByUsername(String username);
-    Optional<UserEntity> findByEmailVerificationCode(UUID emailVerificationCode);
-    Optional<UserEntity> findByPasswordVerificationCode(UUID passwordVerificationCode);
+    Optional<UserEntity> findByEmailVerificationCode(String emailVerificationCode);
+    Optional<UserEntity> findByPasswordVerificationCode(String passwordVerificationCode);
     Optional<List<UserEntity>> findAllByRole(Roles role);
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);

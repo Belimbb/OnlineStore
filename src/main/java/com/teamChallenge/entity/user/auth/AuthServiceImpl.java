@@ -56,12 +56,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserResponseDto emailVerification(String emailVerificationCode) {
-        return userService.confirmEmail(UUID.fromString(emailVerificationCode));
+        return userService.confirmEmail(emailVerificationCode);
     }
 
     @Override
     public UserResponseDto passwordVerification(String passwordVerificationCode) {
-        return userService.confirmPassword(UUID.fromString(passwordVerificationCode));
+        return userService.confirmPassword(passwordVerificationCode);
     }
 
     @Override

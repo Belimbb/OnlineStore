@@ -1,9 +1,10 @@
 package com.teamChallenge.controller;
 
+import com.teamChallenge.dto.request.ReplyRequestDto;
 import com.teamChallenge.dto.request.ReviewRequestDto;
-import com.teamChallenge.dto.response.figure.FigureResponseDto;
 import com.teamChallenge.dto.response.ReviewResponseDto;
 import com.teamChallenge.entity.review.ReviewService;
+import com.teamChallenge.entity.review.reply.Reply;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 
@@ -31,6 +32,7 @@ import java.util.List;
 public class ReviewController {
     private final static String SEC_REC = "BearerAuth";
     private static final String URI_WITH_ID = "/{id}";
+    private static final String REPLY_URI = "/reply";
 
     private final ReviewService reviewService;
 
@@ -40,7 +42,7 @@ public class ReviewController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Added Review",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = FigureResponseDto.class))}),
+                            schema = @Schema(implementation = ReviewResponseDto.class))}),
             @ApiResponse(responseCode = "400", description = "Validation errors",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
@@ -48,6 +50,23 @@ public class ReviewController {
     public ReviewResponseDto create(@Valid @RequestBody ReviewRequestDto review) {
         ReviewResponseDto reviewDto = reviewService.create(review);
         log.info("{}: Review (id: {}) has been added to Figure (id: {})", LogEnum.SERVICE, reviewDto.id(), review.figureId());
+        return reviewDto;
+    }
+
+    @PostMapping(URI_WITH_ID+REPLY_URI)
+    @SecurityRequirement(name = SEC_REC)
+    @Operation(summary = "Add reply to review")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Added Reply",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ReviewResponseDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Validation errors",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CustomErrorResponse.class))})
+    })
+    public ReviewResponseDto addReply(@PathVariable String id, @Valid @RequestBody ReplyRequestDto reply) {
+        ReviewResponseDto reviewDto = reviewService.addReply(id, reply);
+        log.info("{}: Reply has been added to Review (id: {})", LogEnum.SERVICE, reviewDto.id());
         return reviewDto;
     }
 
@@ -106,6 +125,19 @@ public class ReviewController {
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
     public void delete(@PathVariable String id) {
         reviewService.delete(id);
-        log.info("{}: Figure (id: {}) has been deleted", LogEnum.CONTROLLER, id);
+        log.info("{}: Review (id: {}) has been deleted", LogEnum.CONTROLLER, id);
+    }
+
+    @DeleteMapping(URI_WITH_ID+REPLY_URI)
+    @SecurityRequirement(name = SEC_REC)
+    @Operation(summary = "Delete reply")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reply deleted"),
+            @ApiResponse(responseCode = "404", description = "Reply not found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CustomErrorResponse.class)) }) })
+    public void delete(@PathVariable String id, @Valid @RequestBody ReplyRequestDto reply) {
+        reviewService.deleteReply(id, reply);
+        log.info("{}: Reply under Review (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }
 }
