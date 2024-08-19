@@ -1,6 +1,5 @@
 package com.teamChallenge.entity.review.reply;
 
-import com.teamChallenge.entity.user.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

@@ -10,8 +10,10 @@ import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomAlreadyExistException;
 import com.teamChallenge.exception.exceptions.generalExceptions.CustomNotFoundException;
 import com.teamChallenge.mail.EmailService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -141,6 +143,30 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return true;
     }
 
+    @Override
+    public void removeFigureFromWishList(String figureId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = findByEmail(email);
+        user.getWhishList().remove(getFigureFromWishList(user, figureId));
+        userRepository.save(user);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        UserEntity user;
+        try {
+            user = findByEmail(email);
+        } catch (CustomNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                Collections.singleton(new SimpleGrantedAuthority(user.getRole().name()))
+        );
+    }
+
+    //FIGURE IN WISHLIST
     public void addFigureToWishList(FigureEntity figure) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = findByEmail(email);
@@ -162,14 +188,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         throw new CustomNotFoundException(figureId);
     }
 
-    @Override
-    public void removeFigureFromWishList(String figureId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserEntity user = findByEmail(email);
-        user.getWhishList().remove(getFigureFromWishList(user, figureId));
-        userRepository.save(user);
-    }
 
+    //VERIFICATION MESSAGES
     public UserResponseDto sendEmilVerifMessage(String email){
         UserEntity user = findByEmail(email);
 
@@ -192,6 +212,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userMapper.toResponseDto(user);
     }
 
+
+    //CONFIRMATION
     public UserResponseDto confirmEmail(String emailVerificationCode) {
         UserEntity user = findByEmailVerificationCode(emailVerificationCode);
         user.setEmailVerified(true);
@@ -210,6 +232,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userMapper.toResponseDto(savedUser);
     }
 
+
+    //EXIST BY
     public boolean existByEmail (String email){
         return userRepository.existsByEmail(email);
     }
@@ -222,21 +246,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userRepository.existsByPhoneNumber(phoneNumber);
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserEntity user;
-        try {
-            user = findByEmail(email);
-        } catch (CustomNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                Collections.singleton(new SimpleGrantedAuthority(user.getRole().name()))
-        );
-    }
 
+    //FIND BY
     private UserEntity findById(String id) {
         return userRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
     }
@@ -256,6 +267,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userRepository.findByPasswordVerificationCode(verificationCode).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME));
     }
 
+
+    //RECENTLY VIEWED
     public void addFigureToRecentlyViewedList(String userEmail, FigureEntity figure) {
         UserEntity user = findByEmail(userEmail);
         List<FigureEntity> recentlyViewedList = user.getRecentlyViewed();
@@ -276,6 +289,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         }
     }
 
+
+    //REVIEW IN USER
     public void addReviewToUser(UserEntity user, ReviewEntity review) {
         List<ReviewEntity> reviewList = user.getReviews();
         if (reviewList==null){
