@@ -25,7 +25,7 @@ public class BannerEntity {
 
     @Column(nullable = false)
     @Size(min = 7, max = 7)
-    private String titleColor, descriptionColor, collectionNameColor;
+    private String textColor, collectionNameColor, buttonColor;
 
     @Indexed(unique = true)
     private String uniqueHash;
@@ -43,25 +43,25 @@ public class BannerEntity {
     }
 
     public BannerEntity(String title, String description, String collectionName, String imageName,
-                        String titleColor, String descriptionColor, String collectionNameColor) {
-        setUp(title, description, collectionName, imageName, titleColor, descriptionColor, collectionNameColor);
+                        String textColor, String collectionNameColor, String buttonColor) {
+        setUp(title, description, collectionName, imageName, textColor, collectionNameColor, buttonColor);
     }
 
     public BannerEntity(String id, String title, String description, String collectionName, String imageName,
-                        String titleColor, String descriptionColor, String collectionNameColor) {
-        setUp(title, description, collectionName, imageName, titleColor, descriptionColor, collectionNameColor);
+                        String textColor, String collectionNameColor, String buttonColor) {
+        setUp(title, description, collectionName, imageName, textColor, collectionNameColor, buttonColor);
         this.id = id;
     }
 
     private void setUp(String title, String description, String collectionName, String imageName,
-                       String titleColor, String descriptionColor, String collectionNameColor){
+                       String textColor, String collectionNameColor, String buttonColor){
         this.title = title;
         this.description = description;
         this.collectionName = collectionName;
         this.imageName = imageName;
-        this.titleColor = titleColor;
-        this.descriptionColor = descriptionColor;
+        this.textColor = textColor;
         this.collectionNameColor = collectionNameColor;
+        this.buttonColor = buttonColor;
         this.uniqueHash = generateUniqueHash();
     }
 }

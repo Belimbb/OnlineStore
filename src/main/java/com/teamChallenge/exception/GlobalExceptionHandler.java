@@ -1,7 +1,8 @@
 package com.teamChallenge.exception;
 
 import com.teamChallenge.exception.exceptions.generalExceptions.*;
-import com.teamChallenge.exception.exceptions.imageExceptions.IncorrectFileExtension;
+import com.teamChallenge.exception.exceptions.imageExceptions.IncorrectFileExtensionException;
+import com.teamChallenge.exception.exceptions.imageExceptions.UnableToUploadImageException;
 import com.teamChallenge.exception.exceptions.orderExceptions.ThisOrderCancelledException;
 import com.teamChallenge.exception.exceptions.orderExceptions.UpdateDeliveryStatusException;
 import com.teamChallenge.exception.exceptions.userExceptions.UnverifiedAccountException;
@@ -96,8 +97,13 @@ public class GlobalExceptionHandler {
 
     /* Image exceptions */
 
-    @ExceptionHandler(IncorrectFileExtension.class)
-    public ResponseEntity<Map<String, List<String>>> incorrectFileExtension(IncorrectFileExtension ex) {
+    @ExceptionHandler(IncorrectFileExtensionException.class)
+    public ResponseEntity<Map<String, List<String>>> incorrectFileExtensionException(IncorrectFileExtensionException ex) {
+        return getErrorsMap(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnableToUploadImageException.class)
+    public ResponseEntity<Map<String, List<String>>> unableToUploadImageException(UnableToUploadImageException ex) {
         return getErrorsMap(ex, HttpStatus.BAD_REQUEST);
     }
 

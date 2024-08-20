@@ -6,9 +6,8 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
-import com.teamChallenge.exception.exceptions.generalExceptions.CustomBadRequestException;
-import com.teamChallenge.exception.exceptions.generalExceptions.SomethingWentWrongException;
-import com.teamChallenge.exception.exceptions.imageExceptions.IncorrectFileExtension;
+import com.teamChallenge.exception.exceptions.imageExceptions.IncorrectFileExtensionException;
+import com.teamChallenge.exception.exceptions.imageExceptions.UnableToUploadImageException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,15 +29,20 @@ public class ImageUploadingServiceImpl implements ImageUploadingService {
     public String upload(MultipartFile multipartFile) {
         try {
             String filename = multipartFile.getOriginalFilename();
-            filename = UUID.randomUUID().toString().concat(this.getExtension(filename));
+            String extension = filename.substring(filename.lastIndexOf("."));
 
-            File file = this.convertToFile(multipartFile, filename);
-            uploadFile(file, filename);
-            file.delete();
-            return filename;
+            if (checkExtension(extension)) {
+                String newFilename = UUID.randomUUID().toString().concat(".webp");
+                File file = this.convertToFile(multipartFile, filename);
+                uploadFile(file, newFilename);
+                file.delete();
+                return newFilename;
+            }
+
+            throw new IncorrectFileExtensionException(extension);
         }   catch (IOException ex) {
             ex.printStackTrace();
-            throw new SomethingWentWrongException();
+            throw new UnableToUploadImageException(multipartFile.getOriginalFilename());
         }
     }
 
@@ -60,12 +64,7 @@ public class ImageUploadingServiceImpl implements ImageUploadingService {
         storage.create(blobInfo, Files.readAllBytes(file.toPath()));
     }
 
-    private String getExtension(String filename) {
-        String extension = filename.substring(filename.lastIndexOf("."));
-
-        if (extension.equals(".jpg") || extension.equals(".jpeg") || extension.equals(".png")) {
-            return extension;
-        }
-        throw new IncorrectFileExtension(extension);
+    private boolean checkExtension(String extension) {
+        return extension.equals(".jpg") || extension.equals(".jpeg") || extension.equals(".png");
     }
 }
