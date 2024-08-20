@@ -33,7 +33,6 @@ public class OrderEntity {
 
     private List<FigureInCartOrderResponseDto> figures;
 
-    @DBRef
     private String userId;
 
     private Date dateOfCompletion;

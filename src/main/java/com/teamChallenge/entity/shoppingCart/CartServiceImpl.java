@@ -103,7 +103,7 @@ public class CartServiceImpl implements CartService {
         log.info("{}: " + OBJECT_NAME + " (id: {}) deleted", LogEnum.SERVICE, id);
     }
 
-    private CartEntity findById(String id) {
+    public CartEntity findById(String id) {
         return cartRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
     }
 

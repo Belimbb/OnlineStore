@@ -8,6 +8,8 @@ import com.teamChallenge.entity.review.reply.Reply;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AccessValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,8 +35,10 @@ public class ReviewController {
     private final static String SEC_REC = "BearerAuth";
     private static final String URI_WITH_ID = "/{id}";
     private static final String REPLY_URI = "/reply";
+    private static final String OBJECT_NAME = "review";
 
     private final ReviewService reviewService;
+    private final AccessValidator accessValidator;
 
     @PostMapping
     @SecurityRequirement(name = SEC_REC)
@@ -102,16 +106,18 @@ public class ReviewController {
 
     @PutMapping(URI_WITH_ID)
     @SecurityRequirement(name = SEC_REC)
-    @Operation(summary = "Update figure")
+    @Operation(summary = "Update review")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Figure updated"),
-            @ApiResponse(responseCode = "404", description = "Figure not found",
+            @ApiResponse(responseCode = "200", description = "Review updated"),
+            @ApiResponse(responseCode = "404", description = "Review not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    public ReviewResponseDto update(@PathVariable String id, @Valid @RequestBody ReviewRequestDto requestDto) {
+    public ReviewResponseDto update(@PathVariable String id, @Valid @RequestBody ReviewRequestDto requestDto) throws UnauthorizedAccessException {
+        accessValidator.hasPermission(OBJECT_NAME, id);
+
         ReviewResponseDto updated = reviewService.update(id, requestDto);
-        log.info("{}: Figure (id: {}) has been updated", LogEnum.CONTROLLER, id);
+        log.info("{}: Review (id: {}) has been updated", LogEnum.CONTROLLER, id);
         return updated;
     }
 
@@ -123,7 +129,9 @@ public class ReviewController {
             @ApiResponse(responseCode = "404", description = "Review not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public void delete(@PathVariable String id) {
+    public void delete(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.hasPermission(OBJECT_NAME, id);
+
         reviewService.delete(id);
         log.info("{}: Review (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }
@@ -136,7 +144,9 @@ public class ReviewController {
             @ApiResponse(responseCode = "404", description = "Reply not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public void delete(@PathVariable String id, @Valid @RequestBody ReplyRequestDto reply) {
+    public void delete(@PathVariable String id, @Valid @RequestBody ReplyRequestDto reply) throws UnauthorizedAccessException {
+        accessValidator.ownReply(id, reply);
+
         reviewService.deleteReply(id, reply);
         log.info("{}: Reply under Review (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }

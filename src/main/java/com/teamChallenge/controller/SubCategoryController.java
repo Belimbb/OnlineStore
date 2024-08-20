@@ -6,6 +6,8 @@ import com.teamChallenge.entity.figure.sections.subCategory.SubCategoryService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AccessValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,6 +36,7 @@ public class SubCategoryController {
     private static final String SEC_REC = "BearerAuth";
 
     private final SubCategoryService subCategoryService;
+    private final AccessValidator accessValidator;
 
     @PostMapping
     @SecurityRequirement(name = SEC_REC)
@@ -49,7 +52,9 @@ public class SubCategoryController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
     })
-    public SubCategoryResponseDto create(@Valid @RequestBody SubCategoryRequestDto subCategoryRequestDto) {
+    public SubCategoryResponseDto create(@Valid @RequestBody SubCategoryRequestDto subCategoryRequestDto) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         SubCategoryResponseDto subCategoryResponseDto = subCategoryService.createSubCategory(subCategoryRequestDto);
         log.info("{}: SubCategory (id: {}) has been added", LogEnum.CONTROLLER, subCategoryResponseDto.id());
         return subCategoryResponseDto;
@@ -104,7 +109,9 @@ public class SubCategoryController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             )
     })
-    public SubCategoryResponseDto update(@Valid @RequestBody SubCategoryRequestDto subCategoryRequestDto, @PathVariable String id) {
+    public SubCategoryResponseDto update(@Valid @RequestBody SubCategoryRequestDto subCategoryRequestDto, @PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         SubCategoryResponseDto subCategoryResponseDto = subCategoryService.updateSubCategory(id, subCategoryRequestDto);
         log.info("{}: SubCategory (id: {}) has been updated", LogEnum.CONTROLLER, id);
         return subCategoryResponseDto;
@@ -123,7 +130,9 @@ public class SubCategoryController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             )
     })
-    public void delete(@PathVariable String id) {
+    public void delete(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         subCategoryService.deleteSubCategory(id);
         log.info("{}: SubCategory (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }

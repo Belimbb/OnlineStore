@@ -6,6 +6,8 @@ import com.teamChallenge.entity.order.OrderService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AccessValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,8 +33,10 @@ import java.util.List;
 public class OrderController {
     private static final String URI_WITH_ID = "/{id}";
     private static final String SEC_REC = "BearerAuth";
+    private static final String OBJECT_NAME = "order";
 
     private final OrderService orderService;
+    private final AccessValidator accessValidator;
 
     @PostMapping
     @SecurityRequirement(name = SEC_REC)
@@ -62,7 +66,9 @@ public class OrderController {
                             array = @ArraySchema(schema = @Schema(implementation = OrderResponseDto.class)))}
             )
     })
-    public List<OrderResponseDto> getAll() {
+    public List<OrderResponseDto> getAll() throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         List<OrderResponseDto> orderList = orderService.getAll();
         log.info("{}: Order list has been retrieved", LogEnum.CONTROLLER);
         return orderList;
@@ -80,7 +86,9 @@ public class OrderController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             )
     })
-    public OrderResponseDto getById(@PathVariable String id) {
+    public OrderResponseDto getById(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.hasPermission(OBJECT_NAME, id);
+
         OrderResponseDto order = orderService.getById(id);
         log.info("{}: Order (id: {}) has been retrieved", LogEnum.CONTROLLER, id);
         return order;
@@ -103,7 +111,9 @@ public class OrderController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             )
     })
-    public OrderResponseDto update(@PathVariable String id, @Valid @RequestBody OrderRequestDto orderDto) {
+    public OrderResponseDto update(@PathVariable String id, @Valid @RequestBody OrderRequestDto orderDto) throws UnauthorizedAccessException {
+        accessValidator.hasPermission(OBJECT_NAME, id);
+
         OrderResponseDto order = orderService.update(id, orderDto);
         log.info("{}: Order (id: {}) has been updated", LogEnum.CONTROLLER, order.id());
         return order;
@@ -122,7 +132,9 @@ public class OrderController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public void delete(@PathVariable String id) {
+    public void delete(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         orderService.delete(id);
         log.info("{}: Order (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }

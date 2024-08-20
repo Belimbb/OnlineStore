@@ -7,6 +7,7 @@ import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
 
+import com.teamChallenge.security.AccessValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,11 +31,12 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class CartController {
-
     private static final String URI_WITH_ID = "/{id}";
     private static final String SEC_REC = "BearerAuth";
+    private static final String OBJECT_NAME = "cart";
 
     private final CartService cartService;
+    private final AccessValidator accessValidator;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -64,7 +66,9 @@ public class CartController {
                             array = @ArraySchema(schema = @Schema(implementation = CartResponseDto.class)))}
             )
     })
-    public List<CartResponseDto> getAll() {
+    public List<CartResponseDto> getAll() throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         List<CartResponseDto> cartList = cartService.getAll();
         log.info("{}: Cart list has been retrieved", LogEnum.CONTROLLER);
         return cartList;
@@ -82,7 +86,9 @@ public class CartController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public CartResponseDto getById(@PathVariable String id) {
+    public CartResponseDto getById(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.hasPermission(OBJECT_NAME, id);
+
         CartResponseDto cart = cartService.getById(id);
         log.info("{}: Cart (id: {}) has been retrieved", LogEnum.CONTROLLER, id);
         return cart;
@@ -105,7 +111,9 @@ public class CartController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public CartResponseDto update(@PathVariable String id, @RequestBody CartRequestDto cartDto) {
+    public CartResponseDto update(@PathVariable String id, @RequestBody CartRequestDto cartDto) throws UnauthorizedAccessException {
+        accessValidator.hasPermission(OBJECT_NAME, id);
+
         CartResponseDto cart = cartService.update(id, cartDto);
         log.info("{}: Cart (id: {}) has been updated", LogEnum.CONTROLLER, cart.id());
         return cart;
@@ -124,7 +132,9 @@ public class CartController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public void delete(@PathVariable String id) {
+    public void delete(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         cartService.delete(id);
         log.info("{}: Cart (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }

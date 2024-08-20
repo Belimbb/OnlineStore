@@ -6,6 +6,8 @@ import com.teamChallenge.entity.figure.sections.category.CategoryService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AccessValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,6 +36,7 @@ public class CategoryController {
     private static final String SEC_REC = "BearerAuth";
 
     private final CategoryService categoryService;
+    private final AccessValidator accessValidator;
 
     @PostMapping
     @SecurityRequirement(name = SEC_REC)
@@ -49,7 +52,9 @@ public class CategoryController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
     })
-    public CategoryResponseDto create(@Valid @RequestBody CategoryRequestDto categoryRequestDto) {
+    public CategoryResponseDto create(@Valid @RequestBody CategoryRequestDto categoryRequestDto) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         CategoryResponseDto categoryResponseDto = categoryService.createCategory(categoryRequestDto);
         log.info("{}: Category (id: {}) has been added", LogEnum.CONTROLLER, categoryResponseDto.id());
         return categoryResponseDto;
@@ -63,7 +68,7 @@ public class CategoryController {
                             array = @ArraySchema(schema = @Schema(implementation = CategoryResponseDto.class)))}
             )
     })
-    public List<CategoryResponseDto> getAll() {
+    public List<CategoryResponseDto> getAll() throws UnauthorizedAccessException {
         List<CategoryResponseDto> categoryDtoList = categoryService.getAllCategories();
         log.info("{}: Category list has been retrieved", LogEnum.CONTROLLER);
         return categoryDtoList;
@@ -104,7 +109,9 @@ public class CategoryController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             )
     })
-    public CategoryResponseDto update(@PathVariable String id, @Valid @RequestBody CategoryRequestDto categoryRequestDto) {
+    public CategoryResponseDto update(@PathVariable String id, @Valid @RequestBody CategoryRequestDto categoryRequestDto) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         CategoryResponseDto categoryResponseDto = categoryService.updateCategory(id, categoryRequestDto);
         log.info("{}: Category (id: {}) has been updated", LogEnum.CONTROLLER, id);
         return categoryResponseDto;
@@ -123,7 +130,9 @@ public class CategoryController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             )
     })
-    public void delete(@PathVariable String id) {
+    public void delete(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         categoryService.deleteCategory(id);
         log.info("{}: Category (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }

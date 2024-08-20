@@ -1,5 +1,6 @@
 package com.teamChallenge.dto.request.auth;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -20,6 +21,7 @@ public class SignupRequestDto {
 
     @NotBlank
     @Email
+    @Schema(example = "string@gmail.com")
     private String email;
 
     @NotBlank

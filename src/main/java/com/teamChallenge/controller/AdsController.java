@@ -6,6 +6,8 @@ import com.teamChallenge.entity.advertisement.AdvertisementService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AccessValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,10 +36,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/ads")
 public class AdsController {
-
-    private final AdvertisementService adsService;
     private static final String URI_WITH_ID = "/{id}";
     private static final String SEC_REC = "BearerAuth";
+
+    private final AdvertisementService adsService;
+    private final AccessValidator accessValidator;
 
     @PostMapping()
     @SecurityRequirement(name = SEC_REC)
@@ -50,7 +53,9 @@ public class AdsController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    public AdsResponseDto create(@Valid @RequestBody AdsRequestDto request) {
+    public AdsResponseDto create(@Valid @RequestBody AdsRequestDto request) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         AdsResponseDto ads = adsService.create(request);
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, ads.id());
         return ads;
@@ -97,7 +102,9 @@ public class AdsController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    public AdsResponseDto update(@PathVariable String id, @NotNull @RequestBody AdsRequestDto adsDto){
+    public AdsResponseDto update(@PathVariable String id, @NotNull @RequestBody AdsRequestDto adsDto) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         AdsResponseDto updated = adsService.update(id, adsDto);
         log.info("{}: Ads (id: {}) has been updated", LogEnum.CONTROLLER, id);
 
@@ -113,7 +120,9 @@ public class AdsController {
             @ApiResponse(responseCode = "404", description = "Ads not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public void delete(@PathVariable String id) {
+    public void delete(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         adsService.delete(id);
         log.info("{}: Ads (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }

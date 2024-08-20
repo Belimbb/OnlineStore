@@ -6,6 +6,8 @@ import com.teamChallenge.entity.promoCode.PromoCodeService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AccessValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,6 +36,7 @@ public class PromoCodeController {
     private static final String SEC_REC = "BearerAuth";
 
     private final PromoCodeService promoCodeService;
+    private final AccessValidator accessValidator;
 
     @PostMapping
     @SecurityRequirement(name = SEC_REC)
@@ -46,7 +49,9 @@ public class PromoCodeController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    public PromoCodeResponseDto create(@Valid @RequestBody PromoCodeRequestDto request) {
+    public PromoCodeResponseDto create(@Valid @RequestBody PromoCodeRequestDto request) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         PromoCodeResponseDto promoCode = promoCodeService.create(request);
         log.info("{}: Promo Code (id: {}) has been added", LogEnum.SERVICE, promoCode.id());
         return promoCode;
@@ -61,7 +66,9 @@ public class PromoCodeController {
                             array = @ArraySchema(schema = @Schema(implementation = PromoCodeResponseDto.class)))}
             )
     })
-    public List<PromoCodeResponseDto> getAll() {
+    public List<PromoCodeResponseDto> getAll() throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         List<PromoCodeResponseDto> promoCodes = promoCodeService.getAll();
         log.info("{}: Promo Codes have been retrieved", LogEnum.CONTROLLER);
         return promoCodes;
@@ -77,16 +84,33 @@ public class PromoCodeController {
             @ApiResponse(responseCode = "404", description = "Promo code not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public PromoCodeResponseDto getById(@PathVariable String id) {
+    public PromoCodeResponseDto getById(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         PromoCodeResponseDto promoCode = promoCodeService.getById(id);
         log.info("{}: Promo Code (id: {}) has been retrieved", LogEnum.CONTROLLER, id);
         return promoCode;
     }
 
-    @PutMapping(URI_WITH_ID)
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/{code}")
     @SecurityRequirement(name = SEC_REC)
-    @Operation(description = "update aa promo code by id")
+    @Operation(description = "get a promo code by code")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found a promo code",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PromoCodeResponseDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Promo code not found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CustomErrorResponse.class)) }) })
+    public PromoCodeResponseDto getByCode(@PathVariable String code) {
+        PromoCodeResponseDto promoCode = promoCodeService.getByCode(code);
+        log.info("{}: Promo Code (code: {}) has been retrieved", LogEnum.CONTROLLER, code);
+        return promoCode;
+    }
+
+    @PutMapping(URI_WITH_ID)
+    @SecurityRequirement(name = SEC_REC)
+    @Operation(description = "update a promo code by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Promo code updated",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -98,7 +122,9 @@ public class PromoCodeController {
             @ApiResponse(responseCode = "404", description = "User not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public PromoCodeResponseDto update(@PathVariable String id, @Valid @RequestBody PromoCodeRequestDto userRequestDto) {
+    public PromoCodeResponseDto update(@PathVariable String id, @Valid @RequestBody PromoCodeRequestDto userRequestDto) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         PromoCodeResponseDto promoCode = promoCodeService.update(id, userRequestDto);
         log.info("{}: Promo Code (id: {}) has been updated", LogEnum.CONTROLLER, promoCode.id());
         return promoCode;
@@ -112,7 +138,9 @@ public class PromoCodeController {
             @ApiResponse(responseCode = "404", description = "Promo Code not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public void delete(@PathVariable String id) {
+    public void delete(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         promoCodeService.delete(id);
         log.info("{}: Promo Code (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }
