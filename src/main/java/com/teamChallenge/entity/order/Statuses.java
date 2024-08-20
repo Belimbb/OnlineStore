@@ -2,9 +2,8 @@ package com.teamChallenge.entity.order;
 
 public enum Statuses {
 
-    NEW,
-    PENDING,
+    DELIVERED,
+    CANCELLED,
     ON_ITS_WAY,
-    COMPLETED,
-    CANCELED
+    RETURNED
 }

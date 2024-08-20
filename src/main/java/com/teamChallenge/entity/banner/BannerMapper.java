@@ -21,7 +21,10 @@ public class BannerMapper {
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getCollectionName(),
-                entity.getImageName());
+                entity.getImageName(),
+                entity.getTextColor(),
+                entity.getCollectionNameColor(),
+                entity.getButtonColor());
     }
 
     public BannerEntity toEntity(BannerRequestDto dto){
@@ -29,7 +32,10 @@ public class BannerMapper {
                 dto.title(),
                 dto.description(),
                 dto.collectionName(),
-                dto.imageName()
+                dto.imageName(),
+                dto.textColor(),
+                dto.collectionNameColor(),
+                dto.buttonColor()
         );
     }
 
@@ -39,7 +45,10 @@ public class BannerMapper {
                 dto.title(),
                 dto.description(),
                 dto.collectionName(),
-                dto.imageName()
+                dto.imageName(),
+                dto.textColor(),
+                dto.collectionNameColor(),
+                dto.buttonColor()
         );
     }
 
