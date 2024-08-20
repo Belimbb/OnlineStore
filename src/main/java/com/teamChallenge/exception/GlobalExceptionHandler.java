@@ -2,6 +2,8 @@ package com.teamChallenge.exception;
 
 import com.teamChallenge.exception.exceptions.generalExceptions.*;
 import com.teamChallenge.exception.exceptions.imageExceptions.IncorrectFileExtension;
+import com.teamChallenge.exception.exceptions.orderExceptions.ThisOrderCancelledException;
+import com.teamChallenge.exception.exceptions.orderExceptions.UpdateDeliveryStatusException;
 import com.teamChallenge.exception.exceptions.userExceptions.UnverifiedAccountException;
 import com.teamChallenge.exception.exceptions.userExceptions.UserIncorrectPasswordException;
 
@@ -96,6 +98,18 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IncorrectFileExtension.class)
     public ResponseEntity<Map<String, List<String>>> incorrectFileExtension(IncorrectFileExtension ex) {
+        return getErrorsMap(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    /* Order exceptions */
+
+    @ExceptionHandler(UpdateDeliveryStatusException.class)
+    public ResponseEntity<Map<String, List<String>>> updateDeliveryStatusException(UpdateDeliveryStatusException ex) {
+        return getErrorsMap(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ThisOrderCancelledException.class)
+    public ResponseEntity<Map<String, List<String>>> thisOrderCancelledException(ThisOrderCancelledException ex) {
         return getErrorsMap(ex, HttpStatus.BAD_REQUEST);
     }
 

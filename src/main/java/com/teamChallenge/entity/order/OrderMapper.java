@@ -19,7 +19,9 @@ public class OrderMapper {
                 entity.getStatus(),
                 entity.getFigures(),
                 entity.getUserId(),
-                entity.getDateOfCompletion()
+                entity.getDateOfCompletion(),
+                entity.getDeliveryHistory(),
+                entity.getReturnRequest()
         );
     }
 
@@ -31,7 +33,9 @@ public class OrderMapper {
                 dto.status(),
                 dto.figureList(),
                 dto.userId(),
-                dto.dateOfCompletion()
+                dto.dateOfCompletion(),
+                dto.deliveryHistory(),
+                dto.returnRequest()
         );
     }
 

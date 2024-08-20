@@ -3,6 +3,7 @@ package com.teamChallenge.controller;
 import com.teamChallenge.dto.request.OrderRequestDto;
 import com.teamChallenge.dto.response.OrderResponseDto;
 import com.teamChallenge.entity.order.OrderService;
+import com.teamChallenge.entity.order.delivery.DeliveryStatuses;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 
@@ -86,6 +87,17 @@ public class OrderController {
         return order;
     }
 
+    @GetMapping("/delivery-statuses")
+    @Operation(description = "get all delivery statuses")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of delivery status")
+    })
+    public DeliveryStatuses[] getAllDeliveryStatuses() {
+        DeliveryStatuses[] deliveryStatuses = orderService.getAllDeliveryStatuses();
+        log.info("{}: Delivery status list has been retrieved", LogEnum.CONTROLLER);
+        return deliveryStatuses;
+    }
+
     @PutMapping(URI_WITH_ID)
     @SecurityRequirement(name = SEC_REC)
     @Operation(description = "update an order by id")
@@ -107,6 +119,59 @@ public class OrderController {
         OrderResponseDto order = orderService.update(id, orderDto);
         log.info("{}: Order (id: {}) has been updated", LogEnum.CONTROLLER, order.id());
         return order;
+    }
+
+    @PatchMapping(URI_WITH_ID + "/delivery-status")
+    @SecurityRequirement(name = SEC_REC)
+    @Operation(description = "update the delivery status of an order. " +
+            "All delivery statuses can be retrieved using the \"/api/orders/delivery-statuses\" (GET) endpoint. " +
+            "Delivery statuses must be sent in sequence (e.g. PLACED -> PLACED_PROCESSED -> SENT, " +
+            "it's forbidden to send PLACED -> SENT without the PLACED_PROCESSED step), " +
+            "except for CANCELLED (which can only be used after the PLACED_PROCESSED status) " +
+            "and FINISHED (which can be used after the DELIVERED and REFUNDED statuses)." +
+            "A RETURN_REQUEST delivery status can be set using the \"/api/orders/{id}/return-request\" (POST) endpoint. " +
+            "The next delivery statuses (RETURN_REQUEST_PROCESSED, RETURNED, etc.) are set using this (PATCH) endpoint.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Updated the order delivery status",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = OrderResponseDto.class))}
+            ),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CustomErrorResponse.class))}
+            ),
+            @ApiResponse(responseCode = "404", description = "Order not found",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CustomErrorResponse.class))}
+            )
+    })
+    public OrderResponseDto updateDeliveryStatus(@PathVariable String id, @RequestParam String deliveryStatus) {
+        OrderResponseDto orderResponseDto = orderService.updateDeliveryStatus(id, deliveryStatus);
+        log.info("{}: Order (id: {}) delivery status (on: {}) has been updated", LogEnum.CONTROLLER, id, deliveryStatus);
+        return orderResponseDto;
+    }
+
+    @PostMapping(URI_WITH_ID + "/return-request")
+    @SecurityRequirement(name = SEC_REC)
+    @Operation(description = "submit a return request. Order must be delivered, but not finished.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Accepted a return request",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = OrderResponseDto.class))}
+            ),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CustomErrorResponse.class))}
+            ),
+            @ApiResponse(responseCode = "404", description = "Order not found",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CustomErrorResponse.class))}
+            )
+    })
+    public OrderResponseDto submitReturnRequest(@PathVariable String id, @RequestParam String reason) {
+        OrderResponseDto orderResponseDto = orderService.submitReturnRequest(id, reason);
+        log.info("{}: Accepted a return request for an order (id: {}) ", LogEnum.CONTROLLER, id);
+        return orderResponseDto;
     }
 
     @DeleteMapping(URI_WITH_ID)
