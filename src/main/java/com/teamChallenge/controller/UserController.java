@@ -8,6 +8,8 @@ import com.teamChallenge.entity.address.AddressInfo;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AccessValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -37,8 +39,10 @@ public class UserController {
 
     private static final String URI_WITH_ID = "/{id}";
     private static final String SEC_REC = "BearerAuth";
+    private static final String OBJECT_NAME = "user";
 
     private final UserService userService;
+    private final AccessValidator accessValidator;
 
     @PostMapping
     @SecurityRequirement(name = SEC_REC)
@@ -66,7 +70,9 @@ public class UserController {
                             array = @ArraySchema(schema = @Schema(implementation = UserResponseDto.class)))}
             )
     })
-    public List<UserResponseDto> getAll() {
+    public List<UserResponseDto> getAll() throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         List<UserResponseDto> users = userService.getAll();
         log.info("{}: Users have been retrieved", LogEnum.CONTROLLER);
         return users;
@@ -82,7 +88,9 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public UserResponseDto getById(@PathVariable String id) {
+    public UserResponseDto getById(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.hasPermission(OBJECT_NAME, id);
+
         UserResponseDto user = userService.getById(id);
         log.info("{}: User (id: {}) has been retrieved", LogEnum.CONTROLLER, id);
         return user;
@@ -102,7 +110,9 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public UserResponseDto update(@PathVariable String id, @Valid @RequestBody UserRequestDto userRequestDto) {
+    public UserResponseDto update(@PathVariable String id, @Valid @RequestBody UserRequestDto userRequestDto) throws UnauthorizedAccessException {
+        accessValidator.hasPermission(OBJECT_NAME, id);
+
         UserResponseDto user = userService.update(id, userRequestDto);
         log.info("{}: User (id: {}) has been updated", LogEnum.CONTROLLER, user.id());
         return user;
@@ -122,7 +132,9 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public UserResponseDto updateAddressInfo(@PathVariable String id, @RequestBody AddressInfo addressInfo) {
+    public UserResponseDto updateAddressInfo(@PathVariable String id, @RequestBody AddressInfo addressInfo) throws UnauthorizedAccessException {
+        accessValidator.hasPermission(OBJECT_NAME, id);
+
         UserResponseDto user = userService.updateAddressInfo(id, addressInfo);
         log.info("{}: User's (id: {}) address info has been updated", LogEnum.CONTROLLER, user.id());
         return user;
@@ -136,7 +148,9 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public void delete(@PathVariable String id) {
+    public void delete(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.hasPermission(OBJECT_NAME, id);
+
         userService.delete(id);
         log.info("{}: User (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }

@@ -6,6 +6,8 @@ import com.teamChallenge.entity.banner.BannerService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AccessValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,11 +31,11 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class BannerController {
-
-    public static final String URI_WITH_ID = "/{id}";
+    private static final String URI_WITH_ID = "/{id}";
     private static final String SEC_REC = "BearerAuth";
 
     private final BannerService bannerService;
+    private final AccessValidator accessValidator;
 
     @PostMapping
     @SecurityRequirement(name = SEC_REC)
@@ -49,7 +51,9 @@ public class BannerController {
                             schema = @Schema(implementation = CustomErrorResponse.class))}
             ),
     })
-    public BannerResponseDto create(@Valid @RequestBody BannerRequestDto bannerRequestDto) {
+    public BannerResponseDto create(@Valid @RequestBody BannerRequestDto bannerRequestDto) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         BannerResponseDto bannerResponseDto = bannerService.create(bannerRequestDto);
         log.info("{}: Banner (id: {}) has been added", LogEnum.CONTROLLER, bannerResponseDto.id());
         return bannerResponseDto;
@@ -104,7 +108,9 @@ public class BannerController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public BannerResponseDto update(@PathVariable String id, @Valid @RequestBody BannerRequestDto bannerRequestDto) {
+    public BannerResponseDto update(@PathVariable String id, @Valid @RequestBody BannerRequestDto bannerRequestDto) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         BannerResponseDto bannerResponseDto = bannerService.update(id, bannerRequestDto);
         log.info("{}: Banner (id: {}) has been updated", LogEnum.CONTROLLER, id);
         return bannerResponseDto;
@@ -123,7 +129,9 @@ public class BannerController {
                             schema = @Schema(implementation = CustomErrorResponse.class))
                     })
     })
-    public void delete(@PathVariable String id) {
+    public void delete(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         bannerService.delete(id);
         log.info("{}: Banner (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }

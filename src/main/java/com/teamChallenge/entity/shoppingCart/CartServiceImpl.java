@@ -79,29 +79,6 @@ public class CartServiceImpl implements CartService {
         return cartMapper.toResponseDto(savedCart);
     }
 
-    private CartEntity addFigures(String cartId, List<FigureInCartOrderResponseDto> figures) {
-        if (cartRepository.existsById(cartId)) {
-            CartEntity cart = findById(cartId);
-            List<FigureInCartOrderResponseDto> figuresInCart = new ArrayList<>(cart.getFigures());
-
-            Map<String, FigureInCartOrderResponseDto> figureMap = figuresInCart.stream()
-                    .collect(Collectors.toMap(FigureInCartOrderResponseDto::figureId, Function.identity()));
-
-            figures.forEach(elem -> figureMap.put(elem.figureId(), elem));
-
-            figuresInCart.clear();
-            figuresInCart.addAll(figureMap.values());
-
-            cart.setFigures(figuresInCart);
-
-            CartEntity savedCart = cartRepository.save(cart);
-            log.info("{}: " + OBJECT_NAME + " (Id: {}) updated figure list and total price throughout create method", LogEnum.SERVICE, savedCart.getId());
-            return savedCart;
-        }   else {
-            throw new CustomNotFoundException(OBJECT_NAME, cartId);
-        }
-    }
-
     @Override
     public CartResponseDto update(String id, CartRequestDto cartDto) {
         CartEntity cart = findById(id);
@@ -126,7 +103,7 @@ public class CartServiceImpl implements CartService {
         log.info("{}: " + OBJECT_NAME + " (id: {}) deleted", LogEnum.SERVICE, id);
     }
 
-    private CartEntity findById(String id) {
+    public CartEntity findById(String id) {
         return cartRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, id));
     }
 
@@ -137,5 +114,29 @@ public class CartServiceImpl implements CartService {
         }
 
         return discount;
+    }
+
+
+    private CartEntity addFigures(String cartId, List<FigureInCartOrderResponseDto> figures) {
+        if (cartRepository.existsById(cartId)) {
+            CartEntity cart = findById(cartId);
+            List<FigureInCartOrderResponseDto> figuresInCart = new ArrayList<>(cart.getFigures());
+
+            Map<String, FigureInCartOrderResponseDto> figureMap = figuresInCart.stream()
+                    .collect(Collectors.toMap(FigureInCartOrderResponseDto::figureId, Function.identity()));
+
+            figures.forEach(elem -> figureMap.put(elem.figureId(), elem));
+
+            figuresInCart.clear();
+            figuresInCart.addAll(figureMap.values());
+
+            cart.setFigures(figuresInCart);
+
+            CartEntity savedCart = cartRepository.save(cart);
+            log.info("{}: " + OBJECT_NAME + " (Id: {}) updated figure list and total price throughout create method", LogEnum.SERVICE, savedCart.getId());
+            return savedCart;
+        }   else {
+            throw new CustomNotFoundException(OBJECT_NAME, cartId);
+        }
     }
 }

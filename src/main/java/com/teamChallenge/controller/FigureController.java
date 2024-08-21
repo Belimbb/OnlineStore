@@ -6,6 +6,8 @@ import com.teamChallenge.entity.figure.FigureService;
 import com.teamChallenge.exception.CustomErrorResponse;
 import com.teamChallenge.exception.LogEnum;
 
+import com.teamChallenge.exception.exceptions.generalExceptions.UnauthorizedAccessException;
+import com.teamChallenge.security.AccessValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,8 +34,10 @@ import java.util.List;
 public class FigureController {
     private static final String URI_WITH_ID = "/{id}";
     private static final String SEC_REC = "BearerAuth";
+    private static final String OBJECT_NAME = "figure";
 
     private final FigureService figureService;
+    private final AccessValidator accessValidator;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -47,7 +51,9 @@ public class FigureController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    public FigureResponseDto create(@Valid @RequestBody FigureRequestDto request) {
+    public FigureResponseDto create(@Valid @RequestBody FigureRequestDto request) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         FigureResponseDto figure = figureService.create(request);
 
         log.info("{}: Figure (id: {}) has been added", LogEnum.SERVICE, figure.id());
@@ -102,7 +108,9 @@ public class FigureController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    public FigureResponseDto update(@PathVariable String id, @Valid @RequestBody FigureRequestDto figureDto) {
+    public FigureResponseDto update(@PathVariable String id, @Valid @RequestBody FigureRequestDto figureDto) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         FigureResponseDto figureResponseDto = figureService.update(id, figureDto);
         log.info("{}: Figure (id: {}) has been updated", LogEnum.CONTROLLER, id);
         return figureResponseDto;
@@ -116,7 +124,9 @@ public class FigureController {
             @ApiResponse(responseCode = "404", description = "Figure not found",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class)) }) })
-    public void delete(@PathVariable String id) {
+    public void delete(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.isAdmin();
+
         figureService.delete(id);
         log.info("{}: Figure (id: {}) has been deleted", LogEnum.CONTROLLER, id);
     }
@@ -130,7 +140,9 @@ public class FigureController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomErrorResponse.class))})
     })
-    public void addFigureToWishList(@PathVariable String id) {
+    public void addFigureToWishList(@PathVariable String id) throws UnauthorizedAccessException {
+        accessValidator.hasPermission(OBJECT_NAME, id);
+
         figureService.addFigureToWishList(id);
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         log.info("{}: Figure (id: {}) has been added to User (email: {}) wish list", LogEnum.SERVICE, id, email);

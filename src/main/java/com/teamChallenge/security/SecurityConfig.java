@@ -48,8 +48,6 @@ public class SecurityConfig {
                                         "/v3/api-docs/**",
                                         "/api-docs/**")
                                 .permitAll()
-                                .requestMatchers("/api/users/**").authenticated()
-                                .requestMatchers("/api/images/**").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/**")
                                 .permitAll()
                                 .anyRequest().authenticated()

@@ -2,6 +2,8 @@ package com.teamChallenge.entity.order;
 
 import com.teamChallenge.dto.response.figure.FigureInCartOrderResponseDto;
 import com.teamChallenge.entity.address.AddressInfo;
+import com.teamChallenge.entity.order.delivery.DeliveryHistory;
+import com.teamChallenge.entity.order.delivery.ReturnRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
@@ -33,10 +35,13 @@ public class OrderEntity {
 
     private List<FigureInCartOrderResponseDto> figures;
 
-    @DBRef
     private String userId;
 
     private Date dateOfCompletion;
+
+    private DeliveryHistory deliveryHistory;
+
+    private ReturnRequest returnRequest;
 
     public void setTotalPrice() {
         int totalPrice = 0;
@@ -47,7 +52,7 @@ public class OrderEntity {
     }
 
     public void setStatus(Statuses status) {
-        if (status.equals(Statuses.COMPLETED)){
+        if (status.equals(Statuses.DELIVERED)){
             this.dateOfCompletion = new Date();
         }
 
@@ -56,9 +61,10 @@ public class OrderEntity {
 
     public OrderEntity(AddressInfo addressInfo, List<FigureInCartOrderResponseDto> figures, String userId) {
         this.addressInfo = addressInfo;
-        status = Statuses.NEW;
+        status = Statuses.ON_ITS_WAY;
         this.figures = figures;
         this.userId = userId;
+        this.deliveryHistory = new DeliveryHistory();
 
         setTotalPrice();
     }

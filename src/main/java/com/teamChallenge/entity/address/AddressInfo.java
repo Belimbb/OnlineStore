@@ -11,26 +11,5 @@ import lombok.NoArgsConstructor;
 public class AddressInfo {
 
     @NotBlank
-    private String firstName;
-
-    @NotBlank
-    private String lastName;
-
-    @NotBlank
-    private String phoneNumber;
-
-    @NotBlank
-    private String country;
-
-    @NotBlank
-    private String state;
-
-    @NotBlank
-    private String city;
-
-    @NotBlank
-    private String address;
-
-    @NotBlank
-    private String postalCode;
+    private String firstName, lastName, phoneNumber, country, state, city, address, postalCode;
 }
