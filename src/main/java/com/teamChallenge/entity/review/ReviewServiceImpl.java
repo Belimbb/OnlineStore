@@ -94,8 +94,11 @@ public class ReviewServiceImpl implements ReviewService {
     public ReviewResponseDto update(String id, ReviewRequestDto reviewRequestDto) {
         ReviewEntity review = findById(id);
         review.setScore(reviewRequestDto.score());
+        review.setText(reviewRequestDto.text());
         review.setAdvantages(reviewRequestDto.advantages());
         review.setDisadvantages(reviewRequestDto.disadvantages());
+        review.setVideos(reviewRequestDto.videos());
+        review.setPhotos(reviewRequestDto.photos());
 
         ReviewEntity savedReview = reviewRepository.save(review);
         log.info("{}: " + OBJECT_NAME + " (id: {}) was updated", LogEnum.SERVICE, id);
