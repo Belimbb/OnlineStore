@@ -1,9 +1,11 @@
 package com.teamChallenge.entity.review;
 
+import com.teamChallenge.dto.request.ReplyRequestDto;
 import com.teamChallenge.dto.request.ReviewRequestDto;
 import com.teamChallenge.dto.response.ReviewResponseDto;
 import com.teamChallenge.entity.figure.FigureEntity;
 import com.teamChallenge.entity.figure.FigureServiceImpl;
+import com.teamChallenge.entity.review.reply.Reply;
 import com.teamChallenge.entity.user.UserEntity;
 import com.teamChallenge.entity.user.UserServiceImpl;
 import com.teamChallenge.exception.LogEnum;
@@ -14,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -47,15 +50,16 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public ReviewResponseDto create(ReviewRequestDto reviewRequestDto) {
+    public ReviewResponseDto create(ReviewRequestDto revRecDto) {
         UserEntity user = userService.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-        FigureEntity figure = figureService.findById(reviewRequestDto.figureId());
+        FigureEntity figure = figureService.findById(revRecDto.figureId());
 
         if (reviewRepository.existsByUserAndFigure(user, figure)) {
             throw new CustomAlreadyExistException(String.format("This user (email: %s) has already written a review for the figure (name: %s)", user.getEmail(), figure.getName()));
         }
 
-        ReviewEntity newReview = new ReviewEntity(reviewRequestDto.score(), user, reviewRequestDto.advantages(), reviewRequestDto.disadvantages(), figure);
+        ReviewEntity newReview = new ReviewEntity(revRecDto.score(), user, revRecDto.text(), revRecDto.advantages(),
+                revRecDto.disadvantages(), revRecDto.videos(), revRecDto.photos(), figure);
         newReview.setCreationDate(new Date());
 
         ReviewEntity savedReview = reviewRepository.save(newReview);
@@ -64,6 +68,26 @@ public class ReviewServiceImpl implements ReviewService {
 
         log.info("{}: " + OBJECT_NAME + " (Id: {}) was created", LogEnum.SERVICE, savedReview.getId());
         return reviewMapper.toResponseDto(savedReview);
+    }
+
+    @Override
+    public ReviewResponseDto addReply(String reviewId, ReplyRequestDto replyDto) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userService.findByEmail(email);
+        Reply reply = new Reply(user.getUsername(), replyDto.text(), replyDto.likes(), replyDto.dislikes());
+
+        ReviewEntity review = findById(reviewId);
+        List<Reply> replies = review.getReplies();
+
+        if (replies==null){
+            replies=new ArrayList<>();
+        }else if (replies.contains(reply)){
+            throw new CustomAlreadyExistException("Reply", reply.getText());
+        }
+
+        replies.add(reply);
+        review.setReplies(replies);
+        return reviewMapper.toResponseDto(reviewRepository.save(review));
     }
 
     @Override
@@ -88,6 +112,22 @@ public class ReviewServiceImpl implements ReviewService {
         figureService.removeReviewFromFigure(figure, review);
         userService.removeReviewFromUser(user, review);
         log.info("{}: " + OBJECT_NAME + " (id: {}) was deleted", LogEnum.SERVICE, id);
+    }
+
+    @Override
+    public void deleteReply(String reviewId, ReplyRequestDto replyDto) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userService.findByEmail(email);
+        Reply reply = new Reply(user.getUsername(), replyDto.text(), replyDto.likes(), replyDto.dislikes());
+
+        ReviewEntity review = findById(reviewId);
+        List<Reply> replies = review.getReplies();
+        if (!replies.contains(reply)){
+            throw new CustomNotFoundException("Reply");
+        }
+        replies.remove(reply);
+        review.setReplies(replies);
+        reviewRepository.save(review);
     }
 
     public ReviewEntity findById(String id) {

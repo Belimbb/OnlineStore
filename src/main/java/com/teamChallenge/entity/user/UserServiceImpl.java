@@ -70,6 +70,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         }
 
         UserEntity user = new UserEntity(username, email, passwordEncoder.encode(signupRequestDto.getPassword()));
+        user.setPasswordVerified(true);
         user.setCreatedAt(new Date());
 
         if (email.trim().equalsIgnoreCase(adminEmail)){
@@ -96,12 +97,12 @@ public class UserServiceImpl implements UserDetailsService, UserService {
             }
             user.setEmail(email);
             user.setEmailVerified(false);
-            user.setEmailVerificationCode(UUID.randomUUID());
+            user.setEmailVerificationCode(UUID.randomUUID().toString().substring(0, 6));
         }
         if (!passwordEncoder.matches(password, user.getPassword())){
             user.setPassword(passwordEncoder.encode(password));
             user.setPasswordVerified(false);
-            user.setPasswordVerificationCode(UUID.randomUUID());
+            user.setPasswordVerificationCode(UUID.randomUUID().toString().substring(0, 6));
         }
 
         String phoneNumber = userRequestDto.phoneNumber();
@@ -173,7 +174,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         UserEntity user = findByEmail(email);
 
         if (user.getEmailVerificationCode()==null){
-            user.setEmailVerificationCode(UUID.randomUUID());
+            user.setEmailVerificationCode(UUID.randomUUID().toString().substring(0, 6));
         }
 
         emailService.sendVerificationEmailLetter(email, user.getEmailVerificationCode());
@@ -184,14 +185,14 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         UserEntity user = findByEmail(email);
 
         if (user.getPasswordVerificationCode()==null){
-            user.setPasswordVerificationCode(UUID.randomUUID());
+            user.setPasswordVerificationCode(UUID.randomUUID().toString().substring(0, 6));
         }
 
         emailService.sendVerificationPasswordLetter(email, user.getPasswordVerificationCode());
         return userMapper.toResponseDto(user);
     }
 
-    public UserResponseDto confirmEmail(UUID emailVerificationCode) {
+    public UserResponseDto confirmEmail(String emailVerificationCode) {
         UserEntity user = findByEmailVerificationCode(emailVerificationCode);
         user.setEmailVerified(true);
         user.setEmailVerificationCode(null);
@@ -200,7 +201,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userMapper.toResponseDto(savedUser);
     }
 
-    public UserResponseDto confirmPassword(UUID passwordVerificationCode) {
+    public UserResponseDto confirmPassword(String passwordVerificationCode) {
         UserEntity user = findByPasswordVerificationCode(passwordVerificationCode);
         user.setPasswordVerified(true);
         user.setPasswordVerificationCode(null);
@@ -245,12 +246,12 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME, email));
     }
 
-    public UserEntity findByEmailVerificationCode(UUID verificationCode) {
+    public UserEntity findByEmailVerificationCode(String verificationCode) {
         log.info("{}: request on retrieving " + OBJECT_NAME + " by email verification code {} was sent", LogEnum.SERVICE, verificationCode);
         return userRepository.findByEmailVerificationCode(verificationCode).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME));
     }
 
-    public UserEntity findByPasswordVerificationCode(UUID verificationCode) {
+    public UserEntity findByPasswordVerificationCode(String verificationCode) {
         log.info("{}: request on retrieving " + OBJECT_NAME + " by password verification code {} was sent", LogEnum.SERVICE, verificationCode);
         return userRepository.findByPasswordVerificationCode(verificationCode).orElseThrow(() -> new CustomNotFoundException(OBJECT_NAME));
     }

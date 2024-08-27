@@ -16,8 +16,15 @@ public class ReviewMapper {
                 review.getId(),
                 review.getScore(),
                 review.getCreationDate(),
+                review.getText(),
                 review.getAdvantages(),
-                review.getDisadvantages());
+                review.getDisadvantages(),
+                review.getVideos(),
+                review.getPhotos(),
+                review.getReplies(),
+                review.getLikes(),
+                review.getLikes()
+        );
     }
 
     public ReviewEntity toEntity(ReviewResponseDto dto) {
@@ -26,9 +33,16 @@ public class ReviewMapper {
                 dto.score(),
                 null,
                 dto.creationDate(),
+                dto.text(),
                 dto.advantages(),
                 dto.disadvantages(),
-                null);
+                dto.videos(),
+                dto.photos(),
+                dto.replies(),
+                dto.likes(),
+                dto.dislikes(),
+                null
+                );
     }
 
     public List<ReviewResponseDto> toResponseDtoList(List<ReviewEntity> entities) {
