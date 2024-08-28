@@ -81,6 +81,20 @@ public class FigureController {
         return figureResponseDtos;
     }
 
+    @GetMapping("/ids")
+    @Operation(summary = "Get all figures by array id.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List figures",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = FigureResponseDto.class)))}
+            )
+    })
+    public List<FigureResponseDto> getAllByIdArray(@RequestParam String[] arrayId) {
+        List<FigureResponseDto> figureResponseDtos = figureService.getAllByIdArray(arrayId);
+        log.info("{}: Figures have been retrieved by array id", LogEnum.CONTROLLER);
+        return figureResponseDtos;
+    }
+
     @GetMapping(URI_WITH_ID)
     @SecurityRequirement(name = SEC_REC)
     @Operation(summary = "Get figure by ID")

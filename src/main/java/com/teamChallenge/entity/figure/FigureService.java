@@ -12,6 +12,7 @@ public interface FigureService {
     FigureResponseDto getById (String id) throws CustomNotFoundException;
     List<FigureResponseDto> getAll(String categoryName, String subcategoryName, String filter, String label, String type, String genre,
                                    String brand, String material, String startPrice, String endPrice, String page, String size);
+    List<FigureResponseDto> getAllByIdArray(String[] arrayId);
     FigureResponseDto update(String id, FigureRequestDto dto) throws CustomNotFoundException;
     void addFigureToWishList(String figureId);
     void delete(String id) throws CustomNotFoundException;

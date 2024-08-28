@@ -25,10 +25,7 @@ import org.springframework.data.domain.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -105,6 +102,14 @@ public class FigureServiceImpl implements FigureService {
         Pageable pageable = getPageable(getIntegerFromString(pageStr), getIntegerFromString(sizeStr));
         Page<FigureEntity> figurePage = paginateFigureList(sortedFigureList, pageable);
         return figureMapper.toResponseDtoList(figurePage);
+    }
+
+    @Override
+    public List<FigureResponseDto> getAllByIdArray(String[] arrayId) {
+        Iterable<String> iterable = Arrays.asList(arrayId);
+        List<FigureEntity> figureList = figureRepository.findAllById(iterable);
+        log.info("{}: All " + OBJECT_NAME + "s retrieved from db (by array id)", LogEnum.SERVICE);
+        return figureMapper.toResponseDtoList(figureList);
     }
 
     @Override
